@@ -35,7 +35,6 @@ var __importStar = (this && this.__importStar) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 const electron_1 = require("electron");
 const path = __importStar(require("path"));
-const url = __importStar(require("url"));
 let mainWindow = null;
 function createWindow() {
     mainWindow = new electron_1.BrowserWindow({
@@ -47,12 +46,16 @@ function createWindow() {
             contextIsolation: true,
         },
     });
-    const startUrl = url.format({
-        pathname: path.join(__dirname, '..', '..', 'dist', 'rtu-scada-frontend', 'browser', 'index.html')
-    });
-    mainWindow.loadURL(startUrl);
-    if (process.env.ELECTRON_START_URL) {
+    const devServerUrl = process.env.ELECTRON_START_URL;
+    if (devServerUrl) {
+        // Dev-режим: грузим страницу с Angular dev-сервера
+        mainWindow.loadURL(devServerUrl);
         mainWindow.webContents.openDevTools();
+    }
+    else {
+        // Prod-режим: грузим собранные статические файлы
+        const indexPath = path.join(__dirname, '..', '..', 'dist', 'rtu-scada-frontend', 'browser', 'index.html');
+        mainWindow.loadFile(indexPath);
     }
     mainWindow.on('closed', () => {
         mainWindow = null;

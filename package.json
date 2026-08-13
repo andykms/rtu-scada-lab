@@ -8,7 +8,7 @@
     "start": "ng serve",
     "build": "npm run build --prefix src/rtu-scada-frontend",
     "build:electron": "tsc -p tsconfig.electron.json",
-    "electron:dev": "npm run build:electron && cross-env ELECTRON_START_URL=http://localhost:4200 electron dist/electron/main.js",
+    "electron:dev": "npm run build:electron && concurrently -k -s first \"npm run start --prefix src/rtu-scada-frontend\" \"wait-on http://localhost:4200 && cross-env ELECTRON_START_URL=http://localhost:4200 electron dist/electron/main.js\"",
     "electron:watch": "nodemon --watch src/electron --ext ts --exec \"npm run build:electron && npm run electron:dev\"",
     "electron:prod": "npm run build --prefix src/rtu-scada-frontend -- --configuration production --base-href ./ && npm run build:electron && electron-builder"
   },

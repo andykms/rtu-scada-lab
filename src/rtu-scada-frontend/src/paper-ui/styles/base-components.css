@@ -18,19 +18,6 @@
     position: relative;
 }
 
-.substrate::before {
-    content: "";
-    position: absolute;
-    border-radius: inherit;
-    top: 0;
-    left: 0;
-    block-size: 100%;
-    inline-size: 100%;
-    z-index: -100;
-    display: block;
-    background-color: var(--substrate);
-}
-
 .paper-button {
     border: none;
     outline: none;
@@ -40,7 +27,7 @@
     border-radius: var(--border-radius);
     padding-inline: var(--border-radius);
     color: var(--text-color);
-    transition: box-shadow 0.3s ease-in-out, transform 0.3s ease-in-out;
+    transition: background-color 0.3s ease-in-out, transform 0.1s ease-in-out;
 }
 
 .paper-button_xs {
@@ -79,9 +66,9 @@
 }
 
 .paper-button:hover {
-    box-shadow: inset 0 0 11px 4px rgba(255, 255, 255, 0.97);
+    background-color: var(--hover-button-color);
 }
 
 .paper-button:active {
-    box-shadow: inset 0 0 11px 4px rgba(231, 231, 231, 0.97);
+    transform: scale(0.97);
 }

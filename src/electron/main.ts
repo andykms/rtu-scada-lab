@@ -1,6 +1,5 @@
 import { app, BrowserWindow, ipcMain } from 'electron';
 import * as path from 'path';
-import * as url from 'url';
 
 let mainWindow: BrowserWindow | null = null;
 
@@ -15,23 +14,24 @@ function createWindow() {
     },
   });
 
-  const startUrl =
-    url.format({
-      pathname: path.join(
-        __dirname,
-        '..',
-        '..',
-        'dist',
-        'rtu-scada-frontend',
-        'browser',
-        'index.html'
-      )
-    });
+  const devServerUrl = process.env.ELECTRON_START_URL;
 
-  mainWindow.loadURL(startUrl);
-
-  if (process.env.ELECTRON_START_URL) {
+  if (devServerUrl) {
+    // Dev-режим: грузим страницу с Angular dev-сервера
+    mainWindow.loadURL(devServerUrl);
     mainWindow.webContents.openDevTools();
+  } else {
+    // Prod-режим: грузим собранные статические файлы
+    const indexPath = path.join(
+      __dirname,
+      '..',
+      '..',
+      'dist',
+      'rtu-scada-frontend',
+      'browser',
+      'index.html'
+    );
+    mainWindow.loadFile(indexPath);
   }
 
   mainWindow.on('closed', () => {

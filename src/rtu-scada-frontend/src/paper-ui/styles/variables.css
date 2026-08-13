@@ -1,8 +1,10 @@
 :root {
-    --substrate: rgba(0, 28, 73, 0.5);
+    --substrate: #F7F7F7;
     --text-color: rgba(64, 64, 64, 1);
-    --textfield-color: rgba(255, 255, 255, 0.9);
-    --button-color: rgba(255, 255, 255, 0.47);
+    --textfield-color: var(--substrate);
+    --button-color: rgb(212, 243, 255);
+    --hover-button-color: rgba(71, 229, 250, 0.8);
+    --even-color: rgba(255, 255, 255, 0.47);
     --dropdown-color: rgba(164, 177, 198, 0.5);
     --dropdown-color-hover: rgba(255, 255, 255, 0.8);
     --border-color: #FFF;

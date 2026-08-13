@@ -28,7 +28,7 @@
 
 .variant-odd {
     inline-size: 100%;
-    background-color: var(--button-color);
+    background-color: var(--even-color);
     border-radius: 7px;
 }
 
