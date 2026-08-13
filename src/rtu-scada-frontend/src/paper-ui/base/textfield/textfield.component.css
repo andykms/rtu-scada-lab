@@ -1,0 +1,114 @@
+:host {
+    position: relative;
+}
+
+.textfield {
+    border: 1px solid var(--border-color);
+    background-color: var(--textfield-color);
+    box-shadow: inset 0 0 2px 1px rgba(0, 0, 0, 0.23);
+    display: flex;
+}
+
+:host:has(.textfield_xs, .textfield_s), .textfield_xs, .textfield_s  {
+    font-size: var(--font-size-m);
+    border-radius: 19px;
+}
+
+:host:has(.textfield_m), .textfield_m {
+    font-size: var(--font-size-l);
+    border-radius: 22px;
+}
+
+:host:has(.textfield_l, .textfield_xl), .textfield_l, .textfield_xl {
+    font-size: var(--font-size-xl);
+    border-radius: 22px;
+}
+
+.textfield ::ng-deep label {
+    user-select: none;
+    font-size: var(--font-size-m);
+    color: var(--placeholder);
+    position: absolute;
+    z-index: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    left: 16px;
+    transition: font-size 0.3s ease-in-out, top 0.3s ease-in-out, transform 0.3s ease-in-out;
+}
+
+.textfield ::ng-deep input {
+    z-index: 1;
+}
+
+::ng-deep .textfield:has(.mini-placeholder) label {
+    font-size: var(--font-size-xs);
+    top: 1px;
+    transform: translateY(0);
+}
+
+.textfield_xs, .textfield_s ::ng-deep input {
+    block-size: 30px;
+    padding: 5px 0 1px 16px;
+}
+
+.textfield_m ::ng-deep input {
+    block-size: 50px;
+    padding: 12px 18px;
+}
+
+.textfield_l, .textfield_xl ::ng-deep input {
+    block-size: 60px;
+    padding: 12px 18px;
+}
+
+.textfield_xs, .textfield_s ::ng-deep .data-list {
+    font-size: var(--font-size-m);
+    max-block-size: 147px;
+    border-top-left-radius: 11px;
+    border-top-right-radius: 11px;
+    border-bottom-left-radius: 14px;
+    border-bottom-right-radius: 14px;
+}
+
+.textfield_xs, .textfield_s ::ng-deep .data-list .variant {
+    line-height: 23px;
+}
+
+.textfield_m ::ng-deep .data-list {
+    font-size: var(--font-size-l);
+    max-block-size: 173px;
+    border-top-left-radius: 11px;
+    border-top-right-radius: 11px;
+    border-bottom-left-radius: 18px;
+    border-bottom-right-radius: 18px;
+}
+
+.textfield_m ::ng-deep .data-list .variant {
+    line-height: 29px;
+}
+
+.textfield_l >::ng-deep > .data-list {
+    font-size: var(--font-size-xl); 
+    max-block-size: 267px;
+    border-top-left-radius: 11px;
+    border-top-right-radius: 11px;
+    border-bottom-left-radius: 22px;
+    border-bottom-right-radius: 22px;
+}
+
+.textfield_xl >::ng-deep > .data-list {
+    font-size: var(--font-size-xl); 
+    max-block-size: 267px;
+    border-top-left-radius: 11px;
+    border-top-right-radius: 11px;
+    border-bottom-left-radius: 22px;
+    border-bottom-right-radius: 22px;
+}
+
+.textfield_l > ::ng-deep .data-list > .variant {
+    line-height: 38px;
+}
+
+.textfield_xl > ::ng-deep .data-list > .variant {
+    line-height: 38px;
+}

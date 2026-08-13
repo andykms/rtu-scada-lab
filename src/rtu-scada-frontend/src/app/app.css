@@ -1,0 +1,16 @@
+.vitrine {
+    display: flex;
+    flex-direction: column;
+    gap: 50px;
+    padding: 50px;
+    inline-size: 300px;
+}
+
+.buttons {
+    padding: 50px;
+    block-size: 300px;
+}
+
+.form {
+    inline-size: 267px;
+}

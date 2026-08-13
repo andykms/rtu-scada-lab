@@ -1,0 +1,1 @@
+export {type PaperSizes} from "./base-size.type"

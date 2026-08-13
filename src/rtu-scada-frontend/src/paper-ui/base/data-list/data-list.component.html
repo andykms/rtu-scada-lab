@@ -1,0 +1,10 @@
+<ng-content></ng-content>
+@if(recommended().length > 0 && opened()) {
+<div class="data-list floating">
+    @for(rec of recommended(); track $index) {
+        <div (click)="selectVariant(rec)" [class]="`variant ${$index % 2 != 0 ? 'variant-odd': 'variant-even'}`">
+            {{labelResolver()(rec)}}
+        </div>
+    }
+</div>
+}

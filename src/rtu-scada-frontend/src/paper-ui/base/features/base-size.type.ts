@@ -1,0 +1,1 @@
+export type PaperSizes = "xs" | "s" | "m" | "l" | "xl"

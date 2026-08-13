@@ -1,0 +1,50 @@
+.data-list {
+    position: absolute;
+    top: calc(100% + 13px);
+    left: 0;
+    inline-size: 100%;
+    z-index: 9;
+    border-top-left-radius: 11px;
+    border-top-right-radius: 11px;
+    border-bottom-left-radius: 22px;
+    border-bottom-right-radius: 22px;
+    padding: 7px 5px 10px 5px;
+    background-color: var(--dropdown-color);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    box-shadow: inset 0 0 8px 3px rgba(255,255,255,0.5);
+    max-block-size: 265px;
+    overflow-y: auto;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+.variant {
+    padding-inline: 13px;
+    cursor: pointer;
+    line-height: 38px;
+    display: block;
+}
+
+.variant-odd {
+    inline-size: 100%;
+    background-color: var(--button-color);
+    border-radius: 7px;
+}
+
+.variant:hover {
+    border-radius: 14px;
+    background-color: var(--dropdown-color-hover);
+    box-shadow: inset 0 0 4px 2px rgba(255,255,255,0.8);
+}
+
+@keyframes fadeIn {
+    from {
+        transform: scale(0.9);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}

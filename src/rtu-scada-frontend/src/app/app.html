@@ -1,0 +1,54 @@
+<div class="vitrine">
+  <paper-textfield size="s">
+    <label paperLabel>Введите текст</label>
+    <input paperInput>
+  </paper-textfield>
+
+  <paper-textfield size="m">
+    <label paperLabel>Введите текст</label>
+    <input paperInput>
+  </paper-textfield>
+
+  <paper-textfield size="l">
+    <label paperLabel>Введите текст</label>
+    <input paperInput>
+  </paper-textfield>
+</div>
+<div class="buttons">
+  <button paperButton size="xs">Я кнопка xs</button>
+  <button paperButton size="s">Я кнопка s</button>
+  <button paperButton size="m">Я кнопка m</button>
+  <button paperButton size="l">Я кнопка l</button>
+  <button paperButton size="xl">Я кнопка xl</button>
+</div>
+
+<form [formGroup]="form" class="form">
+  <paper-textfield size="s"#textfield >
+    <label paperLabel>Введите текст</label>
+    <paper-data-list [variants]="variants" formControlName="searchS">
+      <input paperInput name="searchS" #inputList>
+    </paper-data-list>
+  </paper-textfield>
+
+  <paper-textfield size="m"#textfield >
+    <label paperLabel>Введите текст</label>
+    <paper-data-list [variants]="variants" formControlName="searchM">
+      <input paperInput name="searchM" #inputList>
+    </paper-data-list>
+  </paper-textfield>
+
+  <paper-textfield size="l"#textfield >
+    <label paperLabel>Введите текст</label>
+    <paper-data-list [variants]="variants" formControlName="searchL">
+      <input paperInput name="searchL" #inputList>
+    </paper-data-list>
+
+  </paper-textfield>
+
+  <paper-textfield size="m"#textfield >
+    <label paperLabel>Поиск студента</label>
+    <paper-data-list [variants]="students" formControlName="student" [labelResolver]="studentResolver">
+      <input paperInput name="student" #inputList>
+    </paper-data-list>
+  </paper-textfield>
+</form>
