@@ -1,11 +1,15 @@
 import { IBaseBlock } from "../../base-block.type";
-import { TTcpServerBlockResponseData } from "./tcp-server.response-data.type";
-import { TTcpServerBlockRequestData } from "./tcp-server.request-data.type";
-import { IBaseNetworkBlockOptions } from "../base-network-block-options.type";
+import { TTcpServerBlockResponseData } from "./data-types/tcp-server.response-data.type";
+import { TTcpServerBlockRequestData } from "./data-types/tcp-server.request-data.type";
+import { IBaseNetworkBlock } from "../base-network-block-options.type";
+import { IBlockResponseData } from "../block-response-data.type";
+import { IBlockRequestData } from "../block-request-data.type";
 
-export interface ITcpServerBlock extends IBaseBlock {
+export interface ITcpServerBlock
+  extends
+    IBaseBlock,
+    IBaseNetworkBlock,
+    IBlockResponseData<TTcpServerBlockResponseData>,
+    IBlockRequestData<TTcpServerBlockRequestData> {
   tcpServerPort: number;
-  typeResponseData: TTcpServerBlockResponseData;
-  typeRequestData: TTcpServerBlockRequestData;
-  options: IBaseNetworkBlockOptions;
 }

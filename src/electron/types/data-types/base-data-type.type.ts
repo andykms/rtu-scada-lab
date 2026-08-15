@@ -8,7 +8,8 @@ export enum EDataTypes {
     AUDIO,
     IMAGE,
     PDF,
-    BYTES
+    BYTES,
+    NOTHING
 }
 
 export interface IBaseDataType {

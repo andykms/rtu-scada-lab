@@ -1,6 +1,6 @@
-import {EDataTypes} from "../../../data-types/base-data-type.type"
+import {EDataTypes} from "../../../../data-types/base-data-type.type"
 
-export type TTcpClientBlockRequestData = 
+export type TTcpServerBlockRequestData = 
 EDataTypes.BYTES | 
 EDataTypes.STRING | 
 EDataTypes.NUMBER |

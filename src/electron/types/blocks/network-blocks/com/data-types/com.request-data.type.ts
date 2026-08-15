@@ -1,4 +1,4 @@
-import {EDataTypes} from "../../../data-types/base-data-type.type"
+import {EDataTypes} from "../../../../data-types/base-data-type.type"
 
 export type TComBlockRequestData = 
 EDataTypes.BYTES | 

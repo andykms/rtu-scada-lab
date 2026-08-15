@@ -1,4 +1,4 @@
-import {EDataTypes} from "../../../data-types/base-data-type.type"
+import {EDataTypes} from "../../../../data-types/base-data-type.type"
 
 export type TMqttBlockRequestData = 
 EDataTypes.BYTES | 
@@ -8,4 +8,7 @@ EDataTypes.IMAGE |
 EDataTypes.AUDIO |
 EDataTypes.VIDEO |
 EDataTypes.PDF |
-EDataTypes.JSON
+EDataTypes.JSON |
+EDataTypes.ANY_FILE |
+EDataTypes.ARRAY_NUMBERS |
+EDataTypes.NOTHING
