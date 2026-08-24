@@ -10,6 +10,9 @@
     --border-color: #FFF;
     --placeholder: rgb(175, 175, 175);
     --theme: #ffffff;
+    --modal-color: rgba(255, 255, 255, 0.73);
+    --primary-color: rgba(63, 136, 201, 1);
+    --box-shadow-color: rgba(255, 255, 255, 0.71);
 
     --font-size-xs: 10px;
     --font-size-s: 14px;

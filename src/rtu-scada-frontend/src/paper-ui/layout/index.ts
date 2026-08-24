@@ -1,0 +1,1 @@
+export { PaperModalComponent } from "./modal/modal.component"

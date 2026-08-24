@@ -24,31 +24,92 @@
 
 <form [formGroup]="form" class="form">
   <paper-textfield size="s"#textfield >
-    <label paperLabel>Введите текст</label>
     <paper-data-list [variants]="variants" formControlName="searchS">
+      <label paperLabel>Введите текст</label>
       <input paperInput name="searchS" #inputList>
     </paper-data-list>
   </paper-textfield>
 
   <paper-textfield size="m"#textfield >
-    <label paperLabel>Введите текст</label>
     <paper-data-list [variants]="variants" formControlName="searchM">
+      <label paperLabel>Введите текст</label>
       <input paperInput name="searchM" #inputList>
     </paper-data-list>
   </paper-textfield>
 
   <paper-textfield size="l"#textfield >
-    <label paperLabel>Введите текст</label>
     <paper-data-list [variants]="variants" formControlName="searchL">
+      <label paperLabel>Введите текст</label>
       <input paperInput name="searchL" #inputList>
     </paper-data-list>
 
   </paper-textfield>
 
   <paper-textfield size="m"#textfield >
-    <label paperLabel>Поиск студента</label>
     <paper-data-list [variants]="students" formControlName="student" [labelResolver]="studentResolver">
+      <label paperLabel>Поиск студента</label>
       <input paperInput name="student" #inputList>
     </paper-data-list>
   </paper-textfield>
 </form>
+
+<button paperButton size="l" (click)="onClickOpenModalS()">
+  Открыть модальное окно размера S
+</button>
+
+
+<button paperButton size="l" (click)="isOpenModalM.set(true)">
+  Открыть модальное окно размера M
+</button>
+
+<button paperButton size="l" (click)="isOpenModalL.set(true)">
+  Открыть модальное окно размера L
+</button>
+
+<paper-modal
+[opened]="isOpenModalS()"
+size="s"
+(close)="isOpenModalS.set(false)"
+(onSecondaryAction)="isOpenModalS.set(false)"
+title="Вы действительно хотите удалить проект?"
+mainActionLabel="Удалить"
+>
+  Проект нельзя будет восстановить, это действие нельзя будет отменить.
+</paper-modal>
+
+<paper-modal
+[opened]="isOpenModalM()"
+size="m"
+(close)="isOpenModalM.set(false)"
+(onSecondaryAction)="isOpenModalM.set(false)"
+mainActionLabel="Подтвердить"
+title="Вы действительно хотите удалить проект?"
+>
+  Проект нельзя будет восстановить, это действие нельзя будет отменить.
+</paper-modal>
+
+<paper-modal
+[opened]="isOpenModalL()"
+size="l"
+(close)="isOpenModalL.set(false)"
+(onSecondaryAction)="isOpenModalL.set(false)"
+mainActionLabel="Сохранить"
+title="TCP клиент"
+>
+  <div class="tcp-form">
+    <paper-textfield size="m">
+      <label paperLabel>ID</label>
+      <input paperInput>
+    </paper-textfield>
+
+    <paper-textfield size="m">
+      <label paperLabel>IP</label>
+      <input paperInput>
+    </paper-textfield>
+
+    <paper-textfield size="m">
+      <label paperLabel>Порт</label>
+      <input paperInput>
+    </paper-textfield>
+  </div>
+</paper-modal>

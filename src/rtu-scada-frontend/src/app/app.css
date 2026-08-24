@@ -14,3 +14,10 @@
 .form {
     inline-size: 267px;
 }
+
+.tcp-form {
+    max-inline-size: 340px;
+    display: grid;
+    grid-template-rows: auto;
+    gap: 10px;
+}

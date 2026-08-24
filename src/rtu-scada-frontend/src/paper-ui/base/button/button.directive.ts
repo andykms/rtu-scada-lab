@@ -1,5 +1,5 @@
 import { Directive, input, OnChanges, OnInit } from "@angular/core"
-import {BaseComponent} from "../base.directive"
+import {BaseComponent} from "../../base.directive"
 
 @Directive({
     selector: "[paperButton]",
@@ -14,6 +14,6 @@ export class PaperButton extends BaseComponent implements OnInit, OnChanges {
   }
 
   ngOnChanges() {
-    this.renderer.setProperty(this.elementRef.nativeElement, 'disabled', this.disabled);
+    this.renderer.setProperty(this.elementRef.nativeElement, 'disabled', this.disabled());
   }
 }

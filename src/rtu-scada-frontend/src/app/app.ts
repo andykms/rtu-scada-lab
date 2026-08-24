@@ -1,36 +1,52 @@
-import { Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { PaperTextfield, PaperInput, PaperLabel, PaperButton,PaperDataList } from "../paper-ui/base"
+import {
+  PaperTextfield,
+  PaperInput,
+  PaperLabel,
+  PaperButton,
+  PaperDataList,
+} from '../paper-ui/base';
+import { PaperModalComponent } from '../paper-ui/layout';
 import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
-
 export type TStudentInfo = {
   fio: {
-    firstName: string
-    lastName: string
-  },
-  age: number
-}
-
+    firstName: string;
+    lastName: string;
+  };
+  age: number;
+};
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, PaperTextfield, PaperInput,PaperLabel, PaperButton, PaperDataList, FormsModule, ReactiveFormsModule],
+  imports: [
+    RouterOutlet,
+    PaperTextfield,
+    PaperInput,
+    PaperLabel,
+    PaperButton,
+    PaperDataList,
+    PaperModalComponent,
+    FormsModule,
+    ReactiveFormsModule,
+  ],
   templateUrl: './app.html',
-  styleUrl: './app.css'
+  styleUrl: './app.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class App {
-  private readonly fb = inject(FormBuilder)
+  private readonly fb = inject(FormBuilder);
 
   protected readonly form = this.fb.group({
     searchS: this.fb.control<string>(''),
     searchM: this.fb.control<string>(''),
     searchL: this.fb.control<string>(''),
-    student: this.fb.control<TStudentInfo|null>(null)
-  })
+    student: this.fb.control<TStudentInfo | null>(null),
+  });
 
-  protected readonly value = ""
+  protected readonly value = '';
 
   protected readonly variants = [
     'Apple',
@@ -55,39 +71,71 @@ export class App {
     'Tangerine',
     'Ugli Fruit',
     'Vanilla',
-    'Very long fruit, its name is very long'
-  ]
+    'Very long fruit, its name is very long',
+  ];
 
   protected readonly students = [
     {
       fio: {
         firstName: 'John',
-        lastName: 'Doe'
+        lastName: 'Doe',
       },
-      age: 25
+      age: 25,
     },
     {
       fio: {
         firstName: 'Jane',
-        lastName: 'Doe'
+        lastName: 'Doe',
       },
-      age: 30
+      age: 30,
     },
     {
       fio: {
         firstName: 'Jim',
-        lastName: 'Smith'
+        lastName: 'Smith',
       },
-      age: 35
+      age: 35,
     },
     {
       fio: {
         firstName: 'Jill',
-        lastName: 'Smith'
+        lastName: 'Smith',
       },
-      age: 40
-    }
-  ]
+      age: 40,
+    },
+  ];
 
-  readonly studentResolver = (student: TStudentInfo | null) => student ? `${student.fio.firstName} ${student.fio.lastName}` : "-"
+  readonly studentResolver = (student: TStudentInfo | null) =>
+    student ? `${student.fio.firstName} ${student.fio.lastName}` : '-';
+
+  readonly isOpenModalS = signal(false);
+  readonly isOpenModalM = signal(false);
+  readonly isOpenModalL = signal(false);
+
+  readonly onSetActionS = (action: string) => {
+    switch (action.toLocaleLowerCase()) {
+      case 'отмена':
+        this.isOpenModalS.set(false);
+        break;
+      case 'сохранить':
+        console.log('Сохранить');
+        break;
+    }
+  };
+
+  readonly onSetActionM = (action: string) => {
+    switch(action.toLowerCase()) {
+      case 'отмена':
+        this.isOpenModalM.set(false);
+        break;
+      case 'сохранить':
+        console.log('Сохранить');
+        break;
+    }
+  }
+
+  readonly onClickOpenModalS = () => {
+    console.log('Open modal');
+    this.isOpenModalS.set(true);
+  };
 }

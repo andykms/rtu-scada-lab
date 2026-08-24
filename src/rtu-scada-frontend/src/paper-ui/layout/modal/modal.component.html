@@ -1,0 +1,27 @@
+
+@if (opened()) {
+<div class="background-modal">
+  <article [class]="`modal modal_${size()}`">
+    <div class="modal_header">
+      <h1 class="modal_header-title">{{ title() }}</h1>
+      <button class="modal_close_button" (click)="close.emit()">Закрыть</button>
+    </div>
+    <div class="content">
+    <ng-content></ng-content>
+    </div>
+    <div class="modal_actions">
+      @for (action_title of otherActionLabels(); track $index) {
+        <button class="modal_action" (click)="onOtherActions.emit(action_title)">
+          {{ action_title }}
+        </button>
+      }
+      <button class="modal_action" (click)="onSecondaryAction.emit()">
+        {{ secondaryActionLabel() }}
+      </button>
+      <button class="modal_action" (click)="onMainAction.emit()">
+        {{ mainActionLabel() }}
+      </button>
+    </div>
+  </article>
+</div>
+}

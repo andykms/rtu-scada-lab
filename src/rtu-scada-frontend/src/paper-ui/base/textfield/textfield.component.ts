@@ -1,5 +1,5 @@
 import { Component, ChangeDetectionStrategy } from "@angular/core";
-import {BaseComponent} from "../base.directive";
+import {BaseComponent} from "../../base.directive";
 
 
 @Component({
