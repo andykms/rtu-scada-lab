@@ -3,7 +3,7 @@ import { INonRealtimeNetworkBlock } from "../non-realtime-network-block.type";
 import { IBaseBlock } from "../../base-block.type";
 import { IBaseNetworkBlock } from "../base-network-block-options.type";
 import { IBlockResponseData } from "../block-response-data.type";
-import { TMqttBlockResponseData } from "./data-types/modbus.response-data.type";
+import { TModbusBlockResponseData } from "./data-types/modbus.response-data.type";
 
 export interface IModbusTcpBlock
   extends
@@ -11,7 +11,7 @@ export interface IModbusTcpBlock
     IBaseModbus,
     IBaseBlock,
     IBaseNetworkBlock,
-    IBlockResponseData<TMqttBlockResponseData> {
+    IBlockResponseData<TModbusBlockResponseData> {
   tcpPort: number;
   tcpHost: string;
 }

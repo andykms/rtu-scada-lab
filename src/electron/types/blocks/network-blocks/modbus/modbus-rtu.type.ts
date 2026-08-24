@@ -4,7 +4,7 @@ import { IBlockResponseData } from "../block-response-data.type";
 import { IComConnectOptions } from "../com/com-connect-options.type";
 import { INonRealtimeNetworkBlock } from "../non-realtime-network-block.type";
 import { IBaseModbus } from "./base-modbus.type";
-import { TMqttBlockResponseData } from "./data-types/modbus.response-data.type";
+import { TModbusBlockResponseData } from "./data-types/modbus.response-data.type";
 
 export interface IModbusRtuBlock
   extends
@@ -13,4 +13,4 @@ export interface IModbusRtuBlock
     IBaseModbus,
     IBaseNetworkBlock,
     IBaseBlock,
-    IBlockResponseData<TMqttBlockResponseData> {}
+    IBlockResponseData<TModbusBlockResponseData> {}

@@ -10,7 +10,8 @@ export type IHttpClientRequestBodyDataTypes =
     EDataTypes.AUDIO |
     EDataTypes.VIDEO |
     EDataTypes.IMAGE |
-    EDataTypes.PDF;
+    EDataTypes.PDF |
+    EDataTypes.NOTHING;
 
 export interface IHttpClientRequestBodyData extends IBlockRequestData<IHttpClientRequestBodyDataTypes> {
 }
