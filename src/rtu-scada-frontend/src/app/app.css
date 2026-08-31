@@ -1,3 +1,16 @@
+.some-list {
+    padding-block-start: 151px;
+    margin-inline: auto;
+    inline-size: 67%;
+}
+
+.projects-list {
+    padding-block-start: 61px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 29px;
+}
+
 .vitrine {
     display: flex;
     flex-direction: column;
@@ -20,4 +33,17 @@
     display: grid;
     grid-template-rows: auto;
     gap: 10px;
+}
+
+.vitrine-cards {
+    margin: 25px;
+    display: grid;
+    grid-template-columns: 200px 200px;
+    grid-template-rows: 177px 222px;
+    gap: 10px;
+}
+
+.last_card_l {
+    grid-column-start: 1;
+    grid-column-end: 3;
 }

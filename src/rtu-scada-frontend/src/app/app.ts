@@ -8,7 +8,9 @@ import {
   PaperDataList,
 } from '../paper-ui/base';
 import { PaperModalComponent } from '../paper-ui/layout';
-import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { PaperCard } from '../paper-ui/layout/card/card.directive';
+import { PaperText } from '../paper-ui/base/text/text.directive';
+import { FormBuilder } from '@angular/forms';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 export type TStudentInfo = {
@@ -29,6 +31,8 @@ export type TStudentInfo = {
     PaperButton,
     PaperDataList,
     PaperModalComponent,
+    PaperCard,
+    PaperText,
     FormsModule,
     ReactiveFormsModule,
   ],
@@ -135,7 +139,6 @@ export class App {
   }
 
   readonly onClickOpenModalS = () => {
-    console.log('Open modal');
     this.isOpenModalS.set(true);
   };
 }

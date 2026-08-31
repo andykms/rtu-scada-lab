@@ -139,7 +139,9 @@ table {
 body {
   font-family: Inter , sans-serif;
   color: var(--text-color);
-  background-color: var(--theme);
+  background: var(--theme-color);
+  background-size: cover;
+  background-attachment: fixed;
 }
 
 html {

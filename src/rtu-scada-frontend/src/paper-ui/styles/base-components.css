@@ -71,3 +71,63 @@
 .paper-button:active {
     transform: scale(0.978);
 }
+
+.paper-text h1, h2, h3, h4, h5, h6 {
+    font-weight: bold;
+}
+
+.paper-text_xs h1, h2, h3, h4, h5, h6 {
+    font-weight: bold;
+    margin-block-end: 5px;
+    font-size: var(--font-size-s);
+}
+
+.paper-text_s h1, h2, h3, h4, h5, h6 {
+    font-weight: bold;
+    margin-block-end: 7px;
+    font-size: var(--font-size-m);
+}
+
+.paper-text_m h1, h2, h3, h4, h5, h6 {
+    font-weight: bold;
+    margin-block-end: 9px;
+    font-size: var(--font-size-l);
+}
+
+.paper-text_l h1, h2, h3, h4, h5, h6 {
+    font-weight: bold;
+    margin-block-end: 11px;
+    font-size: var(--font-size-l);
+}
+
+.paper-text_xl h1, h2, h3, h4, h5, h6 {
+    font-weight: bold;
+    margin-block-end: 13px;
+    font-size: var(--font-size-l);
+}
+
+.paper-text p {
+    font-weight: normal;
+    line-height: 1.31;
+    margin-block-end: 3px;
+}
+
+.paper-text_xs {
+    font-size: var(--font-size-xs);
+}
+
+.paper-text_s {
+    font-size: var(--font-size-s);
+}
+
+.paper-text_m {
+    font-size: var(--font-size-m);
+}
+
+.paper-text_l {
+    font-size: var(--font-size-l);
+}
+
+.paper-text_xl {
+    font-size: var(--font-size-xl);
+}

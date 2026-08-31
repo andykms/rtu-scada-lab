@@ -1,7 +1,12 @@
 :root {
+    --theme-gradient: linear-gradient(to bottom, 
+        rgba(105, 133, 181, 0.53) 67%,
+        rgba(103, 127, 170, 0.42) 78%,
+        rgba(118, 135, 164, 0.23) 86%,
+        rgba(118, 135, 164, 0.23) 100%);
+    --theme-color: var(--theme-gradient); 
     --substrate: #F7F7F7;
     --text-color: rgba(64, 64, 64, 1);
-    --textfield-color: var(--substrate);
     --button-color: rgb(212, 243, 255);
     --hover-button-color: rgba(71, 229, 250, 0.8);
     --even-color: rgba(255, 255, 255, 0.47);
@@ -10,13 +15,33 @@
     --border-color: #FFF;
     --placeholder: rgb(175, 175, 175);
     --theme: #ffffff;
-    --modal-color: rgba(255, 255, 255, 0.73);
+    --modal-color: var(--glass);
     --primary-color: rgba(63, 136, 201, 1);
-    --box-shadow-color: rgba(255, 255, 255, 0.71);
+    --box-shadow-color: rgba(250, 250, 250, 0.71);
+
+    --glassed-color: #E1E7F0;
+    --sub-glassed-color: #CBD7E7;
+    --glass: linear-gradient(to bottom, var(--glassed-color) 0%, var(--sub-glassed-color) 100%);
+    --textfield-color: var(--glass);
+
+    --fade-cubic-bezier: cubic-bezier(0.05, 0.96, 0.36, 0.99);
+    --fade-in-animation: fadeIn 0.7s var(--fade-cubic-bezier);
 
     --font-size-xs: 10px;
     --font-size-s: 14px;
     --font-size-m: 20px;
     --font-size-l: 24px;
     --font-size-xl: 32px;
+}
+
+.night-theme {
+    --theme-gradient: rgba(26, 28, 30, 0.897);
+    --theme-color: var(--theme-gradient); 
+    --text-color: rgb(241, 241, 241);
+    --substrate: #2e2e2e;
+    --box-shadow-color: rgba(117, 117, 117, 0.71);
+    --glassed-color: #15171b;
+    --sub-glassed-color: #3c3e43;
+    --glass: linear-gradient(to bottom, var(--glassed-color) 0%, var(--sub-glassed-color) 100%);
+    --textfield-color: var(--glass);
 }

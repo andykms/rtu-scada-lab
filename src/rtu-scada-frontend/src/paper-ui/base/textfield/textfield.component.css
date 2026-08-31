@@ -5,9 +5,10 @@
 .textfield {
     position: relative;
     border: 1px solid var(--border-color);
-    background-color: var(--textfield-color);
-    box-shadow: inset 0 0 2px 1px rgba(0, 0, 0, 0.23);
+    background: var(--textfield-color);
+    box-shadow: inset 0 0 2px 1px var(--box-shadow-color);
     display: flex;
+    animation: var(--fade-in-animation);
 }
 
 :host:has(.textfield_xs, .textfield_s), .textfield_xs, .textfield_s  {
@@ -40,6 +41,7 @@
 .textfield ::ng-deep input {
     position: relative;
     z-index: 1;
+    color: var(--text-color)
 }
 
 ::ng-deep .textfield:has(.mini-placeholder) label {
