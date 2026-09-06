@@ -13,6 +13,4 @@ export type THttpClientReponseBodyNonFormData =
   | EDataTypes.VIDEO
   | EDataTypes.PDF;
 
-export interface IHttpClientReponseBodyNonFormData extends IBlockRequestData<THttpClientReponseBodyNonFormData> {
-  blockId: string;
-}
+export interface IHttpClientReponseBodyNonFormData extends IBlockRequestData<THttpClientReponseBodyNonFormData> {}

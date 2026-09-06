@@ -5,5 +5,4 @@ export type THttpClientReponseCookieData = EDataTypes.STRING;
 
 export interface IHttpClientReponseCookies extends IBlockRequestData<THttpClientReponseCookieData> {
     cookieFieldName: string;
-    blockId: string;
 }

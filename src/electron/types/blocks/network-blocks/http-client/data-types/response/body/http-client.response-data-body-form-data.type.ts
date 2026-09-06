@@ -14,6 +14,5 @@ export type THttpClientReponseBodyFormData =
   | EDataTypes.PDF;
 
 export interface IHttpClientReponseBodyFormData extends IBlockRequestData<THttpClientReponseBodyFormData> {
-  blockId: string;
   formDataKey: string;
 }

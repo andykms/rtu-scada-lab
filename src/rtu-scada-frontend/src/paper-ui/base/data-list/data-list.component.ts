@@ -1,5 +1,6 @@
 import {
   AfterContentInit,
+  ChangeDetectionStrategy,
   Component,
   ContentChild,
   DestroyRef,
@@ -31,6 +32,7 @@ import { filter, fromEvent, Subscription } from 'rxjs';
       multi: true,
     },
   ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class PaperDataList<T> implements OnInit, AfterContentInit, OnDestroy, ControlValueAccessor {
   private readonly destroyRef$ = inject(DestroyRef);

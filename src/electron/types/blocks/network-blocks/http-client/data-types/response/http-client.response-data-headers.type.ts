@@ -5,5 +5,4 @@ export type THttpClientReponseHeaderData = EDataTypes.STRING;
 
 export interface IHttpClientReponseHeaders extends IBlockRequestData<THttpClientReponseHeaderData> {
     headerName: string;
-    blockId: string;
 }
