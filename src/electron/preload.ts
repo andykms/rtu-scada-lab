@@ -15,6 +15,8 @@ import { IMediaBlock } from "./types/blocks/internal-blocks/media/media.type";
 contextBridge.exposeInMainWorld("electronAPI", {
   initialize: () => ipcRenderer.invoke("initialize"),
 
+  
+
   openProjectFile: (filePath: string) =>
     ipcRenderer.invoke("openProjectFile", filePath),
 

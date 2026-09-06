@@ -1,12 +1,41 @@
+import { dialog } from "electron";
 import * as fs from "fs/promises";
 import path from "path";
 import { IProjectFile } from "../../types/project/project-file/project-file.type";
 
-
 export class FileManager {
+  async saveProjectFile(projectData: IProjectFile): Promise<void> {
+    try {
+      let filePath = projectData.path.trim();
 
-  async saveProjectFile(projectData: IProjectFile, path: string): Promise<void> {
-    //TODO
+      if (!filePath) {
+        const result = await dialog.showSaveDialog({
+          title: "Сохранить проект",
+          defaultPath: `${projectData.projectName || "project"}.json`,
+          filters: [{ name: "Файлы проекта", extensions: ["json"] }],
+        });
+
+        if (result.canceled || !result.filePath) {
+          return;
+        }
+
+        filePath = result.filePath;
+        if (path.extname(filePath).toLowerCase() !== ".json") {
+          filePath = `${filePath}.json`;
+        }
+      }
+
+      projectData.path = filePath;
+      projectData.updatedAt = new Date().toISOString();
+
+      await fs.writeFile(
+        filePath,
+        JSON.stringify(projectData, null, 2),
+        "utf-8",
+      );
+    } catch (err) {
+      return Promise.reject(err);
+    }
   }
 
   async openProjectFile(filePath: string): Promise<IProjectFile> {

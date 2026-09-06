@@ -21,11 +21,62 @@ import { EDataTypes } from "../../types/data-types/base-data-type.type";
 import { IProjectFile } from "../../types/project/project-file/project-file.type";
 
 export abstract class ProjectContructorTools {
-  protected networkBlocks: (keyof IProjectFile["projectData"]["blocks"]["networkBlocks"])[];
+  protected networkBlocks: (keyof IProjectFile["projectData"]["blocks"]["networkBlocks"])[] =
+    [];
 
-  protected internalBlocks: (keyof IProjectFile["projectData"]["blocks"]["internalBlocks"])[];
+  protected internalBlocks: (keyof IProjectFile["projectData"]["blocks"]["internalBlocks"])[] =
+    [];
 
-  constructor(public currProjectState: IProjectFile) {
+  public currProjectState!: IProjectFile;
+
+  setProjectState(projectState: IProjectFile, path?: string): void {
+    this.currProjectState = projectState;
+    if (path) {
+      this.currProjectState.path = path;
+    }
+    this.refreshBlockCatalogKeys();
+  }
+
+  createNewProject(projectName: string): IProjectFile {
+    const now = new Date().toISOString();
+    const project: IProjectFile = {
+      projectLab: "rtu-scada-lab_alpha",
+      projectLabVersion: "0.0.1",
+      projectId: Date.now(),
+      projectName,
+      createdAt: now,
+      updatedAt: now,
+      path: "",
+      projectData: {
+        blocks: {
+          blockIds: [],
+          blockNames: [],
+          networkBlocks: {
+            tcpServers: [],
+            tcpClients: [],
+            mqttClients: [],
+            httpClients: [],
+            modbusRtu: [],
+            modbusTcp: [],
+            database: [],
+            com: [],
+          },
+          internalBlocks: {
+            converters: [],
+            graphs: [],
+            indicators: [],
+            media: [],
+          },
+        },
+        edges: {},
+      },
+    };
+    return project;
+  }
+
+  constructor() {}
+
+  private refreshBlockCatalogKeys(): void {
     this.networkBlocks = Object.keys(
       this.currProjectState.projectData.blocks.networkBlocks,
     ) as (keyof IProjectFile["projectData"]["blocks"]["networkBlocks"])[];

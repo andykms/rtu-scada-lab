@@ -16,15 +16,13 @@ import { IProjectFile } from "../../types/project/project-file/project-file.type
 import { ProjectContructorTools } from "./project-contructor-tools.tool";
 
 export class ProjectConstructorManager extends ProjectContructorTools {
-  constructor(currProjectState: IProjectFile) {
-    super(currProjectState);
-  }
-
   async setTcpServerBlock(
+    projectId: number,
     config: ITcpServerBlock,
     inputBlocks: number[],
     outputBlocks: number[],
   ): Promise<void> {
+    await this.ensureProjectId(projectId);
     this.upsertNetworkBlock("tcpServers", config);
     await this.syncBlockEdges(
       config.blockId,
@@ -36,10 +34,12 @@ export class ProjectConstructorManager extends ProjectContructorTools {
   }
 
   async setTcpClientBlock(
+    projectId: number,
     config: ITcpClientBlock,
     inputBlocks: number[],
     outputBlocks: number[],
   ): Promise<void> {
+    await this.ensureProjectId(projectId);
     this.upsertNetworkBlock("tcpClients", config);
     await this.syncBlockEdges(
       config.blockId,
@@ -51,10 +51,12 @@ export class ProjectConstructorManager extends ProjectContructorTools {
   }
 
   async setMqttBlock(
+    projectId: number,
     config: IMqttClientBlock,
     inputBlocks: number[],
     outputBlocks: number[],
   ): Promise<void> {
+    await this.ensureProjectId(projectId);
     this.upsertNetworkBlock("mqttClients", config);
     await this.syncBlockEdges(
       config.blockId,
@@ -66,10 +68,12 @@ export class ProjectConstructorManager extends ProjectContructorTools {
   }
 
   async setModbusRtuBlock(
+    projectId: number,
     config: IModbusRtuBlock,
     inputBlocks: number[],
     outputBlocks: number[],
   ): Promise<void> {
+    await this.ensureProjectId(projectId);
     if (inputBlocks.length > 0) {
       return Promise.reject(
         new AppError(
@@ -89,10 +93,12 @@ export class ProjectConstructorManager extends ProjectContructorTools {
   }
 
   async setModbusTcpBlock(
+    projectId: number,
     config: IModbusTcpBlock,
     inputBlocks: number[],
     outputBlocks: number[],
   ): Promise<void> {
+    await this.ensureProjectId(projectId);
     if (inputBlocks.length > 0) {
       return Promise.reject(
         new AppError(
@@ -112,10 +118,12 @@ export class ProjectConstructorManager extends ProjectContructorTools {
   }
 
   async setHttpClientBlock(
+    projectId: number,
     config: IHttpClientBlock,
     inputBlocks: number[],
     outputBlocks: number[],
   ): Promise<void> {
+    await this.ensureProjectId(projectId);
     const outputDataType = this.getHttpClientOutputDataType(config);
     if (outputDataType == null && outputBlocks.length > 0) {
       return Promise.reject(
@@ -148,10 +156,12 @@ export class ProjectConstructorManager extends ProjectContructorTools {
   }
 
   async setComBlock(
+    projectId: number,
     config: IComBlock,
     inputBlocks: number[],
     outputBlocks: number[],
   ): Promise<void> {
+    await this.ensureProjectId(projectId);
     this.upsertNetworkBlock("com", config);
     await this.syncBlockEdges(
       config.blockId,
@@ -163,10 +173,12 @@ export class ProjectConstructorManager extends ProjectContructorTools {
   }
 
   async setConverterBlock(
+    projectId: number,
     config: IConverterBlock,
     inputBlocks: number[],
     outputBlocks: number[],
   ): Promise<void> {
+    await this.ensureProjectId(projectId);
     const outputDataType = this.getConverterOutputDataType(config);
     if (outputDataType == null) {
       return Promise.reject(
@@ -187,10 +199,12 @@ export class ProjectConstructorManager extends ProjectContructorTools {
   }
 
   async setIndicatorsBlock(
+    projectId: number,
     config: IIndicatorsBlock,
     inputBlocks: number[],
     outputBlocks: number[],
   ): Promise<void> {
+    await this.ensureProjectId(projectId);
     const outputDataType =
       config.typeResponseData == EDataTypes.NOTHING
         ? null
@@ -214,10 +228,12 @@ export class ProjectConstructorManager extends ProjectContructorTools {
   }
 
   async setGraphBlock(
+    projectId: number,
     config: IGraphBlock,
     inputBlocks: number[],
     outputBlocks: number[],
   ): Promise<void> {
+    await this.ensureProjectId(projectId);
     if (outputBlocks.length > 0) {
       return Promise.reject(
         new AppError(
@@ -274,10 +290,12 @@ export class ProjectConstructorManager extends ProjectContructorTools {
   }
 
   async setMediaBlock(
+    projectId: number,
     config: IMediaBlock,
     inputBlocks: number[],
     outputBlocks: number[],
   ): Promise<void> {
+    await this.ensureProjectId(projectId);
     if (outputBlocks.length > 0) {
       return Promise.reject(
         new AppError(
@@ -294,6 +312,26 @@ export class ProjectConstructorManager extends ProjectContructorTools {
       config.typeRequestData,
       null,
     );
+  }
+
+  private ensureProjectId(projectId: number): Promise<void> {
+    if (!this.currProjectState) {
+      return Promise.reject(
+        new AppError(
+          "Проект не открыт. Сначала откройте или создайте проект",
+          EAppErrorCodes.ProjectNotOpened,
+        ),
+      );
+    }
+    if (this.currProjectState.projectId != projectId) {
+      return Promise.reject(
+        new AppError(
+          `Переданный projectId ${projectId} не совпадает с id текущего проекта ${this.currProjectState.projectId}`,
+          EAppErrorCodes.WrongProjectId,
+        ),
+      );
+    }
+    return Promise.resolve();
   }
 
   private upsertNetworkBlock<

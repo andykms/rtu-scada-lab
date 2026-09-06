@@ -5,5 +5,7 @@ export enum EAppErrorCodes {
     BlockNotAcceptData,
     IdAlreadyExist,
     NotReleased,
-    AppRuntime
+    AppRuntime,
+    WrongProjectId,
+    ProjectNotOpened
 }   
