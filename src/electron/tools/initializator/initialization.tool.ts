@@ -5,7 +5,7 @@ import { FileManager } from "../file-manager/file-manager.tool";
 import { ProjectConstructorManager } from "../project-constructor-manager/project-constructor-manager.tool";
 import { SettingsManager } from "../settings-manager/settings-manager.tool";
 
-export class Initializator {
+export class InitializatorTool {
 
   
   settings: ISettings | null = null;

@@ -1,0 +1,12 @@
+.home {
+    margin-inline-start: 30%;
+    margin-inline-end: 50px;
+    margin-top: 50px;
+}
+
+.title {
+    margin-bottom: 120px;
+    font-size: calc(var(--font-size-xl) * 2);
+    color: var(--primary-color);
+    animation: var(--fade-in-animation);
+}

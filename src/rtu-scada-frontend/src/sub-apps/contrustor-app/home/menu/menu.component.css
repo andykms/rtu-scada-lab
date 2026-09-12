@@ -1,0 +1,27 @@
+.menu {
+    display: flex;
+    gap: 37px;
+}
+
+.menu-item {
+    block-size: 120px;
+    inline-size: 240px;
+    display: flex;
+}
+
+.add-button {
+    font-size: calc(var(--font-size-xl) * 2);
+    color: var(--primary-color);
+    align-self: flex-end;
+}
+
+.open-file {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    block-size: 100%;
+}
+
+.menu {
+    margin-bottom: 40px;
+}

@@ -6,7 +6,8 @@
     "types": []
   },
   "include": [
-    "src/**/*.ts"
+    "src/**/*.ts",
+    "../electron/types/**/*.ts"
   ],
   "exclude": [
     "src/**/*.spec.ts"

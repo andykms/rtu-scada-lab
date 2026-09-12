@@ -1,0 +1,13 @@
+@if (open() && variants().length > 0) {
+  <div [class]="`selector floating selector-${size()}`">
+    @for (variant of variants(); track variant) {
+      <button
+        type="button"
+        (click)="selectVariant(variant)"
+        [class]="`variant ${$index % 2 !== 0 ? 'variant-odd' : 'variant-even'}`"
+      >
+        <span paperText [size]="size()">{{ variant }}</span>
+      </button>
+    }
+  </div>
+}

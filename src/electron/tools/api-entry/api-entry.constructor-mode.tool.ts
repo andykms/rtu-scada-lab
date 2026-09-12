@@ -25,9 +25,10 @@ export class ApiEntryConstructorMode {
     this.projectContructorManager.setProjectState(projectFile, filePath);
   }
 
-  async createNewProject(projectName: string): Promise<void> {
+  async createNewProject(projectName: string): Promise<number> {
     const projectFile = this.projectContructorManager.createNewProject(projectName);
     this.projectContructorManager.setProjectState(projectFile);
+    return projectFile.projectId;
   }
 
   async setTcpServerBlock(

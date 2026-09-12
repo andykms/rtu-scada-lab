@@ -1,0 +1,37 @@
+.project-page {
+  min-block-size: 100vh;
+  padding: 50px;
+}
+
+.blocks-sidebar {
+  inline-size: 300px;
+  position: fixed;
+}
+
+.sidebar-title {
+  margin: 0 0 20px;
+  color: var(--primary-color);
+}
+
+.blocks-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.block-card {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.add-icon {
+  color: var(--primary-color);
+  font-size: var(--font-size-l);
+  font-weight: bold;
+  line-height: 1;
+}
+
+.project-workspace {
+  min-inline-size: 0;
+}

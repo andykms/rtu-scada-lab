@@ -13,12 +13,13 @@ import { IIndicatorsBlock } from "./types/blocks/internal-blocks/indicators/indi
 import { IMediaBlock } from "./types/blocks/internal-blocks/media/media.type";
 
 contextBridge.exposeInMainWorld("electronAPI", {
-  initialize: () => ipcRenderer.invoke("initialize"),
-
-  
+  getAppMode: () => ipcRenderer.invoke("getAppMode"),
 
   openProjectFile: (filePath: string) =>
     ipcRenderer.invoke("openProjectFile", filePath),
+
+  createProject: (projectName: string) =>
+    ipcRenderer.invoke("createProject", projectName),
 
   setTcpServerBlock: (
     projectId: number,

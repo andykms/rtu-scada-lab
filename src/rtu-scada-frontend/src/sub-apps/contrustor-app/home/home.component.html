@@ -1,0 +1,32 @@
+<section class="home">
+  <h1 paperText size="xl" class="title">{{ labels.constructorApp }}</h1>
+  <constructor-app-home-menu
+    (onCreateProject)="onCreateProject()"
+  ></constructor-app-home-menu>
+  <paper-diving-line></paper-diving-line>
+  <contructor-project-list [projects]="PROJECTS_MOCK"></contructor-project-list>
+</section>
+
+<paper-modal
+  size="s"
+  [opened]="createProjectModalOpened()"
+  [title]="labels.createProject"
+  [mainActionLabel]="labels.createProject"
+  [secondaryActionLabel]="labels.cancel"
+  (close)="closeCreateProjectModal()"
+  (onSecondaryAction)="closeCreateProjectModal()"
+  (onMainAction)="submitCreateProject()"
+>
+  <form (ngSubmit)="submitCreateProject()">
+    <paper-textfield size="m">
+      <label paperLabel for="project-name">{{ labels.projectName }}</label>
+      <input
+        paperInput
+        id="project-name"
+        type="text"
+        autocomplete="off"
+        [formControl]="projectNameControl"
+      />
+    </paper-textfield>
+  </form>
+</paper-modal>

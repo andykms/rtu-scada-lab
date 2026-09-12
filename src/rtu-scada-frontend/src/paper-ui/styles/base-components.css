@@ -26,7 +26,7 @@
     --border-radius: 6px;
     border-radius: var(--border-radius);
     padding-inline: var(--border-radius);
-    color: var(--text-color);
+    color: var(--text-color-other-theme);
     transition: opacity 0.3s ease-in-out, transform 0.05s ease-in-out;
 }
 
@@ -130,4 +130,32 @@
 
 .paper-text_xl {
     font-size: var(--font-size-xl);
+}
+
+.paper-text_link {
+    text-decoration: none;
+    color: var(--text-color);
+    transition: color 0.3s ease-in-out;
+}
+
+.paper-text_active {
+    color: var(--primary-color);
+}
+
+.paper-text_link:hover {
+    color: var(--primary-color);
+}
+
+.paper-text_subtext {
+    color: var(--subtext-color)
+}
+
+.paper-text_ellipsis {
+    white-space: nowrap; 
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.paper-radio {
+    background-color: var(--glass);
 }

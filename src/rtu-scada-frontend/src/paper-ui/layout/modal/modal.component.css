@@ -52,7 +52,7 @@
 
 .modal_xs, .modal_s {
     max-inline-size: 560px;
-    min-block-size: 220px;
+    min-block-size: 120px;
     font-size: var(--font-size-s)
 }
 

@@ -1,0 +1,30 @@
+.projects-list {
+    padding-block-start: 23px;
+}
+
+.list {
+    padding-block-start: 61px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 23px;
+}
+
+.project {
+    block-size: 167px;
+    inline-size: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.project-about {
+    display: flex;
+    flex-direction: column;
+    gap: 11px;
+}
+
+@media (width <= 1300px) {
+    .list {
+        grid-template-columns: repeat(1, 1fr);
+    }
+}

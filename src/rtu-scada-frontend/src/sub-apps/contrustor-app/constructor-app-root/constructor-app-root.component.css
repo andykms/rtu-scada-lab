@@ -1,0 +1,40 @@
+.menu {
+    position: fixed;
+    top: 50px;
+    left: 50px;
+    bottom: 50px;
+    block-size: 90vh;
+    inline-size: 297px;
+    display: flex;
+    flex-direction: column;
+}
+
+.menu-option {
+    display: flex;
+    justify-content: space-between;
+    padding: 16px 7px;
+    transition: background-color 0.3s ease;
+}
+
+.menu-option:hover {
+    background-color: var(--dropdown-color-hover);
+    box-shadow: inset 0 0 4px 2px var(--box-shadow-color);
+    border-radius: 7px;
+}
+
+.extended-text {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+@media (width <= 1300px) {
+    .menu {
+        inline-size: auto;
+        left: 5px;
+    }
+
+    .extended-text {
+        display: none;
+    }
+}
