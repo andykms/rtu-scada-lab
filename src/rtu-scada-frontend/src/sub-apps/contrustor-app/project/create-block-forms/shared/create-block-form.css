@@ -1,0 +1,16 @@
+.create-block-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.create-block-form paper-textfield {
+  display: block;
+  margin-block-end: 4px;
+}
+
+.create-block-form select.paper-input {
+  inline-size: 100%;
+  color: var(--text-color);
+  background: transparent;
+}

@@ -16,6 +16,9 @@ export class PaperInput {
 
   ngOnInit() {
     this.renderer.addClass(this.elementRef.nativeElement, 'paper-input');
+    if(this.elementRef.nativeElement.value) {
+      this.value.set(this.elementRef.nativeElement.value);
+    }
   }
 
   onFocus() {

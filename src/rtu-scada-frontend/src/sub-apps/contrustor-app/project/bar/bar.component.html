@@ -1,13 +1,13 @@
 <div class="bar">
-    <span class="option" paperText size="s" (click)="openedFileOptions.set(!openedFileOptions())">{{ labels.file
-        }}<paper-selector [variants]="fileOptions" [open]="openedFileOptions()" size="s" (close)="openedFileOptions.set(false)"></paper-selector></span>
-    <span class="option" paperText size="s" (click)="openedSettingsOptions.set(!openedSettingsOptions())">{{ labels.settings }}
-        <paper-selector [variants]="settingsOptions" [open]="openedSettingsOptions()" size="s" (close)="openedSettingsOptions.set(false)"></paper-selector>
+    <span class="option" paperText size="s" (click)="openedFileOptions.set(!openedFileOptions())">{{ labels().file
+        }}<paper-selector [variants]="fileOptions()" [open]="openedFileOptions()" size="s" (close)="openedFileOptions.set(false)"></paper-selector></span>
+    <span class="option" paperText size="s" (click)="openedSettingsOptions.set(!openedSettingsOptions())">{{ labels().settings }}
+        <paper-selector [variants]="settingsOptions()" [open]="openedSettingsOptions()" size="s" (close)="openedSettingsOptions.set(false)"></paper-selector>
     </span>
-    <span class="option" paperText size="s" (click)="openedDocumentationOptions.set(!openedDocumentationOptions())">{{ labels.documentation }}
-        <paper-selector [variants]="documentationOptions" [open]="openedDocumentationOptions()" size="s" (close)="openedDocumentationOptions.set(false)"></paper-selector>
+    <span class="option" paperText size="s" (click)="openedDocumentationOptions.set(!openedDocumentationOptions())">{{ labels().documentation }}
+        <paper-selector [variants]="documentationOptions()" [open]="openedDocumentationOptions()" size="s" (close)="openedDocumentationOptions.set(false)"></paper-selector>
     </span>
-    <span class="option" paperText size="s" (click)="openedExitOptions.set(!openedExitOptions())">{{ labels.exit }}
-        <paper-selector [variants]="exitOptions" [open]="openedExitOptions()" size="s" (close)="openedExitOptions.set(false)" (selected)="onExitOptions($event)"></paper-selector>
+    <span class="option" paperText size="s" (click)="openedExitOptions.set(!openedExitOptions())">{{ labels().exit }}
+        <paper-selector [variants]="exitOptions()" [open]="openedExitOptions()" size="s" (close)="openedExitOptions.set(false)" (selected)="onExitOptions($event)"></paper-selector>
     </span>
 </div>

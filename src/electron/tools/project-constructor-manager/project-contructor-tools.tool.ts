@@ -792,8 +792,10 @@ export abstract class ProjectContructorTools {
     outputBlocks: number[],
     inputDataType: EDataTypes | null,
     outputDataType: EDataTypes | null,
+    options?: { allowAnyInputType?: boolean },
   ): Promise<void> {
     try {
+      const allowAnyInput = options?.allowAnyInputType === true;
       const [newEdgesOutputBlocks, newEdgesInputBlocks] = await Promise.all([
         outputDataType == null
           ? Promise.resolve([] as number[])
@@ -802,13 +804,15 @@ export abstract class ProjectContructorTools {
               currBlockId,
               outputBlocks,
             ),
-        inputDataType == null
-          ? Promise.resolve([] as number[])
-          : this.updateEdgesByInputBlocks(
-              inputDataType,
-              currBlockId,
-              inputBlocks,
-            ),
+        allowAnyInput
+          ? this.updateEdgesBySignalBlocks(currBlockId, inputBlocks)
+          : inputDataType == null
+            ? Promise.resolve([] as number[])
+            : this.updateEdgesByInputBlocks(
+                inputDataType,
+                currBlockId,
+                inputBlocks,
+              ),
       ]);
 
       this.currProjectState.projectData.edges[currBlockId] =
@@ -831,5 +835,56 @@ export abstract class ProjectContructorTools {
     } catch (error) {
       return Promise.reject(error);
     }
+  }
+
+  /** Wire signal producers without checking data-type compatibility. */
+  protected updateEdgesBySignalBlocks(
+    currBlockId: number,
+    inputBlocks: number[],
+  ): Promise<number[]> {
+    const newEdges: number[] = [];
+    for (const inputBlockId of inputBlocks) {
+      if (inputBlockId === currBlockId) {
+        return Promise.reject(
+          new AppError(
+            `Блок с id ${currBlockId} не может использовать сам себя как сигнал`,
+            EAppErrorCodes.DataTypesNotCompatible,
+          ),
+        );
+      }
+      let found = false;
+      for (const key of this.networkBlocks) {
+        if (
+          this.currProjectState.projectData.blocks.networkBlocks[key].some(
+            (block) => block.blockId === inputBlockId,
+          )
+        ) {
+          found = true;
+          break;
+        }
+      }
+      if (!found) {
+        for (const key of this.internalBlocks) {
+          if (
+            this.currProjectState.projectData.blocks.internalBlocks[key].some(
+              (block) => block.blockId === inputBlockId,
+            )
+          ) {
+            found = true;
+            break;
+          }
+        }
+      }
+      if (!found) {
+        return Promise.reject(
+          new AppError(
+            `Блок с id ${inputBlockId} не найден`,
+            EAppErrorCodes.NotFoundBlockId,
+          ),
+        );
+      }
+      newEdges.push(inputBlockId);
+    }
+    return Promise.resolve(newEdges);
   }
 }

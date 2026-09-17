@@ -3,4 +3,6 @@ export { PaperInput } from './input/input.directive';
 export { PaperLabel } from './label/label.directive';
 export {PaperButton} from './button/button.directive';
 export {PaperDataList} from './data-list/data-list.component';
+export { PaperSelectList } from './select-list/select-list.component';
 export { PaperSelector } from './selector/selector.component';
+export { PaperCheckbox } from './checkbox/checkbox.directive';

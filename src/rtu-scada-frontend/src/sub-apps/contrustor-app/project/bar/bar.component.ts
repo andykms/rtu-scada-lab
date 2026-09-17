@@ -1,6 +1,5 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
-import {PaperText} from '../../../../paper-ui/base/text/text.directive';
-import { LanguageService } from '../../../../libraries/language/language.service';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { PaperText } from '../../../../paper-ui/base/text/text.directive';
 import { PaperSelector } from '../../../../paper-ui/base/selector/selector.component';
 import { Router } from '@angular/router';
 import { LanguageProvider } from '../../../../libraries/language/language.directive';
@@ -21,40 +20,43 @@ export class ConstructorAppProjectBarComponent extends LanguageProvider {
   readonly openedExitOptions = signal<boolean>(false);
 
   readonly onExitOptions = (option: string) => {
-    if (option === this.labels.home) {
+    if (option === this.labels().home) {
       this.router.navigate(['/']);
     }
-  }
+  };
 
-  readonly fileOptions = ([
-    this.labels.new,
-    this.labels.open,
-    this.labels.save,
-    this.labels.saveAs
+  readonly fileOptions = computed(() => [
+    this.labels().new,
+    this.labels().open,
+    this.labels().save,
+    this.labels().saveAs,
   ]);
-  readonly settingsOptions = ([
-    this.labels.language,
-    this.labels.theme,
-    this.labels.about,
-    this.labels.settings,
+
+  readonly settingsOptions = computed(() => [
+    this.labels().language,
+    this.labels().theme,
+    this.labels().about,
+    this.labels().settings,
   ]);
-  readonly documentationOptions = ([
-    this.labels.tcpServer,
-    this.labels.tcpClient,
-    this.labels.mqttClient,
-    this.labels.httpClient,
-    this.labels.modbusRtu,
-    this.labels.modbusTcp,
-    this.labels.comPort,
-    this.labels.database,
-    this.labels.converter,
-    this.labels.graphs,
-    this.labels.indicators,
-    this.labels.media,
-    this.labels.documentation,
+
+  readonly documentationOptions = computed(() => [
+    this.labels().tcpServer,
+    this.labels().tcpClient,
+    this.labels().mqttClient,
+    this.labels().httpClient,
+    this.labels().modbusRtu,
+    this.labels().modbusTcp,
+    this.labels().comPort,
+    this.labels().database,
+    this.labels().converter,
+    this.labels().graphs,
+    this.labels().indicators,
+    this.labels().media,
+    this.labels().documentation,
   ]);
-  readonly exitOptions = ([
-    this.labels.home,
-    this.labels.exit
+
+  readonly exitOptions = computed(() => [
+    this.labels().home,
+    this.labels().exit,
   ]);
 }

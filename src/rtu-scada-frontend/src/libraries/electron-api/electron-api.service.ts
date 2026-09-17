@@ -1,5 +1,5 @@
 import { Injectable } from "@angular/core";
-import { from, Observable, tap } from "rxjs";
+import { from, Observable } from "rxjs";
 import type { IConverterBlock } from "../../../../electron/types/blocks/internal-blocks/converter/converter.type";
 import type { IGraphBlock } from "../../../../electron/types/blocks/internal-blocks/graphs/graphs.type";
 import type { IIndicatorsBlock } from "../../../../electron/types/blocks/internal-blocks/indicators/indicators.type";
@@ -12,6 +12,7 @@ import type { IModbusTcpBlock } from "../../../../electron/types/blocks/network-
 import type { IMqttClientBlock } from "../../../../electron/types/blocks/network-blocks/mqtt-client/mqtt-client.type";
 import type { ITcpClientBlock } from "../../../../electron/types/blocks/network-blocks/tcp-client/tcp-client.type";
 import type { ITcpServerBlock } from "../../../../electron/types/blocks/network-blocks/tcp-server/tcp-server.type";
+import type { IProjectFile } from "../../../../electron/types/project/project-file/project-file.type";
 import type { EAppMode } from "../../../../electron/types/settings/settings.app-mode.type";
 
 @Injectable({
@@ -19,14 +20,14 @@ import type { EAppMode } from "../../../../electron/types/settings/settings.app-
 })
 export class ElectronAPIService {
   getAppMode(): Observable<EAppMode> {
-    return from(window.electronAPI.getAppMode()).pipe(tap(console.log));
+    return from(window.electronAPI.getAppMode());
   }
 
-  openProjectFile(filePath: string): Observable<void> {
+  openProjectFile(filePath: string): Observable<IProjectFile> {
     return from(window.electronAPI.openProjectFile(filePath));
   }
 
-  createProject(projectName: string): Observable<number> {
+  createProject(projectName: string): Observable<IProjectFile> {
     return from(window.electronAPI.createProject(projectName));
   }
 
@@ -35,7 +36,7 @@ export class ElectronAPIService {
     data: ITcpServerBlock,
     inputBlocks: number[],
     outputBlocks: number[],
-  ): Observable<void> {
+  ): Observable<IProjectFile> {
     return from(
       window.electronAPI.setTcpServerBlock(
         projectId,
@@ -51,7 +52,7 @@ export class ElectronAPIService {
     data: ITcpClientBlock,
     inputBlocks: number[],
     outputBlocks: number[],
-  ): Observable<void> {
+  ): Observable<IProjectFile> {
     return from(
       window.electronAPI.setTcpClientBlock(
         projectId,
@@ -67,7 +68,7 @@ export class ElectronAPIService {
     data: IMqttClientBlock,
     inputBlocks: number[],
     outputBlocks: number[],
-  ): Observable<void> {
+  ): Observable<IProjectFile> {
     return from(
       window.electronAPI.setMqttClientBlock(
         projectId,
@@ -83,7 +84,7 @@ export class ElectronAPIService {
     data: IModbusRtuBlock,
     inputBlocks: number[],
     outputBlocks: number[],
-  ): Observable<void> {
+  ): Observable<IProjectFile> {
     return from(
       window.electronAPI.setModbusRtuBlock(
         projectId,
@@ -99,7 +100,7 @@ export class ElectronAPIService {
     data: IModbusTcpBlock,
     inputBlocks: number[],
     outputBlocks: number[],
-  ): Observable<void> {
+  ): Observable<IProjectFile> {
     return from(
       window.electronAPI.setModbusTcpBlock(
         projectId,
@@ -115,7 +116,7 @@ export class ElectronAPIService {
     data: IHttpClientBlock,
     inputBlocks: number[],
     outputBlocks: number[],
-  ): Observable<void> {
+  ): Observable<IProjectFile> {
     return from(
       window.electronAPI.setHttpClientBlock(
         projectId,
@@ -131,7 +132,7 @@ export class ElectronAPIService {
     data: IDatabaseBlock,
     inputBlocks: number[],
     outputBlocks: number[],
-  ): Observable<void> {
+  ): Observable<IProjectFile> {
     return from(
       window.electronAPI.setDatabaseBlock(
         projectId,
@@ -147,7 +148,7 @@ export class ElectronAPIService {
     data: IComBlock,
     inputBlocks: number[],
     outputBlocks: number[],
-  ): Observable<void> {
+  ): Observable<IProjectFile> {
     return from(
       window.electronAPI.setComBlock(
         projectId,
@@ -163,7 +164,7 @@ export class ElectronAPIService {
     data: IConverterBlock,
     inputBlocks: number[],
     outputBlocks: number[],
-  ): Observable<void> {
+  ): Observable<IProjectFile> {
     return from(
       window.electronAPI.setConverterBlock(
         projectId,
@@ -179,7 +180,7 @@ export class ElectronAPIService {
     data: IGraphBlock,
     inputBlocks: number[],
     outputBlocks: number[],
-  ): Observable<void> {
+  ): Observable<IProjectFile> {
     return from(
       window.electronAPI.setGraphBlock(
         projectId,
@@ -195,7 +196,7 @@ export class ElectronAPIService {
     data: IIndicatorsBlock,
     inputBlocks: number[],
     outputBlocks: number[],
-  ): Observable<void> {
+  ): Observable<IProjectFile> {
     return from(
       window.electronAPI.setIndicatorsBlock(
         projectId,
@@ -211,7 +212,7 @@ export class ElectronAPIService {
     data: IMediaBlock,
     inputBlocks: number[],
     outputBlocks: number[],
-  ): Observable<void> {
+  ): Observable<IProjectFile> {
     return from(
       window.electronAPI.setMediaBlock(
         projectId,

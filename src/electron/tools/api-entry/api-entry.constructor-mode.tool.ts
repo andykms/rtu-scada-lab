@@ -3,12 +3,14 @@ import { IGraphBlock } from "../../types/blocks/internal-blocks/graphs/graphs.ty
 import { IIndicatorsBlock } from "../../types/blocks/internal-blocks/indicators/indicators.type";
 import { IMediaBlock } from "../../types/blocks/internal-blocks/media/media.type";
 import { IComBlock } from "../../types/blocks/network-blocks/com/com.type";
+import { IDatabaseBlock } from "../../types/blocks/network-blocks/database/database.type";
 import { IHttpClientBlock } from "../../types/blocks/network-blocks/http-client/http-client.type";
 import { IModbusRtuBlock } from "../../types/blocks/network-blocks/modbus/modbus-rtu.type";
 import { IModbusTcpBlock } from "../../types/blocks/network-blocks/modbus/modbus-tcp.type";
 import { IMqttClientBlock } from "../../types/blocks/network-blocks/mqtt-client/mqtt-client.type";
 import { ITcpClientBlock } from "../../types/blocks/network-blocks/tcp-client/tcp-client.type";
 import { ITcpServerBlock } from "../../types/blocks/network-blocks/tcp-server/tcp-server.type";
+import { IProjectFile } from "../../types/project/project-file/project-file.type";
 import { FileManager } from "../file-manager/file-manager.tool";
 import { ProjectConstructorManager } from "../project-constructor-manager/project-constructor-manager.tool";
 import { SettingsManager } from "../settings-manager/settings-manager.tool";
@@ -20,15 +22,16 @@ export class ApiEntryConstructorMode {
     private readonly projectContructorManager: ProjectConstructorManager,
   ) {}
 
-  async openProjectFile(filePath: string): Promise<void> {
+  async openProjectFile(filePath: string): Promise<IProjectFile> {
     const projectFile = await this.fileManager.openProjectFile(filePath);
     this.projectContructorManager.setProjectState(projectFile, filePath);
+    return this.projectContructorManager.currProjectState;
   }
 
-  async createNewProject(projectName: string): Promise<number> {
+  async createNewProject(projectName: string): Promise<IProjectFile> {
     const projectFile = this.projectContructorManager.createNewProject(projectName);
     this.projectContructorManager.setProjectState(projectFile);
-    return projectFile.projectId;
+    return this.projectContructorManager.currProjectState;
   }
 
   async setTcpServerBlock(
@@ -36,13 +39,14 @@ export class ApiEntryConstructorMode {
     data: ITcpServerBlock,
     inputBlocks: number[],
     outputBlocks: number[],
-  ): Promise<void> {
+  ): Promise<IProjectFile> {
     await this.projectContructorManager.setTcpServerBlock(
       projectId,
       data,
       inputBlocks,
       outputBlocks,
     );
+    return this.projectContructorManager.currProjectState;
   }
 
   async setTcpClientBlock(
@@ -50,13 +54,14 @@ export class ApiEntryConstructorMode {
     data: ITcpClientBlock,
     inputBlocks: number[],
     outputBlocks: number[],
-  ): Promise<void> {
+  ): Promise<IProjectFile> {
     await this.projectContructorManager.setTcpClientBlock(
       projectId,
       data,
       inputBlocks,
       outputBlocks,
     );
+    return this.projectContructorManager.currProjectState;
   }
 
   async setMqttBlock(
@@ -64,13 +69,14 @@ export class ApiEntryConstructorMode {
     data: IMqttClientBlock,
     inputBlocks: number[],
     outputBlocks: number[],
-  ): Promise<void> {
+  ): Promise<IProjectFile> {
     await this.projectContructorManager.setMqttBlock(
       projectId,
       data,
       inputBlocks,
       outputBlocks,
     );
+    return this.projectContructorManager.currProjectState;
   }
 
   async setModbusRtuBlock(
@@ -78,13 +84,14 @@ export class ApiEntryConstructorMode {
     data: IModbusRtuBlock,
     inputBlocks: number[],
     outputBlocks: number[],
-  ): Promise<void> {
+  ): Promise<IProjectFile> {
     await this.projectContructorManager.setModbusRtuBlock(
       projectId,
       data,
       inputBlocks,
       outputBlocks,
     );
+    return this.projectContructorManager.currProjectState;
   }
 
   async setModbusTcpBlock(
@@ -92,13 +99,14 @@ export class ApiEntryConstructorMode {
     data: IModbusTcpBlock,
     inputBlocks: number[],
     outputBlocks: number[],
-  ): Promise<void> {
+  ): Promise<IProjectFile> {
     await this.projectContructorManager.setModbusTcpBlock(
       projectId,
       data,
       inputBlocks,
       outputBlocks,
     );
+    return this.projectContructorManager.currProjectState;
   }
 
   async setHttpClientBlock(
@@ -106,13 +114,29 @@ export class ApiEntryConstructorMode {
     data: IHttpClientBlock,
     inputBlocks: number[],
     outputBlocks: number[],
-  ): Promise<void> {
+  ): Promise<IProjectFile> {
     await this.projectContructorManager.setHttpClientBlock(
       projectId,
       data,
       inputBlocks,
       outputBlocks,
     );
+    return this.projectContructorManager.currProjectState;
+  }
+
+  async setDatabaseBlock(
+    projectId: number,
+    data: IDatabaseBlock,
+    inputBlocks: number[],
+    outputBlocks: number[],
+  ): Promise<IProjectFile> {
+    await this.projectContructorManager.setDatabaseBlock(
+      projectId,
+      data,
+      inputBlocks,
+      outputBlocks,
+    );
+    return this.projectContructorManager.currProjectState;
   }
 
   async setComBlock(
@@ -120,13 +144,14 @@ export class ApiEntryConstructorMode {
     data: IComBlock,
     inputBlocks: number[],
     outputBlocks: number[],
-  ): Promise<void> {
+  ): Promise<IProjectFile> {
     await this.projectContructorManager.setComBlock(
       projectId,
       data,
       inputBlocks,
       outputBlocks,
     );
+    return this.projectContructorManager.currProjectState;
   }
 
   async setConverterBlock(
@@ -134,13 +159,14 @@ export class ApiEntryConstructorMode {
     data: IConverterBlock,
     inputBlocks: number[],
     outputBlocks: number[],
-  ): Promise<void> {
+  ): Promise<IProjectFile> {
     await this.projectContructorManager.setConverterBlock(
       projectId,
       data,
       inputBlocks,
       outputBlocks,
     );
+    return this.projectContructorManager.currProjectState;
   }
 
   async setIndicatorsBlock(
@@ -148,13 +174,14 @@ export class ApiEntryConstructorMode {
     data: IIndicatorsBlock,
     inputBlocks: number[],
     outputBlocks: number[],
-  ): Promise<void> {
+  ): Promise<IProjectFile> {
     await this.projectContructorManager.setIndicatorsBlock(
       projectId,
       data,
       inputBlocks,
       outputBlocks,
     );
+    return this.projectContructorManager.currProjectState;
   }
 
   async setGraphBlock(
@@ -162,13 +189,14 @@ export class ApiEntryConstructorMode {
     data: IGraphBlock,
     inputBlocks: number[],
     outputBlocks: number[],
-  ): Promise<void> {
+  ): Promise<IProjectFile> {
     await this.projectContructorManager.setGraphBlock(
       projectId,
       data,
       inputBlocks,
       outputBlocks,
     );
+    return this.projectContructorManager.currProjectState;
   }
 
   async setMediaBlock(
@@ -176,18 +204,19 @@ export class ApiEntryConstructorMode {
     data: IMediaBlock,
     inputBlocks: number[],
     outputBlocks: number[],
-  ): Promise<void> {
+  ): Promise<IProjectFile> {
     await this.projectContructorManager.setMediaBlock(
       projectId,
       data,
       inputBlocks,
       outputBlocks,
     );
+    return this.projectContructorManager.currProjectState;
   }
 
   async saveProjectFile(): Promise<void> {
     await this.fileManager.saveProjectFile(
-      this.projectContructorManager.currProjectState
+      this.projectContructorManager.currProjectState,
     );
   }
 }

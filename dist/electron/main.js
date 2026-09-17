@@ -88,6 +88,9 @@ function registerConstructorModeHandlers(apiEntryConstructorMode) {
     electron_1.ipcMain.handle("setHttpClientBlock", async (_event, projectId, data, inputBlocks, outputBlocks) => {
         return apiEntryConstructorMode.setHttpClientBlock(projectId, data, inputBlocks, outputBlocks);
     });
+    electron_1.ipcMain.handle("setDatabaseBlock", async (_event, projectId, data, inputBlocks, outputBlocks) => {
+        return apiEntryConstructorMode.setDatabaseBlock(projectId, data, inputBlocks, outputBlocks);
+    });
     electron_1.ipcMain.handle("setComBlock", async (_event, projectId, data, inputBlocks, outputBlocks) => {
         return apiEntryConstructorMode.setComBlock(projectId, data, inputBlocks, outputBlocks);
     });

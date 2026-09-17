@@ -1,0 +1,151 @@
+<section class="create-block-form">
+  <form [formGroup]="form">
+    <paper-textfield size="m">
+      <label paperLabel>{{ labels().blockId }}</label>
+      <input paperInput type="number" formControlName="blockId" />
+    </paper-textfield>
+
+    <paper-textfield size="m">
+      <label paperLabel>{{ labels().blockName }}</label>
+      <input paperInput type="text" formControlName="blockName" autocomplete="off" />
+    </paper-textfield>
+
+    <label class="flag-row" paperText size="s">
+      <input paperCheckbox size="m" type="checkbox" formControlName="isDemoMode" />
+      {{ labels().isDemoMode }}
+    </label>
+
+    @if (!isDemoMode()) {
+      <div class="flags-container">
+        <paper-diving-line />
+
+        <paper-textfield size="m">
+          <label paperLabel>{{ labels().comPort }}</label>
+          <input paperInput type="text" formControlName="comPort" autocomplete="off" />
+        </paper-textfield>
+
+        <paper-textfield size="m">
+          <label paperLabel>{{ labels().baudRate }}</label>
+          <input paperInput type="number" formControlName="baudRate" />
+        </paper-textfield>
+
+        <label class="flag-row compact" paperText size="s">
+          <input paperCheckbox size="m" type="checkbox" formControlName="isParity" />
+          {{ labels().isParity }}
+        </label>
+
+        <paper-textfield size="m">
+          <label paperLabel>{{ labels().dataBits }}</label>
+          <input paperInput type="number" formControlName="dataBits" />
+        </paper-textfield>
+
+        <paper-textfield size="m">
+          <label paperLabel>{{ labels().stopBits }}</label>
+          <input paperInput type="number" formControlName="stopBits" />
+        </paper-textfield>
+
+        <paper-diving-line />
+      </div>
+
+      <label class="flag-row" paperText size="s">
+        <input paperCheckbox size="m" type="checkbox" formControlName="isFullInput" />
+        {{ labels().modbusFullInput }}
+      </label>
+
+      @if (isFullInput()) {
+        <paper-textfield size="m">
+          <label paperLabel>{{ labels().modbusFullCommand }}</label>
+          <input
+            paperInput
+            type="text"
+            formControlName="fullCommand"
+            autocomplete="off"
+          />
+        </paper-textfield>
+      } @else {
+        <div class="command-parts-row">
+          <paper-textfield size="m">
+            <label paperLabel>{{ labels().slaveId }}</label>
+            <input paperInput type="number" formControlName="slaveId" />
+          </paper-textfield>
+
+          <paper-textfield size="m">
+            <label paperLabel>{{ labels().modbusFunctionCode }}</label>
+            <input paperInput type="number" formControlName="codeFunction" />
+          </paper-textfield>
+
+          <paper-textfield size="m">
+            <label paperLabel>{{ labels().modbusAddress }}</label>
+            <input paperInput type="number" formControlName="address" />
+          </paper-textfield>
+
+          <paper-textfield size="m">
+            <label paperLabel>{{ labels().modbusLength }}</label>
+            <input paperInput type="number" formControlName="length" />
+          </paper-textfield>
+
+          <paper-textfield size="m">
+            <label paperLabel>{{ labels().modbusValue }}</label>
+            <input paperInput type="number" formControlName="value" />
+          </paper-textfield>
+
+          <paper-textfield size="m">
+            <label paperLabel>{{ labels().modbusTypeData }}</label>
+            <input paperInput type="number" formControlName="typeData" />
+          </paper-textfield>
+        </div>
+      }
+
+      <div class="flags-container">
+        <paper-diving-line />
+
+        <paper-textfield size="m">
+          <paper-select-list
+            formControlName="timeRequestOption"
+            [variants]="timeOptionVariants"
+            [labelResolver]="resolveTimeOptionLabel"
+          >
+            <label paperLabel>{{ labels().httpWhenSend }}</label>
+            <input paperInput readonly #inputList />
+          </paper-select-list>
+        </paper-textfield>
+
+        @if (showPeriod()) {
+          <paper-textfield size="m">
+            <label paperLabel>{{ labels().httpPeriodMs }}</label>
+            <input paperInput type="number" formControlName="period" />
+          </paper-textfield>
+        }
+
+        <paper-textfield size="m">
+          <label paperLabel>{{ labels().httpCountRequest }}</label>
+          <input paperInput type="number" formControlName="countRequest" />
+        </paper-textfield>
+
+        <paper-diving-line />
+      </div>
+    }
+  </form>
+
+  @if (!isDemoMode()) {
+    @if (showSignalBlocks()) {
+      <constructor-block-connections-ribbon
+        direction="inputs"
+        [matchAny]="true"
+        [excludeBlockId]="blockId"
+        [selectedIds]="signalBlocks()"
+        (selectedIdsChange)="onSignalBlocksChange($event)"
+        [title]="labels().modbusSignalBlocks"
+      />
+    }
+
+    <constructor-block-connections-ribbon
+      direction="outputs"
+      [matchDataType]="matchResponseType"
+      [excludeBlockId]="blockId"
+      [selectedIds]="outputBlocks()"
+      (selectedIdsChange)="onOutputBlocksChange($event)"
+      [title]="labels().outputBlocks"
+    />
+  }
+</section>

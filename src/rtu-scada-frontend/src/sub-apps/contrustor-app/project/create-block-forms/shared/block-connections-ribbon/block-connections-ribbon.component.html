@@ -1,0 +1,106 @@
+<section class="connections-ribbon">
+  <h3 paperText size="s" class="ribbon-title">{{ title() }}</h3>
+
+  @if (!picking()) {
+    <div class="ribbon-row">
+      <div class="ribbon-cards">
+        @for (block of selectedBlocks(); track block.blockId) {
+          <div paperCard size="m" class="connection-card">
+            <span paperText size="s" class="card-name">{{ block.blockName }}</span>
+            <span class="card-meta">{{ labels().blockId }}: {{ block.blockId }}</span>
+            @if (block.typeResponseData != null) {
+              <span class="card-meta">
+                {{ labels().producesData }}: {{ dataTypeLabel(block.typeResponseData) }}
+              </span>
+            }
+            @if (block.typeRequestData != null) {
+              <span class="card-meta">
+                {{ labels().acceptsData }}: {{ dataTypeLabel(block.typeRequestData) }}
+              </span>
+            }
+            <button
+              type="button"
+              paperButton
+              size="s"
+              class="remove-btn"
+              (click)="removeBlock(block.blockId)"
+            >
+              {{ labels().removeBlock }}
+            </button>
+          </div>
+        } @empty {
+          <span class="empty-hint">{{ labels().noConnectedBlocks }}</span>
+        }
+      </div>
+      <button
+        type="button"
+        paperButton
+        size="m"
+        class="add-btn"
+        [disabled]="!canPick()"
+        (click)="openPicker()"
+      >
+        {{ labels().addBlock }}
+      </button>
+    </div>
+  } @else {
+    <div class="picker-layout">
+      <div class="picker-column">
+        <span class="column-label">{{ labels().selectedBlocks }}</span>
+        <div class="ribbon-cards">
+          @for (block of selectedBlocks(); track block.blockId) {
+            <div paperCard size="m" class="connection-card">
+              <span paperText size="s" class="card-name">{{ block.blockName }}</span>
+              <span class="card-meta">{{ labels().blockId }}: {{ block.blockId }}</span>
+              <button
+                type="button"
+                paperButton
+                size="s"
+                class="remove-btn"
+                (click)="removeBlock(block.blockId)"
+              >
+                {{ labels().removeBlock }}
+              </button>
+            </div>
+          } @empty {
+            <span class="empty-hint">{{ labels().noConnectedBlocks }}</span>
+          }
+        </div>
+      </div>
+
+      <div class="picker-column">
+        <span class="column-label">{{ labels().availableMatchingBlocks }}</span>
+        <div class="ribbon-cards">
+          @for (block of availableBlocks(); track block.blockId) {
+            <div
+              paperCard
+              size="m"
+              class="connection-card available-card"
+              [pointer]="true"
+              (click)="addBlock(block.blockId)"
+            >
+              <span paperText size="s" class="card-name">{{ block.blockName }}</span>
+              <span class="card-meta">{{ labels().blockId }}: {{ block.blockId }}</span>
+              @if (block.typeResponseData != null) {
+                <span class="card-meta">
+                  {{ labels().producesData }}: {{ dataTypeLabel(block.typeResponseData) }}
+                </span>
+              }
+              @if (block.typeRequestData != null) {
+                <span class="card-meta">
+                  {{ labels().acceptsData }}: {{ dataTypeLabel(block.typeRequestData) }}
+                </span>
+              }
+            </div>
+          } @empty {
+            <span class="empty-hint">{{ labels().noMatchingBlocks }}</span>
+          }
+        </div>
+      </div>
+
+      <button type="button" paperButton size="m" class="done-btn" (click)="closePicker()">
+        {{ labels().done }}
+      </button>
+    </div>
+  }
+</section>

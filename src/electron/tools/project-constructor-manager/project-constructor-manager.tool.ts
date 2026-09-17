@@ -5,10 +5,13 @@ import { IGraphBlock } from "../../types/blocks/internal-blocks/graphs/graphs.ty
 import { IIndicatorsBlock } from "../../types/blocks/internal-blocks/indicators/indicators.type";
 import { IMediaBlock } from "../../types/blocks/internal-blocks/media/media.type";
 import { IComBlock } from "../../types/blocks/network-blocks/com/com.type";
+import { EDatabaseQueryType } from "../../types/blocks/network-blocks/database/database-query-type";
+import { IDatabaseBlock } from "../../types/blocks/network-blocks/database/database.type";
 import { IHttpClientBlock } from "../../types/blocks/network-blocks/http-client/http-client.type";
 import { IModbusRtuBlock } from "../../types/blocks/network-blocks/modbus/modbus-rtu.type";
 import { IModbusTcpBlock } from "../../types/blocks/network-blocks/modbus/modbus-tcp.type";
 import { IMqttClientBlock } from "../../types/blocks/network-blocks/mqtt-client/mqtt-client.type";
+import { ENonRealtimeSettingOption } from "../../types/blocks/network-blocks/non-realtime-network-block.type";
 import { ITcpClientBlock } from "../../types/blocks/network-blocks/tcp-client/tcp-client.type";
 import { ITcpServerBlock } from "../../types/blocks/network-blocks/tcp-server/tcp-server.type";
 import { EDataTypes } from "../../types/data-types/base-data-type.type";
@@ -74,7 +77,10 @@ export class ProjectConstructorManager extends ProjectContructorTools {
     outputBlocks: number[],
   ): Promise<void> {
     await this.ensureProjectId(projectId);
-    if (inputBlocks.length > 0) {
+    const bySignal =
+      config.timeRequestSettings.timeRequestOption ===
+      ENonRealtimeSettingOption.BY_SIGNAL;
+    if (inputBlocks.length > 0 && !bySignal) {
       return Promise.reject(
         new AppError(
           `Блок протокола Modbus RTU с id ${config.blockId} не принимает данные`,
@@ -85,10 +91,11 @@ export class ProjectConstructorManager extends ProjectContructorTools {
     this.upsertNetworkBlock("modbusRtu", config);
     await this.syncBlockEdges(
       config.blockId,
-      [],
+      bySignal ? inputBlocks : [],
       outputBlocks,
       null,
       config.typeResponseData,
+      { allowAnyInputType: bySignal },
     );
   }
 
@@ -312,6 +319,53 @@ export class ProjectConstructorManager extends ProjectContructorTools {
       config.typeRequestData,
       null,
     );
+  }
+
+  async setDatabaseBlock(
+    projectId: number,
+    config: IDatabaseBlock,
+    inputBlocks: number[],
+    outputBlocks: number[],
+  ): Promise<void> {
+    await this.ensureProjectId(projectId);
+    if (outputBlocks.length > 0) {
+      return Promise.reject(
+        new AppError(
+          `Блок базы данных с id ${config.blockId} не отдаёт данные в другие блоки`,
+          EAppErrorCodes.BlockNotAcceptData,
+        ),
+      );
+    }
+    const inputDataType = this.getDatabaseInputDataType(config);
+    if (inputDataType == null && inputBlocks.length > 0) {
+      return Promise.reject(
+        new AppError(
+          `В блоке базы данных с id ${config.blockId} не настроен тип принимаемых данных. Проверьте конфигурацию блока с id ${config.blockId}`,
+          EAppErrorCodes.NotFullConfigurations,
+        ),
+      );
+    }
+    this.upsertNetworkBlock("database", config);
+    await this.syncBlockEdges(
+      config.blockId,
+      inputBlocks,
+      [],
+      inputDataType,
+      null,
+    );
+  }
+
+  private getDatabaseInputDataType(config: IDatabaseBlock): EDataTypes | null {
+    switch (config.queryType) {
+      case EDatabaseQueryType.RAW:
+        return config.rawQueryConfig?.typeRequestData ?? null;
+      case EDatabaseQueryType.INSERT:
+        return config.insertQueryConfig?.typeRequestData ?? null;
+      case EDatabaseQueryType.UPDATE:
+        return config.updateQueryConfig?.typeRequestData ?? null;
+      default:
+        return null;
+    }
   }
 
   private ensureProjectId(projectId: number): Promise<void> {

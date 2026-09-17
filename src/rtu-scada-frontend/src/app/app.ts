@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject, OnInit } from '@angular/core';
 import { Router, RouterOutlet } from '@angular/router';
 import { InitializationService } from '../libraries/initialization/initialization.service';
+import { SettingsService } from '../libraries/settings/settings.service';
 import { EAppMode } from '../../../electron/types/settings/settings.app-mode.type';
 
 @Component({
@@ -14,6 +15,7 @@ import { EAppMode } from '../../../electron/types/settings/settings.app-mode.typ
 })
 export class AppComponent implements OnInit {
   readonly _initializationService = inject(InitializationService);
+  readonly _settingsService = inject(SettingsService);
   readonly _router = inject(Router);
 
   ngOnInit() {

@@ -1,0 +1,51 @@
+<section class="create-block-form">
+  <form [formGroup]="form">
+    <paper-textfield size="m">
+      <label paperLabel>{{ labels().blockId }}</label>
+      <input paperInput type="number" formControlName="blockId" />
+    </paper-textfield>
+
+    <paper-textfield size="m">
+      <label paperLabel>{{ labels().blockName }}</label>
+      <input paperInput type="text" formControlName="blockName" autocomplete="off" />
+    </paper-textfield>
+
+    <paper-textfield size="m">
+      <label paperLabel>{{ labels().host }}</label>
+      <input paperInput type="text" formControlName="tcpHost" autocomplete="off" />
+    </paper-textfield>
+
+    <paper-textfield size="m">
+      <label paperLabel>{{ labels().port }}</label>
+      <input paperInput type="number" formControlName="tcpPort" />
+    </paper-textfield>
+
+    <paper-textfield size="m">
+      <label paperLabel>{{ labels().slaveId }}</label>
+      <input paperInput type="number" formControlName="slaveId" />
+    </paper-textfield>
+
+    <paper-textfield size="m">
+      <label paperLabel>{{ labels().modbusFunctionCode }}</label>
+      <input paperInput type="number" formControlName="codeFunction" />
+    </paper-textfield>
+
+    <paper-textfield size="m">
+      <label paperLabel>{{ labels().modbusAddress }}</label>
+      <input paperInput type="number" formControlName="address" />
+    </paper-textfield>
+
+    <paper-textfield size="m">
+      <label paperLabel>{{ labels().modbusLength }}</label>
+      <input paperInput type="number" formControlName="length" />
+    </paper-textfield>
+  </form>
+
+  <constructor-block-connections-ribbon
+    direction="outputs"
+    [matchDataType]="matchResponseType"
+    [excludeBlockId]="blockId"
+    [(selectedIds)]="outputBlocks"
+    [title]="labels().outputBlocks"
+  />
+</section>

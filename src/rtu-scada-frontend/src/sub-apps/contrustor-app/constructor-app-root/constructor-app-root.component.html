@@ -8,8 +8,8 @@
     [link]="true"
   >
     <div class="extended-text">
-      <span>{{ labels.home }}</span>
-      <span paperText size="s" [subtext]="true">{{ language != 'en' && 'Home' }}</span>
+      <span>{{ labels().home }}</span>
+      <span paperText size="s" [subtext]="true">{{ language() != 'en' ? 'Home' : ''}}</span>
     </div>
     <paper-icon
       icon="home"
@@ -26,8 +26,8 @@
     [link]="true"
   >
     <div class="extended-text">
-      <span>{{ labels.settings }}</span>
-      <span paperText size="s" [subtext]="true">{{ language != 'en' && 'Settings' }}</span>
+      <span>{{ labels().settings }}</span>
+      <span paperText size="s" [subtext]="true">{{ language() != 'en' ? 'Settings' : ''}}</span>
     </div>
     <paper-icon
       icon="settings"
@@ -44,8 +44,8 @@
     [link]="true"
   >
     <div class="extended-text">
-      <span>{{ labels.documentation }}</span>
-      <span paperText size="s" [subtext]="true">{{ language != 'en' && 'Documentation' }}</span>
+      <span>{{ labels().documentation }}</span>
+      <span paperText size="s" [subtext]="true">{{ language() != 'en' ? 'Documentation' : ''}}</span>
     </div>
     <paper-icon
       icon="library"
@@ -62,8 +62,8 @@
     [activeLink]="isActive('/constructor/exit')"
   >
     <div class="extended-text">
-      <span>{{ labels.exit }}</span>
-      <span paperText size="s" [subtext]="true">{{ language != 'en' && 'Exit' }}</span>
+      <span>{{ labels().exit }}</span>
+      <span paperText size="s" [subtext]="true">{{ language() != 'en' ? 'Exit' : ''}}</span>
     </div>
     <paper-icon
       icon="exit"
@@ -73,4 +73,6 @@
   </a>
 </div>
 
+<section class="outlet">
 <router-outlet />
+</section>

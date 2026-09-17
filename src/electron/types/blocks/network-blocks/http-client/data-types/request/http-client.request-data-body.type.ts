@@ -12,6 +12,5 @@ export type IHttpClientRequestBodyDataTypes =
     EDataTypes.IMAGE |
     EDataTypes.PDF |
     EDataTypes.NOTHING;
-
 export interface IHttpClientRequestBodyData extends IBlockRequestData<IHttpClientRequestBodyDataTypes> {
 }

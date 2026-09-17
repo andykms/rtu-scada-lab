@@ -1,0 +1,78 @@
+<section class="create-block-form">
+  <form [formGroup]="form">
+    <paper-textfield size="m">
+      <label paperLabel>{{ labels().blockId }}</label>
+      <input paperInput type="number" formControlName="blockId" />
+    </paper-textfield>
+
+    <paper-textfield size="m">
+      <label paperLabel>{{ labels().blockName }}</label>
+      <input paperInput type="text" formControlName="blockName" autocomplete="off" />
+    </paper-textfield>
+
+    <label class="flag-row" paperText size="s">
+      <input paperCheckbox size="m" type="checkbox" formControlName="isDemoMode" />
+      {{ labels().isDemoMode }}
+    </label>
+
+    @if (!isDemoMode()) {
+      <div class="flags-container">
+        <paper-diving-line />
+        <paper-textfield size="m">
+          <label paperLabel>{{ labels().tcpServerPort }}</label>
+          <input paperInput type="number" formControlName="tcpServerPort" />
+        </paper-textfield>
+        <paper-diving-line />
+      </div>
+
+        <paper-textfield size="m">
+          <paper-select-list
+            formControlName="typeRequestData"
+            [variants]="requestTypeVariants"
+            [labelResolver]="resolveDataTypeLabel"
+          >
+            <label paperLabel>{{ labels().typeRequestData }}</label>
+            <input paperInput readonly #inputList />
+          </paper-select-list>
+        </paper-textfield>
+
+        <paper-textfield size="m">
+          <paper-select-list
+            formControlName="typeResponseData"
+            [variants]="responseTypeVariants"
+            [labelResolver]="resolveDataTypeLabel"
+          >
+            <label paperLabel>{{ labels().typeResponseData }}</label>
+            <input paperInput readonly #inputList />
+          </paper-select-list>
+        </paper-textfield>
+
+        <label class="flag-row" paperText size="s">
+          <input paperCheckbox size="m" type="checkbox" formControlName="isCanUserSendData" />
+          {{ labels().isCanUserSendData }}
+        </label>
+    }
+  </form>
+
+  @if (!isDemoMode()) {
+    <!-- Producers of send type → data forwarded to TCP clients -->
+    <constructor-block-connections-ribbon
+      direction="inputs"
+      [matchDataType]="matchResponseType()"
+      [excludeBlockId]="blockId"
+      [selectedIds]="inputBlocks()"
+      (selectedIdsChange)="onInputBlocksChange($event)"
+      [title]="labels().inputBlocks"
+    />
+
+    <!-- Consumers of receive type → get data from TCP clients -->
+    <constructor-block-connections-ribbon
+      direction="outputs"
+      [matchDataType]="matchRequestType()"
+      [excludeBlockId]="blockId"
+      [selectedIds]="outputBlocks()"
+      (selectedIdsChange)="onOutputBlocksChange($event)"
+      [title]="labels().outputBlocks"
+    />
+  }
+</section>

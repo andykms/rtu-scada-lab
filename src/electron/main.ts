@@ -9,6 +9,7 @@ import { IMqttClientBlock } from "./types/blocks/network-blocks/mqtt-client/mqtt
 import { IModbusRtuBlock } from "./types/blocks/network-blocks/modbus/modbus-rtu.type";
 import { IModbusTcpBlock } from "./types/blocks/network-blocks/modbus/modbus-tcp.type";
 import { IHttpClientBlock } from "./types/blocks/network-blocks/http-client/http-client.type";
+import { IDatabaseBlock } from "./types/blocks/network-blocks/database/database.type";
 import { IComBlock } from "./types/blocks/network-blocks/com/com.type";
 import { IConverterBlock } from "./types/blocks/internal-blocks/converter/converter.type";
 import { IGraphBlock } from "./types/blocks/internal-blocks/graphs/graphs.type";
@@ -164,6 +165,24 @@ function registerConstructorModeHandlers(
       outputBlocks: number[],
     ) => {
       return apiEntryConstructorMode.setHttpClientBlock(
+        projectId,
+        data,
+        inputBlocks,
+        outputBlocks,
+      );
+    },
+  );
+
+  ipcMain.handle(
+    "setDatabaseBlock",
+    async (
+      _event,
+      projectId: number,
+      data: IDatabaseBlock,
+      inputBlocks: number[],
+      outputBlocks: number[],
+    ) => {
+      return apiEntryConstructorMode.setDatabaseBlock(
         projectId,
         data,
         inputBlocks,

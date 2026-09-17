@@ -1,0 +1,13 @@
+<ng-content></ng-content>
+@if (opened() && variants().length > 0) {
+  <div class="data-list floating">
+    @for (variant of variants(); track $index) {
+      <div
+        (click)="selectVariant(variant)"
+        [class]="`variant ${$index % 2 != 0 ? 'variant-odd' : 'variant-even'}`"
+      >
+        {{ labelResolver()(variant) }}
+      </div>
+    }
+  </div>
+}

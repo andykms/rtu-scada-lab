@@ -28,6 +28,12 @@
     gap: 5px;
 }
 
+.outlet {
+    margin-inline-start: 453px;
+    margin-inline-end: 50px;
+    margin-top: 50px;
+}
+
 @media (width <= 1300px) {
     .menu {
         inline-size: auto;
@@ -36,5 +42,9 @@
 
     .extended-text {
         display: none;
+    }
+
+    .outlet {
+        margin-inline-start: 153px;
     }
 }

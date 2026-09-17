@@ -10,98 +10,99 @@ import type { IModbusTcpBlock } from "../../../../electron/types/blocks/network-
 import type { IMqttClientBlock } from "../../../../electron/types/blocks/network-blocks/mqtt-client/mqtt-client.type";
 import type { ITcpClientBlock } from "../../../../electron/types/blocks/network-blocks/tcp-client/tcp-client.type";
 import type { ITcpServerBlock } from "../../../../electron/types/blocks/network-blocks/tcp-server/tcp-server.type";
+import type { IProjectFile } from "../../../../electron/types/project/project-file/project-file.type";
 import type { EAppMode } from "../../../../electron/types/settings/settings.app-mode.type";
 
 export interface IElectronAPI {
   getAppMode: () => Promise<EAppMode>;
 
-  openProjectFile: (filePath: string) => Promise<void>;
+  openProjectFile: (filePath: string) => Promise<IProjectFile>;
 
-  createProject: (projectName: string) => Promise<number>;
+  createProject: (projectName: string) => Promise<IProjectFile>;
 
   setTcpServerBlock: (
     projectId: number,
     data: ITcpServerBlock,
     inputBlocks: number[],
     outputBlocks: number[],
-  ) => Promise<void>;
+  ) => Promise<IProjectFile>;
 
   setTcpClientBlock: (
     projectId: number,
     data: ITcpClientBlock,
     inputBlocks: number[],
     outputBlocks: number[],
-  ) => Promise<void>;
+  ) => Promise<IProjectFile>;
 
   setMqttClientBlock: (
     projectId: number,
     data: IMqttClientBlock,
     inputBlocks: number[],
     outputBlocks: number[],
-  ) => Promise<void>;
+  ) => Promise<IProjectFile>;
 
   setModbusRtuBlock: (
     projectId: number,
     data: IModbusRtuBlock,
     inputBlocks: number[],
     outputBlocks: number[],
-  ) => Promise<void>;
+  ) => Promise<IProjectFile>;
 
   setModbusTcpBlock: (
     projectId: number,
     data: IModbusTcpBlock,
     inputBlocks: number[],
     outputBlocks: number[],
-  ) => Promise<void>;
+  ) => Promise<IProjectFile>;
 
   setHttpClientBlock: (
     projectId: number,
     data: IHttpClientBlock,
     inputBlocks: number[],
     outputBlocks: number[],
-  ) => Promise<void>;
+  ) => Promise<IProjectFile>;
 
   setDatabaseBlock: (
     projectId: number,
     data: IDatabaseBlock,
     inputBlocks: number[],
     outputBlocks: number[],
-  ) => Promise<void>;
+  ) => Promise<IProjectFile>;
 
   setComBlock: (
     projectId: number,
     data: IComBlock,
     inputBlocks: number[],
     outputBlocks: number[],
-  ) => Promise<void>;
+  ) => Promise<IProjectFile>;
 
   setConverterBlock: (
     projectId: number,
     data: IConverterBlock,
     inputBlocks: number[],
     outputBlocks: number[],
-  ) => Promise<void>;
+  ) => Promise<IProjectFile>;
 
   setGraphBlock: (
     projectId: number,
     data: IGraphBlock,
     inputBlocks: number[],
     outputBlocks: number[],
-  ) => Promise<void>;
+  ) => Promise<IProjectFile>;
 
   setIndicatorsBlock: (
     projectId: number,
     data: IIndicatorsBlock,
     inputBlocks: number[],
     outputBlocks: number[],
-  ) => Promise<void>;
+  ) => Promise<IProjectFile>;
 
   setMediaBlock: (
     projectId: number,
     data: IMediaBlock,
     inputBlocks: number[],
     outputBlocks: number[],
-  ) => Promise<void>;
+  ) => Promise<IProjectFile>;
 
   saveProject: (projectId: number) => Promise<void>;
 

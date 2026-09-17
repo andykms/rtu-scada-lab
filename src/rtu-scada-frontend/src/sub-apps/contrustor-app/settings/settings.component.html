@@ -1,0 +1,34 @@
+<div class="settings">
+  <form [formGroup]="settingsForm">
+    <div class="setting">
+      <h2 paperText size="m">{{ labels().language }}</h2>
+      <div paperRadio size="m">
+        <label>
+          <input type="radio" formControlName="language" [value]="ESettingsLanguages.RU" />
+          {{ labels().russian }}
+        </label>
+        <label>
+          <input type="radio" formControlName="language" [value]="ESettingsLanguages.EN" />
+          {{ labels().english }}
+        </label>
+      </div>
+    </div>
+    <div class="setting">
+      <h2 paperText size="m">{{ labels().theme }}</h2>
+      <div paperRadio size="m">
+        <label>
+          <input type="radio" formControlName="theme" [value]="ESettingsTheme.LIGHT" />
+          {{ labels().light }}
+        </label>
+        <label>
+          <input type="radio" formControlName="theme" [value]="ESettingsTheme.DARK" />
+          {{ labels().dark }}
+        </label>
+        <label>
+          <input type="radio" formControlName="theme" [value]="ESettingsTheme.SYSTEM" />
+          {{ labels().system }}
+        </label>
+      </div>
+    </div>
+  </form>
+</div>

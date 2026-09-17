@@ -1,0 +1,48 @@
+<section class="create-block-form">
+  <form [formGroup]="form">
+    <paper-textfield size="m">
+      <label paperLabel>{{ labels().blockId }}</label>
+      <input paperInput type="number" formControlName="blockId" />
+    </paper-textfield>
+
+    <paper-textfield size="m">
+      <label paperLabel>{{ labels().blockName }}</label>
+      <input paperInput type="text" formControlName="blockName" autocomplete="off" />
+    </paper-textfield>
+
+    <paper-textfield size="m">
+      <paper-select-list
+        formControlName="databaseVariant"
+        [variants]="databaseVariants"
+        [labelResolver]="resolveDatabaseVariantLabel"
+      >
+        <label paperLabel>{{ labels().databaseVariant }}</label>
+        <input paperInput readonly #inputList />
+      </paper-select-list>
+    </paper-textfield>
+
+    <paper-textfield size="m">
+      <label paperLabel>{{ labels().sqlQuery }}</label>
+      <input paperInput type="text" formControlName="query" autocomplete="off" />
+    </paper-textfield>
+
+    <paper-textfield size="m">
+      <paper-select-list
+        formControlName="typeRequestData"
+        [variants]="dataTypeVariants"
+        [labelResolver]="resolveDataTypeLabel"
+      >
+        <label paperLabel>{{ labels().typeRequestData }}</label>
+        <input paperInput readonly #inputList />
+      </paper-select-list>
+    </paper-textfield>
+  </form>
+
+  <constructor-block-connections-ribbon
+    direction="inputs"
+    [matchDataType]="matchRequestType()"
+    [excludeBlockId]="blockId"
+    [(selectedIds)]="inputBlocks"
+    [title]="labels().inputBlocks"
+  />
+</section>

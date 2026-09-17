@@ -2,45 +2,45 @@
 <section class="project-page">
   <aside class="blocks-sidebar">
     <h1 paperText size="l" class="sidebar-title">
-      {{ labels.availableBlocks }}
+      {{ labels().availableBlocks }}
     </h1>
 
     <div class="blocks-list">
-      <div paperCard size="m" [pointer]="true" class="block-card">
-        <span>{{ labels.tcpServer }}</span><span class="add-icon">+</span>
+      <div paperCard size="m" [pointer]="true" class="block-card" (click)="openTcpServerDialog()">
+        <span>{{ labels().tcpServer }}</span><span class="add-icon">+</span>
       </div>
-      <div paperCard size="m" [pointer]="true" class="block-card">
-        <span>{{ labels.tcpClient }}</span><span class="add-icon">+</span>
+      <div paperCard size="m" [pointer]="true" class="block-card" (click)="openTcpClientDialog()">
+        <span>{{ labels().tcpClient }}</span><span class="add-icon">+</span>
       </div>
-      <div paperCard size="m" [pointer]="true" class="block-card">
-        <span>{{ labels.mqttClient }}</span><span class="add-icon">+</span>
+      <div paperCard size="m" [pointer]="true" class="block-card" (click)="openMqttClientDialog()">
+        <span>{{ labels().mqttClient }}</span><span class="add-icon">+</span>
       </div>
-      <div paperCard size="m" [pointer]="true" class="block-card">
-        <span>{{ labels.httpClient }}</span><span class="add-icon">+</span>
+      <div paperCard size="m" [pointer]="true" class="block-card" (click)="openHttpClientDialog()">
+        <span>{{ labels().httpClient }}</span><span class="add-icon">+</span>
       </div>
-      <div paperCard size="m" [pointer]="true" class="block-card">
-        <span>{{ labels.modbusRtu }}</span><span class="add-icon">+</span>
+      <div paperCard size="m" [pointer]="true" class="block-card" (click)="openModbusRtuDialog()">
+        <span>{{ labels().modbusRtu }}</span><span class="add-icon">+</span>
       </div>
-      <div paperCard size="m" [pointer]="true" class="block-card">
-        <span>{{ labels.modbusTcp }}</span><span class="add-icon">+</span>
+      <div paperCard size="m" [pointer]="true" class="block-card" (click)="openModbusTcpDialog()">
+        <span>{{ labels().modbusTcp }}</span><span class="add-icon">+</span>
       </div>
-      <div paperCard size="m" [pointer]="true" class="block-card">
-        <span>{{ labels.comPort }}</span><span class="add-icon">+</span>
+      <div paperCard size="m" [pointer]="true" class="block-card" (click)="openComDialog()">
+        <span>{{ labels().comPort }}</span><span class="add-icon">+</span>
       </div>
-      <div paperCard size="m" [pointer]="true" class="block-card">
-        <span>{{ labels.database }}</span><span class="add-icon">+</span>
+      <div paperCard size="m" [pointer]="true" class="block-card" (click)="openDatabaseDialog()">
+        <span>{{ labels().database }}</span><span class="add-icon">+</span>
       </div>
-      <div paperCard size="m" [pointer]="true" class="block-card">
-        <span>{{ labels.converter }}</span><span class="add-icon">+</span>
+      <div paperCard size="m" [pointer]="true" class="block-card" (click)="openConverterDialog()">
+        <span>{{ labels().converter }}</span><span class="add-icon">+</span>
       </div>
-      <div paperCard size="m" [pointer]="true" class="block-card">
-        <span>{{ labels.graphs }}</span><span class="add-icon">+</span>
+      <div paperCard size="m" [pointer]="true" class="block-card" (click)="openGraphsDialog()">
+        <span>{{ labels().graphs }}</span><span class="add-icon">+</span>
       </div>
-      <div paperCard size="m" [pointer]="true" class="block-card">
-        <span>{{ labels.indicators }}</span><span class="add-icon">+</span>
+      <div paperCard size="m" [pointer]="true" class="block-card" (click)="openIndicatorsDialog()">
+        <span>{{ labels().indicators }}</span><span class="add-icon">+</span>
       </div>
-      <div paperCard size="m" [pointer]="true" class="block-card">
-        <span>{{ labels.media }}</span><span class="add-icon">+</span>
+      <div paperCard size="m" [pointer]="true" class="block-card" (click)="openMediaDialog()">
+        <span>{{ labels().media }}</span><span class="add-icon">+</span>
       </div>
     </div>
   </aside>

@@ -1,14 +1,14 @@
 <div class="menu">
     <div paperCard size="m" [pointer]="true" (click)="onCreateProject.emit()" class="menu-item">
-        {{ labels.createProject }}
+        {{ labels().createProject }}
         <div class="add-button">
             +
         </div>
     </div>
     <div paperCard size="m" [pointer]="true" class="menu-item">
-        {{ labels.openFileProject }}
+        {{ labels().openFileProject }}
         <div class="open-file">
-            <span paperText [subtext]="true" size="s">{{labels.labelSupportedFiles}}</span>
+            <span paperText [subtext]="true" size="s">{{ labels().labelSupportedFiles }}</span>
             <paper-icon size="xl" icon="open-file"></paper-icon>
         </div>
     </div>

@@ -4,7 +4,6 @@ import { Router } from '@angular/router';
 import { ElectronAPIService } from '../../../libraries/electron-api/electron-api.service';
 import { IProjectFileInfo } from '../../../../../electron/types/project/project-file/project-file-info.type';
 import { MenuComponent } from './menu/menu.component';
-import { LanguageService } from '../../../libraries/language/language.service';
 import { PaperDivingLine } from '../../../paper-ui/layout/diving-line/diving-line.component';
 import { PaperModalComponent } from '../../../paper-ui/layout/modal/modal.component';
 import { PaperTextfield } from '../../../paper-ui/base/textfield/textfield.component';
@@ -13,6 +12,7 @@ import { PaperLabel } from '../../../paper-ui/base/label/label.directive';
 import { PaperText } from '../../../paper-ui/base/text/text.directive';
 import { ProjectListComponent } from './projects-list/project-list.component';
 import { LanguageProvider } from '../../../libraries/language/language.directive';
+import { ProjectService } from '../../../libraries/project/project.service';
 
 @Component({
     selector: 'constructor-app-home',
@@ -72,6 +72,7 @@ export class HomeComponent extends LanguageProvider {
     ];
 
     readonly _electronAPI = inject(ElectronAPIService);
+    readonly _projectService = inject(ProjectService);
     readonly _router = inject(Router);
 
     readonly createProjectModalOpened = signal(false);
@@ -102,10 +103,12 @@ export class HomeComponent extends LanguageProvider {
 
         this.isCreatingProject.set(true);
         this._electronAPI.createProject(projectName).subscribe({
-            next: (projectId) => {
+            next: (projectFile) => {
+                this._projectService.setProjectFile(projectFile);
+                this._projectService.setProjectId(projectFile.projectId);
                 this.createProjectModalOpened.set(false);
                 this.projectNameControl.reset();
-                void this._router.navigate(['/constructor', 'project', projectId]);
+                void this._router.navigate(['/constructor', 'project', projectFile.projectId]);
             },
             error: () => this.isCreatingProject.set(false),
             complete: () => this.isCreatingProject.set(false),

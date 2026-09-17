@@ -14,6 +14,8 @@ export class PaperModalComponent extends BaseComponent {
     readonly mainActionLabel = input<string>("Ок");
     readonly secondaryActionLabel = input<string>("Отмена");
     readonly otherActionLabels = input<string[]>([]);
+    readonly showActions = input<boolean>(true);
+    readonly mainActionDisabled = input<boolean>(false);
     readonly onMainAction = output<void>();
     readonly onSecondaryAction = output<void>();
     readonly onOtherActions = output<string>();

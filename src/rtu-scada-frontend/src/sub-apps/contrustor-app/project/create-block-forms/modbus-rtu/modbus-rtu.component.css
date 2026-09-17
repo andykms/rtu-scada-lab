@@ -1,0 +1,39 @@
+.flag-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--text-color);
+  cursor: pointer;
+  user-select: none;
+  margin-block: 29px;
+}
+
+.flag-row.compact {
+  margin-block: 0;
+}
+
+.flags-container {
+  display: flex;
+  flex-direction: column;
+  gap: 29px;
+  margin-block: 29px;
+}
+
+.command-parts-row {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: flex-start;
+  margin-block-end: 12px;
+}
+
+.command-parts-row paper-textfield {
+  flex: 1 1 120px;
+  min-inline-size: 100px;
+  max-inline-size: none;
+}
+
+paper-textfield {
+  max-inline-size: 497px;
+}

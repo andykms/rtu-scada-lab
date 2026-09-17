@@ -31,13 +31,13 @@ export interface IHttpClientBlock
 }
 
 export interface IHttpClientBlockRequestData extends IBlockRequestData<IHttpClientRequestBodyDataTypes> {
-  requestHeaders: IHttpClientRequestHeaders;
+  requestHeaders: IHttpClientRequestHeaders[];
   requestBody: {
     type: IHttpClientRequestDataBodyTypes;
     jsonConfiguration: {
       message: string;
     } | null;
-    formDataConfiguration: IHttpRequestDataBodyFormData | null;
+    formDataConfiguration: IHttpRequestDataBodyFormData[] | null;
     isOtherTypes: boolean;
   };
 }
