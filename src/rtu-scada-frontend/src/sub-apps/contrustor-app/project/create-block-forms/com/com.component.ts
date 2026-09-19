@@ -1,34 +1,63 @@
-import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { ChangeDetectionStrategy, Component, computed, effect, signal } from '@angular/core';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { merge, startWith } from 'rxjs';
 import { IComBlock } from '../../../../../../../electron/types/blocks/network-blocks/com/com.type';
 import { TComBlockRequestData } from '../../../../../../../electron/types/blocks/network-blocks/com/data-types/com.request-data.type';
 import { TComBlockResponseData } from '../../../../../../../electron/types/blocks/network-blocks/com/data-types/com.response-data.type';
+import {
+  EOnDisconnectActions,
+  IOnDisconnectSettings,
+} from '../../../../../../../electron/types/project/state/errors/on-disconnect.type';
 import { EDataTypes } from '../../../../../../../electron/types/data-types/base-data-type.type';
 import { injectDialogContext } from '../../../../../libraries/dialog';
 import { LanguageProvider } from '../../../../../libraries/language/language.directive';
-import { PaperInput, PaperLabel, PaperSelectList, PaperTextfield } from '../../../../../paper-ui/base';
+import {
+  PaperCheckbox,
+  PaperInput,
+  PaperLabel,
+  PaperSelectList,
+  PaperTextfield,
+} from '../../../../../paper-ui/base';
+import { PaperText } from '../../../../../paper-ui/base/text/text.directive';
+import { PaperDivingLine } from '../../../../../paper-ui/layout/diving-line/diving-line.component';
 import {
   ICreateBlockDialogData,
   ICreateBlockFormResult,
 } from '../shared/create-block-dialog.model';
 import { dataTypeLabelKey, dataTypeValues } from '../shared/data-type-options';
 import { BlockConnectionsRibbonComponent } from '../shared/block-connections-ribbon/block-connections-ribbon.component';
-import { DEFAULT_BLOCK_OPTIONS, DEFAULT_ON_DISCONNECT } from '../shared/network-block.defaults';
+import { DEFAULT_ON_DISCONNECT } from '../shared/network-block.defaults';
 
-const COM_TYPES: TComBlockRequestData[] = [
+/** Receiving from COM — TZ. */
+const REQUEST_TYPES: TComBlockRequestData[] = [
   EDataTypes.BYTES,
   EDataTypes.STRING,
   EDataTypes.NUMBER,
   EDataTypes.IMAGE,
-  EDataTypes.AUDIO,
   EDataTypes.VIDEO,
+  EDataTypes.AUDIO,
 ];
+
+/** Sending to COM — TZ. */
+const RESPONSE_TYPES: TComBlockResponseData[] = [
+  EDataTypes.BYTES,
+  EDataTypes.STRING,
+  EDataTypes.NUMBER,
+  EDataTypes.IMAGE,
+  EDataTypes.VIDEO,
+  EDataTypes.AUDIO,
+];
+
+const ON_DISCONNECT_ACTIONS = [
+  EOnDisconnectActions.IGNORE,
+  EOnDisconnectActions.STOP_APP,
+] as const;
 
 @Component({
   selector: 'constructor-com',
   templateUrl: './com.component.html',
-  styleUrls: ['../shared/create-block-form.css'],
+  styleUrls: ['../shared/create-block-form.css', './com.component.css'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
@@ -38,7 +67,10 @@ const COM_TYPES: TComBlockRequestData[] = [
     PaperInput,
     PaperLabel,
     PaperSelectList,
+    PaperCheckbox,
+    PaperText,
     BlockConnectionsRibbonComponent,
+    PaperDivingLine,
   ],
 })
 export class ComComponent extends LanguageProvider {
@@ -48,23 +80,67 @@ export class ComComponent extends LanguageProvider {
   >();
   private readonly fb = new FormBuilder();
 
-  readonly dataTypeVariants = dataTypeValues(COM_TYPES);
+  readonly requestTypeVariants = dataTypeValues(REQUEST_TYPES);
+  readonly responseTypeVariants = dataTypeValues(RESPONSE_TYPES);
+  readonly onDisconnectActionVariants = [...ON_DISCONNECT_ACTIONS];
   readonly inputBlocks = signal<number[]>([]);
   readonly outputBlocks = signal<number[]>([]);
+  readonly connectionsDirty = signal(false);
   readonly blockId = this.context.data.blockId;
-  readonly matchRequestType = signal<EDataTypes>(EDataTypes.STRING);
-  readonly matchResponseType = signal<EDataTypes>(EDataTypes.STRING);
 
   readonly form = this.fb.nonNullable.group({
     blockId: [{ value: this.blockId, disabled: true }],
     blockName: ['', Validators.required],
     comPort: ['COM1', Validators.required],
-    baudRate: [9600, [Validators.required, Validators.min(1)]],
+    baudRate: [115200, [Validators.required, Validators.min(1)]],
     isParity: [false],
-    dataBits: [8, Validators.required],
-    stopBits: [1, Validators.required],
-    typeRequestData: [EDataTypes.STRING as TComBlockRequestData, Validators.required],
-    typeResponseData: [EDataTypes.STRING as TComBlockResponseData, Validators.required],
+    dataBits: [8, [Validators.required, Validators.min(5), Validators.max(8)]],
+    stopBits: [1, [Validators.required, Validators.min(1), Validators.max(2)]],
+    typeRequestData: [EDataTypes.BYTES as TComBlockRequestData, Validators.required],
+    typeResponseData: [EDataTypes.BYTES as TComBlockResponseData, Validators.required],
+    isDemoMode: [false],
+    onDisconnectAction: [DEFAULT_ON_DISCONNECT.action as EOnDisconnectActions, Validators.required],
+    isCanUserReconnect: [DEFAULT_ON_DISCONNECT.isCanUserReconnect],
+  });
+
+  private readonly formSnapshot = toSignal(
+    merge(this.form.valueChanges, this.form.statusChanges).pipe(startWith(null)),
+    { initialValue: null },
+  );
+
+  readonly isDemoMode = toSignal(
+    this.form.controls.isDemoMode.valueChanges.pipe(
+      startWith(this.form.controls.isDemoMode.value),
+    ),
+    { initialValue: false },
+  );
+
+  readonly matchRequestType = toSignal(
+    this.form.controls.typeRequestData.valueChanges.pipe(
+      startWith(this.form.controls.typeRequestData.value),
+    ),
+    { initialValue: EDataTypes.BYTES as TComBlockRequestData },
+  );
+
+  readonly matchResponseType = toSignal(
+    this.form.controls.typeResponseData.valueChanges.pipe(
+      startWith(this.form.controls.typeResponseData.value),
+    ),
+    { initialValue: EDataTypes.BYTES as TComBlockResponseData },
+  );
+
+  readonly canSave = computed(() => {
+    this.formSnapshot();
+    this.connectionsDirty();
+    const demo = this.form.controls.isDemoMode.value;
+    const dirty = this.form.dirty || this.connectionsDirty();
+    if (!dirty) {
+      return false;
+    }
+    if (demo) {
+      return !!this.form.controls.blockName.value.trim();
+    }
+    return this.form.valid;
   });
 
   readonly resolveDataTypeLabel = (value: EDataTypes | null): string => {
@@ -72,39 +148,73 @@ export class ComComponent extends LanguageProvider {
     return key ? (this.labels() as Record<string, string>)[key] ?? '' : '';
   };
 
+  readonly resolveOnDisconnectActionLabel = (value: EOnDisconnectActions | null): string => {
+    const map = this.labels() as Record<string, string>;
+    if (value === EOnDisconnectActions.IGNORE) {
+      return map['onDisconnectIgnore'] ?? '';
+    }
+    if (value === EOnDisconnectActions.STOP_APP) {
+      return map['onDisconnectStopApp'] ?? '';
+    }
+    return '';
+  };
+
   constructor() {
     super();
-    this.form.controls.typeRequestData.valueChanges
-      .pipe(takeUntilDestroyed())
-      .subscribe((value) => this.matchRequestType.set(value));
-    this.form.controls.typeResponseData.valueChanges
-      .pipe(takeUntilDestroyed())
-      .subscribe((value) => this.matchResponseType.set(value));
+
+    effect(() => {
+      this.context.setMainActionEnabled(this.canSave());
+    });
+
     this.context.mainAction$.pipe(takeUntilDestroyed()).subscribe(() => this.submit());
   }
 
+  protected onInputBlocksChange(ids: number[]): void {
+    this.inputBlocks.set(ids);
+    this.connectionsDirty.set(true);
+  }
+
+  protected onOutputBlocksChange(ids: number[]): void {
+    this.outputBlocks.set(ids);
+    this.connectionsDirty.set(true);
+  }
+
   private submit(): void {
-    if (this.form.invalid) {
+    if (!this.canSave()) {
       this.form.markAllAsTouched();
       return;
     }
+
     const raw = this.form.getRawValue();
+    const isDemoMode = raw.isDemoMode;
+
+    const onDisconnect: IOnDisconnectSettings = {
+      action: raw.onDisconnectAction,
+      isCanUserReconnect: isDemoMode
+        ? DEFAULT_ON_DISCONNECT.isCanUserReconnect
+        : raw.isCanUserReconnect,
+      retryCount: DEFAULT_ON_DISCONNECT.retryCount,
+    };
+
     this.context.completeWith({
       block: {
         blockId: raw.blockId,
         blockName: raw.blockName.trim(),
-        comPort: raw.comPort.trim(),
-        baudRate: Number(raw.baudRate),
-        isParity: raw.isParity,
-        dataBits: Number(raw.dataBits),
-        stopBits: Number(raw.stopBits),
+        comPort: isDemoMode ? 'COM1' : raw.comPort.trim(),
+        baudRate: isDemoMode ? 115200 : Number(raw.baudRate),
+        isParity: isDemoMode ? false : raw.isParity,
+        dataBits: isDemoMode ? 8 : Number(raw.dataBits),
+        stopBits: isDemoMode ? 1 : Number(raw.stopBits),
         typeRequestData: raw.typeRequestData,
         typeResponseData: raw.typeResponseData,
-        blockOptions: { ...DEFAULT_BLOCK_OPTIONS },
-        onDisconnect: { ...DEFAULT_ON_DISCONNECT },
+        blockOptions: {
+          isCanUserSendData: false,
+          isDemoMode,
+        },
+        onDisconnect,
       },
-      inputBlocks: this.inputBlocks(),
-      outputBlocks: this.outputBlocks(),
+      inputBlocks: isDemoMode ? [] : this.inputBlocks(),
+      outputBlocks: isDemoMode ? [] : this.outputBlocks(),
     });
   }
 }

@@ -15,6 +15,7 @@
   "build": {
     "appId": "com.rtuscada.lab",
     "productName": "RTU SCADA Lab",
+    "icon": "src/rtu-scada-frontend/public/rtu-lab-logo.png",
     "files": [
       "dist/electron/**/*",
       "dist/rtu-scada-frontend/browser/**/*"
@@ -24,6 +25,7 @@
     },
     "win": {
       "target": "nsis",
+      "icon": "src/rtu-scada-frontend/public/rtu-lab-logo.png",
       "signAndEditExecutable": false
     },
     "nsis": {
@@ -31,10 +33,12 @@
       "allowToChangeInstallationDirectory": true
     },
     "mac": {
-      "target": "dmg"
+      "target": "dmg",
+      "icon": "src/rtu-scada-frontend/public/rtu-lab-logo.png"
     },
     "linux": {
-      "target": "AppImage"
+      "target": "AppImage",
+      "icon": "src/rtu-scada-frontend/public/rtu-lab-logo.png"
     }
   },
   "repository": {

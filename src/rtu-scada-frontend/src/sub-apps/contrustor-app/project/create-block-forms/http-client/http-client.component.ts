@@ -179,6 +179,7 @@ export class HttpClientComponent extends LanguageProvider {
     extractBody: [true],
     extractCookies: [false],
     bodyKind: ['json' as TResponseBodyKind, Validators.required],
+    bodyBlockId: [0],
     nonFormBodyType: [EDataTypes.JSON as THttpClientReponseBodyNonFormData, Validators.required],
     requestBodyType: [
       IHttpClientRequestDataBodyTypes.JSON as IHttpClientRequestDataBodyTypes,
@@ -407,6 +408,8 @@ export class HttpClientComponent extends LanguageProvider {
 
   constructor() {
     super();
+
+    this.form.controls.bodyBlockId.setValue(this.allocateId(), { emitEvent: false });
 
     effect(() => {
       this.context.setMainActionEnabled(this.canSave());
@@ -784,8 +787,6 @@ export class HttpClientComponent extends LanguageProvider {
 
     const requestData = this.buildSharedRequestData(raw);
     const sharedInputs = [...this.inputBlocks()];
-    let nextId = this.startBlockId;
-    const takeId = () => nextId++;
 
     if (raw.extractHeaders) {
       for (const row of raw.responseHeaders) {
@@ -793,7 +794,7 @@ export class HttpClientComponent extends LanguageProvider {
           continue;
         }
         entries.push({
-          block: this.makeBlock(takeId(), raw, requestData, {
+          block: this.makeBlock(row.blockId, raw, requestData, {
             type: EHttpClientResponseDataType.FROM_HEADERS,
             fromHeaders: {
               headerName: row.headerName.trim(),
@@ -815,7 +816,7 @@ export class HttpClientComponent extends LanguageProvider {
             continue;
           }
           entries.push({
-            block: this.makeBlock(takeId(), raw, requestData, {
+            block: this.makeBlock(row.blockId, raw, requestData, {
               type: EHttpClientResponseDataType.FROM_BODY,
               fromHeaders: null,
               fromBody: {
@@ -834,7 +835,7 @@ export class HttpClientComponent extends LanguageProvider {
         }
       } else {
         entries.push({
-          block: this.makeBlock(takeId(), raw, requestData, {
+          block: this.makeBlock(raw.bodyBlockId, raw, requestData, {
             type: EHttpClientResponseDataType.FROM_BODY,
             fromHeaders: null,
             fromBody: {
@@ -856,7 +857,7 @@ export class HttpClientComponent extends LanguageProvider {
           continue;
         }
         entries.push({
-          block: this.makeBlock(takeId(), raw, requestData, {
+          block: this.makeBlock(row.blockId, raw, requestData, {
             type: EHttpClientResponseDataType.FROM_COOKIE,
             fromHeaders: null,
             fromBody: null,

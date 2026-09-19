@@ -1,0 +1,102 @@
+.flags-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-block: 24px;
+}
+
+.section-title {
+  margin: 0;
+  color: var(--text-color);
+  font-weight: 600;
+}
+
+.hint {
+  margin: 0;
+  color: var(--text-color);
+  opacity: 0.7;
+}
+
+.graphs-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-block-end: 16px;
+}
+
+.graph-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+}
+
+.graph-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.graph-id {
+  margin: 0;
+  color: var(--text-color);
+}
+
+.sub-title {
+  margin: 8px 0 0;
+  color: var(--text-color);
+  opacity: 0.85;
+  font-weight: 600;
+}
+
+.table {
+  display: grid;
+  column-gap: 10px;
+  row-gap: 10px;
+  align-items: center;
+  margin-block-end: 8px;
+}
+
+.table.cols-line {
+  grid-template-columns: minmax(180px, 1.4fr) minmax(100px, 0.8fr) auto;
+}
+
+.table.cols-bar {
+  grid-template-columns: minmax(120px, 1fr) minmax(180px, 1.4fr) auto;
+}
+
+.table.cols-source {
+  grid-template-columns: 1fr auto;
+}
+
+.table-head,
+.table-row {
+  display: contents;
+}
+
+.table-head > * {
+  color: var(--text-color);
+  font-weight: 600;
+  opacity: 0.8;
+}
+
+.table > button {
+  grid-column: 1 / -1;
+  justify-self: start;
+}
+
+.histogram-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+paper-textfield {
+  max-inline-size: 497px;
+}
+
+.table paper-textfield,
+.histogram-grid paper-textfield {
+  max-inline-size: none;
+}

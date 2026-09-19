@@ -7,7 +7,6 @@
     border: 1px solid var(--border-color);
     background: var(--textfield-color);
     box-shadow: inset 0 0 2px 1px rgba(0, 0, 0, 0.25);
-    display: flex;
 }
 
 :host:has(.textfield_xs, .textfield_s), .textfield_xs, .textfield_s  {
@@ -37,6 +36,12 @@
     transition: font-size 0.3s ease-in-out, top 0.3s ease-in-out, transform 0.3s ease-in-out;
 }
 
+.textfield:has(::ng-deep textarea):not(:has(::ng-deep input)) label {
+    font-size: var(--font-size-xs);
+    top: 1px;
+    transform: translateY(0);
+}
+
 .textfield ::ng-deep input {
     position: relative;
     z-index: 1;
@@ -49,17 +54,17 @@
     transform: translateY(0);
 }
 
-.textfield_xs, .textfield_s ::ng-deep input {
+.textfield_xs ::ng-deep input, .textfield_s ::ng-deep input, .textfield_xs ::ng-deep textarea, .textfield_s ::ng-deep textarea {
     block-size: 30px;
     padding: 5px 0 1px 16px;
 }
 
-.textfield_m ::ng-deep input {
+.textfield_m ::ng-deep input, .textfield_m ::ng-deep textarea {
     block-size: 50px;
     padding: 12px 18px;
 }
 
-.textfield_l, .textfield_xl ::ng-deep input {
+.textfield_l ::ng-deep input, .textfield_xl ::ng-deep input, .textfield_l ::ng-deep textarea, .textfield_xl ::ng-deep textarea {
     block-size: 60px;
     padding: 12px 18px;
 }

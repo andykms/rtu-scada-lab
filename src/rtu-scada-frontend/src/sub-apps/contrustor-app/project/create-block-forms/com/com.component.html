@@ -10,62 +10,106 @@
       <input paperInput type="text" formControlName="blockName" autocomplete="off" />
     </paper-textfield>
 
-    <paper-textfield size="m">
-      <label paperLabel>{{ labels().comPort }}</label>
-      <input paperInput type="text" formControlName="comPort" autocomplete="off" />
-    </paper-textfield>
+    <label class="flag-row" paperText size="s">
+      <input paperCheckbox size="m" type="checkbox" formControlName="isDemoMode" />
+      {{ labels().isDemoMode }}
+    </label>
 
-    <paper-textfield size="m">
-      <label paperLabel>{{ labels().baudRate }}</label>
-      <input paperInput type="number" formControlName="baudRate" />
-    </paper-textfield>
+    @if (!isDemoMode()) {
+      <div class="flags-container">
+        <paper-diving-line />
 
-    <paper-textfield size="m">
-      <label paperLabel>{{ labels().dataBits }}</label>
-      <input paperInput type="number" formControlName="dataBits" />
-    </paper-textfield>
+        <paper-textfield size="m">
+          <label paperLabel>{{ labels().comPort }}</label>
+          <input paperInput type="text" formControlName="comPort" autocomplete="off" />
+        </paper-textfield>
 
-    <paper-textfield size="m">
-      <label paperLabel>{{ labels().stopBits }}</label>
-      <input paperInput type="number" formControlName="stopBits" />
-    </paper-textfield>
+        <paper-textfield size="m">
+          <label paperLabel>{{ labels().baudRate }}</label>
+          <input paperInput type="number" formControlName="baudRate" />
+        </paper-textfield>
 
-    <paper-textfield size="m">
-      <paper-select-list
-        formControlName="typeRequestData"
-        [variants]="dataTypeVariants"
-        [labelResolver]="resolveDataTypeLabel"
-      >
-        <label paperLabel>{{ labels().typeRequestData }}</label>
-        <input paperInput readonly #inputList />
-      </paper-select-list>
-    </paper-textfield>
+        <label class="flag-row compact" paperText size="s">
+          <input paperCheckbox size="m" type="checkbox" formControlName="isParity" />
+          {{ labels().isParity }}
+        </label>
 
-    <paper-textfield size="m">
-      <paper-select-list
-        formControlName="typeResponseData"
-        [variants]="dataTypeVariants"
-        [labelResolver]="resolveDataTypeLabel"
-      >
-        <label paperLabel>{{ labels().typeResponseData }}</label>
-        <input paperInput readonly #inputList />
-      </paper-select-list>
-    </paper-textfield>
+        <paper-textfield size="m">
+          <label paperLabel>{{ labels().dataBits }}</label>
+          <input paperInput type="number" formControlName="dataBits" />
+        </paper-textfield>
+
+        <paper-textfield size="m">
+          <label paperLabel>{{ labels().stopBits }}</label>
+          <input paperInput type="number" formControlName="stopBits" />
+        </paper-textfield>
+
+        <paper-diving-line />
+      </div>
+
+      <paper-textfield size="m">
+        <paper-select-list
+          formControlName="typeRequestData"
+          [variants]="requestTypeVariants"
+          [labelResolver]="resolveDataTypeLabel"
+        >
+          <label paperLabel>{{ labels().typeRequestData }}</label>
+          <input paperInput readonly #inputList />
+        </paper-select-list>
+      </paper-textfield>
+
+      <paper-textfield size="m">
+        <paper-select-list
+          formControlName="typeResponseData"
+          [variants]="responseTypeVariants"
+          [labelResolver]="resolveDataTypeLabel"
+        >
+          <label paperLabel>{{ labels().typeResponseData }}</label>
+          <input paperInput readonly #inputList />
+        </paper-select-list>
+      </paper-textfield>
+
+      <div class="flags-container">
+        <paper-diving-line />
+
+        <paper-textfield size="m">
+          <paper-select-list
+            formControlName="onDisconnectAction"
+            [variants]="onDisconnectActionVariants"
+            [labelResolver]="resolveOnDisconnectActionLabel"
+          >
+            <label paperLabel>{{ labels().onDisconnectAction }}</label>
+            <input paperInput readonly #inputList />
+          </paper-select-list>
+        </paper-textfield>
+
+        <label class="flag-row" paperText size="s">
+          <input paperCheckbox size="m" type="checkbox" formControlName="isCanUserReconnect" />
+          {{ labels().isCanUserReconnectCom }}
+        </label>
+
+        <paper-diving-line />
+      </div>
+    }
   </form>
 
-  <constructor-block-connections-ribbon
-    direction="inputs"
-    [matchDataType]="matchRequestType()"
-    [excludeBlockId]="blockId"
-    [(selectedIds)]="inputBlocks"
-    [title]="labels().inputBlocks"
-  />
+  @if (!isDemoMode()) {
+    <constructor-block-connections-ribbon
+      direction="inputs"
+      [matchDataType]="matchRequestType()"
+      [excludeBlockId]="blockId"
+      [selectedIds]="inputBlocks()"
+      (selectedIdsChange)="onInputBlocksChange($event)"
+      [title]="labels().inputBlocks"
+    />
 
-  <constructor-block-connections-ribbon
-    direction="outputs"
-    [matchDataType]="matchResponseType()"
-    [excludeBlockId]="blockId"
-    [(selectedIds)]="outputBlocks"
-    [title]="labels().outputBlocks"
-  />
+    <constructor-block-connections-ribbon
+      direction="outputs"
+      [matchDataType]="matchResponseType()"
+      [excludeBlockId]="blockId"
+      [selectedIds]="outputBlocks()"
+      (selectedIdsChange)="onOutputBlocksChange($event)"
+      [title]="labels().outputBlocks"
+    />
+  }
 </section>

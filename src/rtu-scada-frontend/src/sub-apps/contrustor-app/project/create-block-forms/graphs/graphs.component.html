@@ -1,32 +1,175 @@
-<section class="create-block-form">
+<section class="create-block-form graphs-form">
   <form [formGroup]="form">
-    <paper-textfield size="m">
-      <label paperLabel>{{ labels().blockId }}</label>
-      <input paperInput type="number" formControlName="blockId" />
-    </paper-textfield>
-
     <paper-textfield size="m">
       <label paperLabel>{{ labels().blockName }}</label>
       <input paperInput type="text" formControlName="blockName" autocomplete="off" />
     </paper-textfield>
 
-    <paper-textfield size="m">
-      <paper-select-list
-        formControlName="typeRequestData"
-        [variants]="dataTypeVariants"
-        [labelResolver]="resolveDataTypeLabel"
-      >
-        <label paperLabel>{{ labels().typeRequestData }}</label>
-        <input paperInput readonly #inputList />
-      </paper-select-list>
-    </paper-textfield>
-  </form>
+    <div class="flags-container">
+      <paper-diving-line />
+      <p class="section-title" paperText size="m">{{ labels().graphListTitle }}</p>
+      <p class="hint" paperText size="s">{{ labels().graphListHint }}</p>
+      <paper-diving-line />
+    </div>
 
-  <constructor-block-connections-ribbon
-    direction="inputs"
-    [matchDataType]="matchRequestType()"
-    [excludeBlockId]="blockId"
-    [(selectedIds)]="inputBlocks"
-    [title]="labels().inputBlocks"
-  />
+    <div formArrayName="graphs" class="graphs-list">
+      @for (graph of graphs.controls; track graph.value.blockId; let gi = $index) {
+        <div class="graph-card" paperCard [formGroupName]="gi">
+          <div class="graph-card-head">
+            <p class="graph-id" paperText size="s">
+              {{ labels().blockId }}: {{ graph.value.blockId }}
+            </p>
+            <button type="button" paperButton size="s" (click)="removeGraph(gi)">
+              {{ labels().removeBlock }}
+            </button>
+          </div>
+
+          <paper-textfield size="m">
+            <paper-select-list
+              formControlName="graphType"
+              [variants]="graphTypeVariants"
+              [labelResolver]="resolveGraphTypeLabel"
+            >
+              <label paperLabel>{{ labels().graphType }}</label>
+              <input paperInput readonly #inputList />
+            </paper-select-list>
+          </paper-textfield>
+
+          @if (graphTypeOf($any(graph)) === graphTypes.LINE) {
+            <p class="sub-title" paperText size="s">{{ labels().graphSources }}</p>
+            <div class="table cols-line" formArrayName="sources">
+              <div class="table-head">
+                <span>{{ labels().graphSourceBlock }}</span>
+                <span>{{ labels().graphUnit }}</span>
+                <span></span>
+              </div>
+              @for (source of sourcesOf($any(graph)).controls; track $index; let si = $index) {
+                <div class="table-row" [formGroupName]="si">
+                  <paper-textfield size="s">
+                    <paper-select-list
+                      formControlName="sourceBlockId"
+                      [variants]="sourceBlockVariants()"
+                      [labelResolver]="resolveSourceBlockLabel"
+                    >
+                      <input
+                        paperInput
+                        readonly
+                        #inputList
+                        (change)="syncSourceType($any(source))"
+                      />
+                    </paper-select-list>
+                  </paper-textfield>
+                  <paper-textfield size="s">
+                    <input paperInput type="text" formControlName="unit" />
+                  </paper-textfield>
+                  <button type="button" paperButton size="s" (click)="removeSource(gi, si)">
+                    {{ labels().removeBlock }}
+                  </button>
+                </div>
+              }
+              <button type="button" paperButton size="s" (click)="addSource(gi)">
+                {{ labels().graphAddSource }}
+              </button>
+            </div>
+          }
+
+          @if (graphTypeOf($any(graph)) === graphTypes.BAR) {
+            <p class="sub-title" paperText size="s">{{ labels().graphColumns }}</p>
+            <div class="table cols-bar" formArrayName="columns">
+              <div class="table-head">
+                <span>{{ labels().graphColumnName }}</span>
+                <span>{{ labels().graphSourceBlock }}</span>
+                <span></span>
+              </div>
+              @for (column of columnsOf($any(graph)).controls; track $index; let ci = $index) {
+                <div class="table-row" [formGroupName]="ci">
+                  <paper-textfield size="s">
+                    <input paperInput type="text" formControlName="columnName" />
+                  </paper-textfield>
+                  <paper-textfield size="s">
+                    <paper-select-list
+                      formControlName="sourceBlockId"
+                      [variants]="sourceBlockVariants()"
+                      [labelResolver]="resolveSourceBlockLabel"
+                    >
+                      <input
+                        paperInput
+                        readonly
+                        #inputList
+                        (change)="syncSourceType($any(column))"
+                      />
+                    </paper-select-list>
+                  </paper-textfield>
+                  <button type="button" paperButton size="s" (click)="removeColumn(gi, ci)">
+                    {{ labels().removeBlock }}
+                  </button>
+                </div>
+              }
+              <button type="button" paperButton size="s" (click)="addColumn(gi)">
+                {{ labels().graphAddColumn }}
+              </button>
+            </div>
+          }
+
+          @if (
+            graphTypeOf($any(graph)) === graphTypes.GROUPED_BAR ||
+            graphTypeOf($any(graph)) === graphTypes.HISTOGRAM
+          ) {
+            <p class="sub-title" paperText size="s">{{ labels().graphSources }}</p>
+            <div class="table cols-source" formArrayName="sources">
+              <div class="table-head">
+                <span>{{ labels().graphSourceBlock }}</span>
+                <span></span>
+              </div>
+              @for (source of sourcesOf($any(graph)).controls; track $index; let si = $index) {
+                <div class="table-row" [formGroupName]="si">
+                  <paper-textfield size="s">
+                    <paper-select-list
+                      formControlName="sourceBlockId"
+                      [variants]="sourceBlockVariants()"
+                      [labelResolver]="resolveSourceBlockLabel"
+                    >
+                      <input
+                        paperInput
+                        readonly
+                        #inputList
+                        (change)="syncSourceType($any(source))"
+                      />
+                    </paper-select-list>
+                  </paper-textfield>
+                  <button type="button" paperButton size="s" (click)="removeSource(gi, si)">
+                    {{ labels().removeBlock }}
+                  </button>
+                </div>
+              }
+              <button type="button" paperButton size="s" (click)="addSource(gi)">
+                {{ labels().graphAddSource }}
+              </button>
+            </div>
+          }
+
+          @if (graphTypeOf($any(graph)) === graphTypes.HISTOGRAM) {
+            <div class="histogram-grid">
+              <paper-textfield size="m">
+                <label paperLabel>{{ labels().graphHistStart }}</label>
+                <input paperInput type="number" formControlName="defaultStartValue" />
+              </paper-textfield>
+              <paper-textfield size="m">
+                <label paperLabel>{{ labels().graphHistEnd }}</label>
+                <input paperInput type="number" formControlName="defaultEndValue" />
+              </paper-textfield>
+              <paper-textfield size="m">
+                <label paperLabel>{{ labels().graphHistStep }}</label>
+                <input paperInput type="number" formControlName="defaultStep" />
+              </paper-textfield>
+            </div>
+          }
+        </div>
+      }
+    </div>
+
+    <button type="button" paperButton size="m" (click)="addGraph()">
+      {{ labels().graphAddGraph }}
+    </button>
+  </form>
 </section>

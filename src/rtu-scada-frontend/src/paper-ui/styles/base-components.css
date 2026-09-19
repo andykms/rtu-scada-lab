@@ -22,6 +22,7 @@
     border: none;
     outline: none;
     background-color: var(--primary-color);
+    inline-size: max-content;
     cursor: pointer;
     --border-radius: 6px;
     border-radius: var(--border-radius);
@@ -209,7 +210,7 @@
     block-size: 30px;
 }
 
-.paper-card_m label {
+.paper-radio_m label {
     block-size: 30px;
     padding: 0 13px;
 }

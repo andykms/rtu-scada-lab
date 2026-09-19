@@ -83,7 +83,7 @@
                 </div>
                 @for (row of responseHeaders.controls; track $index; let i = $index) {
                   <div class="table-row" [formGroupName]="i">
-                    <span class="id-cell" paperText size="s">{{ row.value.blockId }}</span>
+                    <span class="id-cell" paperText size="m">{{ row.value.blockId }}</span>
                     <paper-textfield size="s">
                       <input paperInput type="text" formControlName="headerName" />
                     </paper-textfield>
@@ -127,7 +127,7 @@
                   </div>
                   @for (row of responseFormData.controls; track $index; let i = $index) {
                     <div class="table-row" [formGroupName]="i">
-                      <span class="id-cell" paperText size="s">{{ row.value.blockId }}</span>
+                      <span class="id-cell" paperText size="m">{{ row.value.blockId }}</span>
                       <paper-textfield size="s">
                         <input paperInput type="text" formControlName="formDataKey" />
                       </paper-textfield>
@@ -150,6 +150,9 @@
                   </button>
                 </div>
               } @else {
+                <p class="body-block-id" paperText size="s">
+                  {{ labels().blockId }}: {{ form.controls.bodyBlockId.value }}
+                </p>
                 @if (bodyKind() === 'file') {
                   <paper-textfield size="m">
                     <paper-select-list
@@ -193,7 +196,7 @@
                 </div>
                 @for (row of responseCookies.controls; track $index; let i = $index) {
                   <div class="table-row" [formGroupName]="i">
-                    <span class="id-cell" paperText size="s">{{ row.value.blockId }}</span>
+                    <span class="id-cell" paperText size="m">{{ row.value.blockId }}</span>
                     <paper-textfield size="s">
                       <input paperInput type="text" formControlName="cookieFieldName" />
                     </paper-textfield>

@@ -718,6 +718,9 @@ export abstract class ProjectContructorTools {
       case EDataTypes.VIDEO: {
         return convertTypeConfig.inputTypeVideo?.outputType ?? null;
       }
+      case EDataTypes.AUDIO: {
+        return convertTypeConfig.inputTypeAudio?.outputType ?? null;
+      }
       case EDataTypes.ANY_FILE: {
         return convertTypeConfig.inputTypeAnyFile?.outputType ?? null;
       }
@@ -730,6 +733,9 @@ export abstract class ProjectContructorTools {
           return jsonConfig.jsonFieldConfig.outputType;
         }
         return jsonConfig.outputType;
+      }
+      case EDataTypes.ARRAY_NUMBERS: {
+        return convertTypeConfig.inputTypeArrayNumbers?.outputType ?? null;
       }
       default: {
         return null;

@@ -257,6 +257,24 @@ export class ProjectService {
     );
   }
 
+  createGraphBlocks(
+    entries: Array<{
+      block: IGraphBlock;
+      inputBlocks: number[];
+      outputBlocks: number[];
+    }>,
+  ): Observable<IProjectFile> {
+    if (!entries.length) {
+      return throwError(() => new Error('No graph blocks to create'));
+    }
+    return from(entries).pipe(
+      concatMap((entry) =>
+        this.createGraphBlock(entry.block, entry.inputBlocks, entry.outputBlocks),
+      ),
+      last(),
+    );
+  }
+
   createIndicatorsBlock(
     block: IIndicatorsBlock,
     inputBlocks: number[],
@@ -267,6 +285,24 @@ export class ProjectService {
     );
   }
 
+  createIndicatorsBlocks(
+    entries: Array<{
+      block: IIndicatorsBlock;
+      inputBlocks: number[];
+      outputBlocks: number[];
+    }>,
+  ): Observable<IProjectFile> {
+    if (!entries.length) {
+      return throwError(() => new Error('No indicator blocks to create'));
+    }
+    return from(entries).pipe(
+      concatMap((entry) =>
+        this.createIndicatorsBlock(entry.block, entry.inputBlocks, entry.outputBlocks),
+      ),
+      last(),
+    );
+  }
+
   createMediaBlock(
     block: IMediaBlock,
     inputBlocks: number[],
@@ -274,6 +310,24 @@ export class ProjectService {
   ): Observable<IProjectFile> {
     return this.callCreate((projectId) =>
       this.electronApi.setMediaBlock(projectId, block, inputBlocks, outputBlocks),
+    );
+  }
+
+  createMediaBlocks(
+    entries: Array<{
+      block: IMediaBlock;
+      inputBlocks: number[];
+      outputBlocks: number[];
+    }>,
+  ): Observable<IProjectFile> {
+    if (!entries.length) {
+      return throwError(() => new Error('No media blocks to create'));
+    }
+    return from(entries).pipe(
+      concatMap((entry) =>
+        this.createMediaBlock(entry.block, entry.inputBlocks, entry.outputBlocks),
+      ),
+      last(),
     );
   }
 
@@ -323,6 +377,8 @@ export class ProjectService {
         return convertTypeConfig.inputTypeImage?.outputType ?? null;
       case EDataTypes.VIDEO:
         return convertTypeConfig.inputTypeVideo?.outputType ?? null;
+      case EDataTypes.AUDIO:
+        return convertTypeConfig.inputTypeAudio?.outputType ?? null;
       case EDataTypes.ANY_FILE:
         return convertTypeConfig.inputTypeAnyFile?.outputType ?? null;
       case EDataTypes.JSON: {
@@ -335,6 +391,8 @@ export class ProjectService {
         }
         return jsonConfig.outputType;
       }
+      case EDataTypes.ARRAY_NUMBERS:
+        return convertTypeConfig.inputTypeArrayNumbers?.outputType ?? null;
       default:
         return null;
     }

@@ -1,4 +1,5 @@
 import { app, BrowserWindow, ipcMain } from "electron";
+import * as fs from "fs";
 import * as path from "path";
 import { ApiEntryConstructorMode } from "./tools/api-entry/api-entry.constructor-mode.tool";
 import { InitializatorTool } from "./tools/initializator/initialization.tool";
@@ -20,10 +21,38 @@ let mainWindow: BrowserWindow | null = null;
 const initializationTool = new InitializatorTool();
 const settingsManager = new SettingsManager();
 
+function resolveAppIconPath(): string | undefined {
+  const candidates = [
+    // Packaged / prod: frontend assets next to electron build output
+    path.join(
+      __dirname,
+      "..",
+      "..",
+      "dist",
+      "rtu-scada-frontend",
+      "browser",
+      "rtu-lab-logo.png",
+    ),
+    // Dev: source public folder
+    path.join(
+      __dirname,
+      "..",
+      "..",
+      "src",
+      "rtu-scada-frontend",
+      "public",
+      "rtu-lab-logo.png",
+    ),
+  ];
+  return candidates.find((candidate) => fs.existsSync(candidate));
+}
+
 function createWindow() {
+  const icon = resolveAppIconPath();
   mainWindow = new BrowserWindow({
     width: 1200,
     height: 800,
+    ...(icon ? { icon } : {}),
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
       nodeIntegration: false,

@@ -106,7 +106,10 @@ export class ProjectConstructorManager extends ProjectContructorTools {
     outputBlocks: number[],
   ): Promise<void> {
     await this.ensureProjectId(projectId);
-    if (inputBlocks.length > 0) {
+    const bySignal =
+      config.timeRequestSettings.timeRequestOption ===
+      ENonRealtimeSettingOption.BY_SIGNAL;
+    if (inputBlocks.length > 0 && !bySignal) {
       return Promise.reject(
         new AppError(
           `Блок протокола Modbus TCP с id ${config.blockId} не принимает данные`,
@@ -117,10 +120,11 @@ export class ProjectConstructorManager extends ProjectContructorTools {
     this.upsertNetworkBlock("modbusTcp", config);
     await this.syncBlockEdges(
       config.blockId,
-      [],
+      bySignal ? inputBlocks : [],
       outputBlocks,
       null,
       config.typeResponseData,
+      { allowAnyInputType: bySignal },
     );
   }
 

@@ -34,16 +34,28 @@ var __importStar = (this && this.__importStar) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 const electron_1 = require("electron");
+const fs = __importStar(require("fs"));
 const path = __importStar(require("path"));
 const initialization_tool_1 = require("./tools/initializator/initialization.tool");
 const settings_manager_tool_1 = require("./tools/settings-manager/settings-manager.tool");
 let mainWindow = null;
 const initializationTool = new initialization_tool_1.InitializatorTool();
 const settingsManager = new settings_manager_tool_1.SettingsManager();
+function resolveAppIconPath() {
+    const candidates = [
+        // Packaged / prod: frontend assets next to electron build output
+        path.join(__dirname, "..", "..", "dist", "rtu-scada-frontend", "browser", "rtu-lab-logo.png"),
+        // Dev: source public folder
+        path.join(__dirname, "..", "..", "src", "rtu-scada-frontend", "public", "rtu-lab-logo.png"),
+    ];
+    return candidates.find((candidate) => fs.existsSync(candidate));
+}
 function createWindow() {
+    const icon = resolveAppIconPath();
     mainWindow = new electron_1.BrowserWindow({
         width: 1200,
         height: 800,
+        ...(icon ? { icon } : {}),
         webPreferences: {
             preload: path.join(__dirname, "preload.js"),
             nodeIntegration: false,

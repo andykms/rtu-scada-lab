@@ -6,8 +6,10 @@ export interface IConverterTypeConfig {
   inputTypeBytes: IConverterInputBytesTypeConfig | null;
   inputTypeImage: IConverterInputImageTypeConfig | null;
   inputTypeVideo: IConverterInputVideoTypeConfig | null;
+  inputTypeAudio: IConverterInputAudioTypeConfig | null;
   inputTypeAnyFile: IConverterInputAnyFileTypeConfig | null;
   inputTypeJson: IConverterInputJsonTypeConfig | null;
+  inputTypeArrayNumbers: IConverterInputArrayNumbersConfig | null;
 }
 
 export interface IConverterOutputTypeConfig<T extends EDataTypes> {
@@ -78,16 +80,18 @@ export enum EConverterInputArrayNumbersOutputNumberType {
   SUM,
   AVG,
   MODE,
-  STDDEV
+  STDDEV,
 }
 
 export interface IConverterInputArrayNumbersConfig extends IConverterOutputTypeConfig<
-  EDataTypes.ARRAY_NUMBERS |
-  EDataTypes.JSON |
-  EDataTypes.STRING |
-  EDataTypes.NUMBER
+  | EDataTypes.ARRAY_NUMBERS
+  | EDataTypes.JSON
+  | EDataTypes.STRING
+  | EDataTypes.NUMBER
 > {
   numberConfig: {
     outputType: EConverterInputArrayNumbersOutputNumberType;
-  }
+    /** Used when outputType is INDEX. */
+    index: number | null;
+  } | null;
 }

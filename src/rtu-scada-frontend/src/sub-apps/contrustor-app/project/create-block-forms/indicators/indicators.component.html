@@ -1,51 +1,158 @@
-<section class="create-block-form">
+<section class="create-block-form indicators-form">
   <form [formGroup]="form">
-    <paper-textfield size="m">
-      <label paperLabel>{{ labels().blockId }}</label>
-      <input paperInput type="number" formControlName="blockId" />
-    </paper-textfield>
-
     <paper-textfield size="m">
       <label paperLabel>{{ labels().blockName }}</label>
       <input paperInput type="text" formControlName="blockName" autocomplete="off" />
     </paper-textfield>
 
-    <paper-textfield size="m">
-      <paper-select-list
-        formControlName="typeRequestData"
-        [variants]="requestTypeVariants"
-        [labelResolver]="resolveDataTypeLabel"
-      >
-        <label paperLabel>{{ labels().typeRequestData }}</label>
-        <input paperInput readonly #inputList />
-      </paper-select-list>
-    </paper-textfield>
+    <div class="flags-container">
+      <paper-diving-line />
+      <p class="section-title" paperText size="m">{{ labels().indicatorListTitle }}</p>
+      <p class="hint" paperText size="s">{{ labels().indicatorListHint }}</p>
+      <paper-diving-line />
+    </div>
 
-    <paper-textfield size="m">
-      <paper-select-list
-        formControlName="typeResponseData"
-        [variants]="responseTypeVariants"
-        [labelResolver]="resolveDataTypeLabel"
-      >
-        <label paperLabel>{{ labels().typeResponseData }}</label>
-        <input paperInput readonly #inputList />
-      </paper-select-list>
-    </paper-textfield>
+    <div formArrayName="indicators" class="indicators-list">
+      @for (indicator of indicators.controls; track indicator.value.blockId; let ii = $index) {
+        <div class="indicator-card" paperCard [formGroupName]="ii">
+          <div class="indicator-card-head">
+            <p class="indicator-id" paperText size="s">
+              {{ labels().blockId }}: {{ indicator.value.blockId }}
+            </p>
+            <button type="button" paperButton size="s" (click)="removeIndicator(ii)">
+              {{ labels().removeBlock }}
+            </button>
+          </div>
+
+          <paper-textfield size="m">
+            <paper-select-list
+              formControlName="sourceBlockId"
+              [variants]="sourceBlockVariants()"
+              [labelResolver]="resolveSourceBlockLabel"
+            >
+              <label paperLabel>{{ labels().indicatorSourceBlock }}</label>
+              <input paperInput readonly #inputList />
+            </paper-select-list>
+          </paper-textfield>
+
+          @if (sourceTypeOf($any(indicator)) === dataTypes.ARRAY_NUMBERS) {
+            <paper-textfield size="m">
+              <label paperLabel>{{ labels().indicatorValueIndex }}</label>
+              <input paperInput type="number" formControlName="valueIndex" min="0" />
+            </paper-textfield>
+          }
+
+          @if (
+            sourceTypeOf($any(indicator)) === dataTypes.NUMBER ||
+            sourceTypeOf($any(indicator)) === dataTypes.STRING ||
+            sourceTypeOf($any(indicator)) === dataTypes.ARRAY_NUMBERS
+          ) {
+            <paper-textfield size="m">
+              <label paperLabel>{{ labels().indicatorUnit }}</label>
+              <input paperInput type="text" formControlName="unit" />
+            </paper-textfield>
+          }
+
+          @if (
+            sourceTypeOf($any(indicator)) === dataTypes.NUMBER ||
+            sourceTypeOf($any(indicator)) === dataTypes.ARRAY_NUMBERS
+          ) {
+            <div class="triggers-section">
+              <paper-diving-line />
+              <p class="sub-title" paperText size="s">{{ labels().indicatorTriggers }}</p>
+              <p class="hint" paperText size="s">{{ labels().indicatorTriggersHint }}</p>
+
+              <div class="triggers-list" formArrayName="triggers">
+                @for (
+                  trigger of triggersOf($any(indicator)).controls;
+                  track $index;
+                  let ti = $index
+                ) {
+                  <div class="trigger-card" [formGroupName]="ti">
+                    <div class="trigger-card-head">
+                      <p class="sub-title" paperText size="s">
+                        {{ labels().indicatorTrigger }} #{{ ti + 1 }}
+                      </p>
+                      <button
+                        type="button"
+                        paperButton
+                        size="s"
+                        (click)="removeTrigger(ii, ti)"
+                      >
+                        {{ labels().removeBlock }}
+                      </button>
+                    </div>
+
+                    <paper-textfield size="m">
+                      <paper-select-list
+                        formControlName="triggerType"
+                        [variants]="triggerTypeVariants"
+                        [labelResolver]="resolveTriggerTypeLabel"
+                      >
+                        <label paperLabel>{{ labels().indicatorTriggerType }}</label>
+                        <input paperInput readonly #inputList />
+                      </paper-select-list>
+                    </paper-textfield>
+
+                    @if (triggerTypeOf($any(trigger)) === triggerTypes.MAX) {
+                      <paper-textfield size="m">
+                        <label paperLabel>{{ labels().indicatorMaxValue }}</label>
+                        <input paperInput type="number" formControlName="maxValue" />
+                      </paper-textfield>
+                    }
+
+                    @if (triggerTypeOf($any(trigger)) === triggerTypes.MIN) {
+                      <paper-textfield size="m">
+                        <label paperLabel>{{ labels().indicatorMinValue }}</label>
+                        <input paperInput type="number" formControlName="minValue" />
+                      </paper-textfield>
+                    }
+
+                    @if (triggerTypeOf($any(trigger)) === triggerTypes.RANGE) {
+                      <div class="range-grid">
+                        <paper-textfield size="m">
+                          <label paperLabel>{{ labels().indicatorRangeMin }}</label>
+                          <input paperInput type="number" formControlName="rangeMin" />
+                        </paper-textfield>
+                        <paper-textfield size="m">
+                          <label paperLabel>{{ labels().indicatorRangeMax }}</label>
+                          <input paperInput type="number" formControlName="rangeMax" />
+                        </paper-textfield>
+                      </div>
+                    }
+
+                    @if (triggerTypeOf($any(trigger)) === triggerTypes.EXACT_VALUE) {
+                      <paper-textfield size="m">
+                        <label paperLabel>{{ labels().indicatorExactValue }}</label>
+                        <input paperInput type="number" formControlName="exactValue" />
+                      </paper-textfield>
+                    }
+
+                    <paper-textfield size="m">
+                      <paper-select-list
+                        formControlName="outputBlockId"
+                        [variants]="outputBlockVariants()"
+                        [labelResolver]="resolveOutputBlockLabel"
+                      >
+                        <label paperLabel>{{ labels().indicatorOutputBlock }}</label>
+                        <input paperInput readonly #inputList />
+                      </paper-select-list>
+                    </paper-textfield>
+                  </div>
+                }
+              </div>
+
+              <button type="button" paperButton size="s" (click)="addTrigger(ii)">
+                {{ labels().indicatorAddTrigger }}
+              </button>
+            </div>
+          }
+        </div>
+      }
+    </div>
+
+    <button type="button" paperButton size="m" (click)="addIndicator()">
+      {{ labels().indicatorAdd }}
+    </button>
   </form>
-
-  <constructor-block-connections-ribbon
-    direction="inputs"
-    [matchDataType]="matchRequestType()"
-    [excludeBlockId]="blockId"
-    [(selectedIds)]="inputBlocks"
-    [title]="labels().inputBlocks"
-  />
-
-  <constructor-block-connections-ribbon
-    direction="outputs"
-    [matchDataType]="matchResponseType()"
-    [excludeBlockId]="blockId"
-    [(selectedIds)]="outputBlocks"
-    [title]="labels().outputBlocks"
-  />
 </section>

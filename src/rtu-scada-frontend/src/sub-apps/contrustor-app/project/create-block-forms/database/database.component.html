@@ -1,4 +1,4 @@
-<section class="create-block-form">
+<section class="create-block-form database-form">
   <form [formGroup]="form">
     <paper-textfield size="m">
       <label paperLabel>{{ labels().blockId }}</label>
@@ -10,39 +10,441 @@
       <input paperInput type="text" formControlName="blockName" autocomplete="off" />
     </paper-textfield>
 
-    <paper-textfield size="m">
-      <paper-select-list
-        formControlName="databaseVariant"
-        [variants]="databaseVariants"
-        [labelResolver]="resolveDatabaseVariantLabel"
-      >
-        <label paperLabel>{{ labels().databaseVariant }}</label>
-        <input paperInput readonly #inputList />
-      </paper-select-list>
-    </paper-textfield>
+    <label class="flag-row" paperText size="s">
+      <input paperCheckbox size="m" type="checkbox" formControlName="isDemoMode" />
+      {{ labels().isDemoMode }}
+    </label>
 
-    <paper-textfield size="m">
-      <label paperLabel>{{ labels().sqlQuery }}</label>
-      <input paperInput type="text" formControlName="query" autocomplete="off" />
-    </paper-textfield>
+    @if (!isDemoMode()) {
+      <div class="flags-container">
+        <paper-diving-line />
+        <p class="section-title" paperText size="m">{{ labels().dbConnectionTitle }}</p>
 
-    <paper-textfield size="m">
-      <paper-select-list
-        formControlName="typeRequestData"
-        [variants]="dataTypeVariants"
-        [labelResolver]="resolveDataTypeLabel"
-      >
-        <label paperLabel>{{ labels().typeRequestData }}</label>
-        <input paperInput readonly #inputList />
-      </paper-select-list>
-    </paper-textfield>
+        <paper-textfield size="m">
+          <paper-select-list
+            formControlName="databaseVariant"
+            [variants]="databaseVariants"
+            [labelResolver]="resolveDatabaseVariantLabel"
+          >
+            <label paperLabel>{{ labels().databaseVariant }}</label>
+            <input paperInput readonly #inputList />
+          </paper-select-list>
+        </paper-textfield>
+
+        @if (databaseVariant() === dbVariants.SQLITE) {
+          <paper-textfield size="m">
+            <label paperLabel>{{ labels().dbSqlitePath }}</label>
+            <input
+              paperInput
+              type="text"
+              formControlName="databaseName"
+              autocomplete="off"
+            />
+          </paper-textfield>
+        } @else {
+          <paper-textfield size="m">
+            <label paperLabel>{{ labels().host }}</label>
+            <input paperInput type="text" formControlName="host" autocomplete="off" />
+          </paper-textfield>
+
+          <paper-textfield size="m">
+            <label paperLabel>{{ labels().port }}</label>
+            <input paperInput type="number" formControlName="port" />
+          </paper-textfield>
+
+          <paper-textfield size="m">
+            <label paperLabel>{{ labels().dbUsername }}</label>
+            <input paperInput type="text" formControlName="username" autocomplete="off" />
+          </paper-textfield>
+
+          <paper-textfield size="m">
+            <label paperLabel>{{ labels().dbPassword }}</label>
+            <input paperInput type="password" formControlName="password" autocomplete="off" />
+          </paper-textfield>
+
+          <paper-textfield size="m">
+            <label paperLabel>{{ labels().dbName }}</label>
+            <input
+              paperInput
+              type="text"
+              formControlName="databaseName"
+              autocomplete="off"
+            />
+          </paper-textfield>
+        }
+        <paper-diving-line />
+      </div>
+
+      <div class="flags-container">
+        <paper-diving-line />
+        <p class="section-title" paperText size="m">{{ labels().dbQueryTitle }}</p>
+
+        <paper-textfield size="m">
+          <paper-select-list
+            formControlName="queryType"
+            [variants]="queryTypeVariants"
+            [labelResolver]="resolveQueryTypeLabel"
+          >
+            <label paperLabel>{{ labels().dbQueryType }}</label>
+            <input paperInput readonly #inputList />
+          </paper-select-list>
+        </paper-textfield>
+        <paper-diving-line />
+      </div>
+
+      @if (queryType() === queryTypes.RAW) {
+        <div class="query-section" paperCard>
+          <p class="section-title" paperText size="m">{{ labels().dbQueryRaw }}</p>
+
+          <paper-textfield size="m">
+            <label paperLabel>{{ labels().sqlQuery }}</label>
+            <input paperInput type="text" formControlName="rawQuery" autocomplete="off" />
+          </paper-textfield>
+
+          <paper-textfield size="m">
+            <paper-select-list
+              formControlName="rawTimeOption"
+              [variants]="rawTimeVariants"
+              [labelResolver]="resolveRawTimeLabel"
+            >
+              <label paperLabel>{{ labels().httpWhenSend }}</label>
+              <input paperInput readonly #inputList />
+            </paper-select-list>
+          </paper-textfield>
+
+          @if (rawTimeOption() === timeOptions.INTERVAL) {
+            <paper-textfield size="m">
+              <label paperLabel>{{ labels().httpPeriodMs }}</label>
+              <input paperInput type="number" formControlName="rawPeriod" />
+            </paper-textfield>
+          }
+
+          @if (rawTimeOption() === timeOptions.BY_SIGNAL) {
+            <paper-textfield size="m">
+              <paper-select-list
+                formControlName="rawTypeRequestData"
+                [variants]="rawTypeVariants"
+                [labelResolver]="resolveDataTypeLabel"
+              >
+                <label paperLabel>{{ labels().dbSignalDataType }}</label>
+                <input paperInput readonly #inputList />
+              </paper-select-list>
+            </paper-textfield>
+
+            <p class="hint" paperText size="s">{{ labels().dbRawDataHint }}</p>
+
+            @if (showSqlInjectionWarning()) {
+              <p class="warning" paperText size="s">{{ labels().dbSqlInjectionWarning }}</p>
+            }
+          }
+        </div>
+      }
+
+      @if (queryType() === queryTypes.INSERT) {
+        <div class="query-section" paperCard>
+          <p class="section-title" paperText size="m">{{ labels().dbQueryInsert }}</p>
+
+          <paper-textfield size="m">
+            <label paperLabel>{{ labels().dbTableName }}</label>
+            <input paperInput type="text" formControlName="insertTable" autocomplete="off" />
+          </paper-textfield>
+
+          @if (databaseVariant() !== dbVariants.SQLITE) {
+            <div class="table-meta-grid">
+              <paper-textfield size="m">
+                <label paperLabel>{{ labels().dbSchemaOptional }}</label>
+                <input
+                  paperInput
+                  type="text"
+                  formControlName="insertSchema"
+                  autocomplete="off"
+                />
+              </paper-textfield>
+              <paper-textfield size="m">
+                <label paperLabel>{{ labels().dbDatabaseOptional }}</label>
+                <input
+                  paperInput
+                  type="text"
+                  formControlName="insertDatabase"
+                  autocomplete="off"
+                />
+              </paper-textfield>
+            </div>
+          }
+
+          <paper-textfield size="m">
+            <paper-select-list
+              formControlName="insertTypeRequestData"
+              [variants]="insertTypeVariants"
+              [labelResolver]="resolveDataTypeLabel"
+            >
+              <label paperLabel>{{ labels().dbInsertDataType }}</label>
+              <input paperInput readonly #inputList />
+            </paper-select-list>
+          </paper-textfield>
+
+          <p class="hint" paperText size="s">{{ labels().dbInsertHint }}</p>
+
+          <p class="sub-title" paperText size="s">{{ labels().dbFieldsTitle }}</p>
+          <div class="table cols-values" formArrayName="insertValues">
+            <div class="table-head">
+              <span>{{ labels().dbFieldName }}</span>
+              <span>{{ labels().dbValueSource }}</span>
+              <span>{{ labels().dbValue }}</span>
+              <span></span>
+            </div>
+            @for (row of insertValues.controls; track $index; let i = $index) {
+              <div class="table-row" [formGroupName]="i">
+                <paper-textfield size="s">
+                  <input paperInput type="text" formControlName="fieldName" />
+                </paper-textfield>
+                <paper-textfield size="s">
+                  <paper-select-list
+                    formControlName="valueSource"
+                    [variants]="valueSourceVariants"
+                    [labelResolver]="resolveValueSourceLabel"
+                  >
+                    <input paperInput readonly #inputList />
+                  </paper-select-list>
+                </paper-textfield>
+                @if (!isFromBlock($any(row))) {
+                  <paper-textfield size="s">
+                    <input paperInput type="text" formControlName="inlineValue" />
+                  </paper-textfield>
+                } @else if (insertUsesPath()) {
+                  <div class="json-path">
+                    <span class="json-prefix" paperText size="s">JSON</span>
+                    <paper-textfield size="s">
+                      <input
+                        paperInput
+                        type="text"
+                        formControlName="jsonPath"
+                        placeholder=".users.0.name"
+                      />
+                    </paper-textfield>
+                  </div>
+                } @else if (insertUsesFile()) {
+                  <span class="from-block-hint" paperText size="s">
+                    {{ labels().dbValueFileFromBlock }}
+                  </span>
+                } @else if (insertUsesBytes()) {
+                  <span class="from-block-hint" paperText size="s">
+                    {{ labels().dbValueBytesFromBlock }}
+                  </span>
+                } @else {
+                  <span class="from-block-hint" paperText size="s">
+                    {{ labels().dbValueDataFromBlock }}
+                  </span>
+                }
+                <button type="button" paperButton size="s" (click)="removeInsertValue(i)">
+                  {{ labels().removeBlock }}
+                </button>
+              </div>
+            }
+            <button type="button" paperButton size="s" (click)="addInsertValue()">
+              {{ labels().dbAddField }}
+            </button>
+          </div>
+        </div>
+      }
+
+      @if (queryType() === queryTypes.UPDATE) {
+        <div class="query-section" paperCard>
+          <p class="section-title" paperText size="m">{{ labels().dbQueryUpdate }}</p>
+
+          <paper-textfield size="m">
+            <label paperLabel>{{ labels().dbTableName }}</label>
+            <input paperInput type="text" formControlName="updateTable" autocomplete="off" />
+          </paper-textfield>
+
+          @if (databaseVariant() !== dbVariants.SQLITE) {
+            <div class="table-meta-grid">
+              <paper-textfield size="m">
+                <label paperLabel>{{ labels().dbSchemaOptional }}</label>
+                <input
+                  paperInput
+                  type="text"
+                  formControlName="updateSchema"
+                  autocomplete="off"
+                />
+              </paper-textfield>
+              <paper-textfield size="m">
+                <label paperLabel>{{ labels().dbDatabaseOptional }}</label>
+                <input
+                  paperInput
+                  type="text"
+                  formControlName="updateDatabase"
+                  autocomplete="off"
+                />
+              </paper-textfield>
+            </div>
+          }
+
+          <paper-textfield size="m">
+            <paper-select-list
+              formControlName="updateTypeRequestData"
+              [variants]="updateTypeVariants"
+              [labelResolver]="resolveDataTypeLabel"
+            >
+              <label paperLabel>{{ labels().dbUpdateDataType }}</label>
+              <input paperInput readonly #inputList />
+            </paper-select-list>
+          </paper-textfield>
+
+          <p class="hint" paperText size="s">{{ labels().dbUpdateHint }}</p>
+
+          <p class="sub-title" paperText size="s">{{ labels().dbUpdateValuesTitle }}</p>
+          <div class="table cols-values" formArrayName="updateValues">
+            <div class="table-head">
+              <span>{{ labels().dbFieldName }}</span>
+              <span>{{ labels().dbValueSource }}</span>
+              <span>{{ labels().dbValue }}</span>
+              <span></span>
+            </div>
+            @for (row of updateValues.controls; track $index; let i = $index) {
+              <div class="table-row" [formGroupName]="i">
+                <paper-textfield size="s">
+                  <input paperInput type="text" formControlName="fieldName" />
+                </paper-textfield>
+                <paper-textfield size="s">
+                  <paper-select-list
+                    formControlName="valueSource"
+                    [variants]="valueSourceVariants"
+                    [labelResolver]="resolveValueSourceLabel"
+                  >
+                    <input paperInput readonly #inputList />
+                  </paper-select-list>
+                </paper-textfield>
+                @if (!isFromBlock($any(row))) {
+                  <paper-textfield size="s">
+                    <input paperInput type="text" formControlName="inlineValue" />
+                  </paper-textfield>
+                } @else if (updateUsesPath()) {
+                  <div class="json-path">
+                    <span class="json-prefix" paperText size="s">JSON</span>
+                    <paper-textfield size="s">
+                      <input
+                        paperInput
+                        type="text"
+                        formControlName="jsonPath"
+                        placeholder=".users.0.name"
+                      />
+                    </paper-textfield>
+                  </div>
+                } @else {
+                  <span class="from-block-hint" paperText size="s">
+                    {{ labels().dbValueDataFromBlock }}
+                  </span>
+                }
+                <button type="button" paperButton size="s" (click)="removeUpdateValue(i)">
+                  {{ labels().removeBlock }}
+                </button>
+              </div>
+            }
+            <button type="button" paperButton size="s" (click)="addUpdateValue()">
+              {{ labels().dbAddField }}
+            </button>
+          </div>
+
+          <paper-diving-line />
+          <p class="sub-title" paperText size="s">{{ labels().dbFiltersTitle }}</p>
+          <p class="hint" paperText size="s">{{ labels().dbFiltersHint }}</p>
+
+          <div class="filters-list" formArrayName="updateFilters">
+            @for (row of updateFilters.controls; track $index; let i = $index; let last = $last) {
+              <div class="filter-card" [formGroupName]="i">
+                <div class="filter-card-head">
+                  <p class="sub-title" paperText size="s">
+                    {{ labels().dbFilter }} #{{ i + 1 }}
+                  </p>
+                  <button type="button" paperButton size="s" (click)="removeUpdateFilter(i)">
+                    {{ labels().removeBlock }}
+                  </button>
+                </div>
+
+                <paper-textfield size="m">
+                  <label paperLabel>{{ labels().dbFieldName }}</label>
+                  <input paperInput type="text" formControlName="fieldName" />
+                </paper-textfield>
+
+                <paper-textfield size="m">
+                  <paper-select-list
+                    formControlName="filterType"
+                    [variants]="filterTypeVariants"
+                    [labelResolver]="resolveFilterTypeLabel"
+                  >
+                    <label paperLabel>{{ labels().dbFilterOperator }}</label>
+                    <input paperInput readonly #inputList />
+                  </paper-select-list>
+                </paper-textfield>
+
+                <paper-textfield size="m">
+                  <paper-select-list
+                    formControlName="valueSource"
+                    [variants]="valueSourceVariants"
+                    [labelResolver]="resolveValueSourceLabel"
+                  >
+                    <label paperLabel>{{ labels().dbValueSource }}</label>
+                    <input paperInput readonly #inputList />
+                  </paper-select-list>
+                </paper-textfield>
+
+                @if (!isFromBlock($any(row))) {
+                  <paper-textfield size="m">
+                    <label paperLabel>{{ labels().dbValue }}</label>
+                    <input paperInput type="text" formControlName="inlineValue" />
+                  </paper-textfield>
+                } @else if (updateUsesPath()) {
+                  <div class="json-path labeled">
+                    <label paperLabel>{{ labels().dbJsonPath }}</label>
+                    <div class="json-path-row">
+                      <span class="json-prefix" paperText size="s">JSON</span>
+                      <paper-textfield size="m">
+                        <input
+                          paperInput
+                          type="text"
+                          formControlName="jsonPath"
+                          placeholder=".status"
+                        />
+                      </paper-textfield>
+                    </div>
+                  </div>
+                } @else {
+                  <p class="hint" paperText size="s">{{ labels().dbValueDataFromBlock }}</p>
+                }
+
+                @if (!last) {
+                  <paper-textfield size="m">
+                    <paper-select-list
+                      formControlName="operatorNextFilter"
+                      [variants]="operatorVariants"
+                      [labelResolver]="resolveOperatorLabel"
+                    >
+                      <label paperLabel>{{ labels().dbLogicalOperator }}</label>
+                      <input paperInput readonly #inputList />
+                    </paper-select-list>
+                  </paper-textfield>
+                }
+              </div>
+            }
+          </div>
+
+          <button type="button" paperButton size="s" (click)="addUpdateFilter()">
+            {{ labels().dbAddFilter }}
+          </button>
+        </div>
+      }
+    }
   </form>
 
-  <constructor-block-connections-ribbon
-    direction="inputs"
-    [matchDataType]="matchRequestType()"
-    [excludeBlockId]="blockId"
-    [(selectedIds)]="inputBlocks"
-    [title]="labels().inputBlocks"
-  />
+  @if (!isDemoMode() && matchRequestType()) {
+    <constructor-block-connections-ribbon
+      direction="inputs"
+      [matchDataType]="matchRequestType()"
+      [excludeBlockId]="blockId"
+      [selectedIds]="inputBlocks()"
+      (selectedIdsChange)="onInputBlocksChange($event)"
+      [title]="labels().inputBlocks"
+    />
+  }
 </section>

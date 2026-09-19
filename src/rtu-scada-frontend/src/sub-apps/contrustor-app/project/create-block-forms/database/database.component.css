@@ -1,0 +1,153 @@
+.flag-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--text-color);
+  cursor: pointer;
+  user-select: none;
+  margin-block: 16px;
+}
+
+.flags-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-block: 8px;
+}
+
+.section-title {
+  margin: 0;
+  color: var(--text-color);
+  font-weight: 600;
+}
+
+.sub-title {
+  margin: 8px 0 0;
+  color: var(--text-color);
+  opacity: 0.85;
+  font-weight: 600;
+}
+
+.hint {
+  margin: 0;
+  color: var(--text-color);
+  opacity: 0.7;
+}
+
+.warning {
+  margin: 0;
+  color: #b45309;
+  opacity: 0.95;
+}
+
+.query-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  margin-block-end: 16px;
+}
+
+.table-meta-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.table-meta-grid paper-textfield {
+  flex: 1 1 180px;
+  max-inline-size: none;
+}
+
+.table {
+  display: grid;
+  column-gap: 10px;
+  row-gap: 10px;
+  align-items: center;
+  margin-block-end: 8px;
+}
+
+.table.cols-values {
+  grid-template-columns: minmax(100px, 1fr) minmax(120px, 1fr) minmax(160px, 1.4fr) auto;
+}
+
+.table-head,
+.table-row {
+  display: contents;
+}
+
+.table-head > * {
+  color: var(--text-color);
+  font-weight: 600;
+  opacity: 0.8;
+}
+
+.table > button {
+  grid-column: 1 / -1;
+  justify-self: start;
+}
+
+.json-path {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-inline-size: 0;
+}
+
+.json-path.labeled {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 6px;
+}
+
+.json-path-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.json-prefix {
+  flex: 0 0 auto;
+  opacity: 0.75;
+  font-weight: 600;
+}
+
+.json-path paper-textfield {
+  flex: 1 1 auto;
+  max-inline-size: none;
+}
+
+.from-block-hint {
+  opacity: 0.7;
+}
+
+.filters-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.filter-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid color-mix(in srgb, var(--text-color) 18%, transparent);
+  border-radius: 8px;
+}
+
+.filter-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+paper-textfield {
+  max-inline-size: 497px;
+}
+
+.table paper-textfield {
+  max-inline-size: none;
+}

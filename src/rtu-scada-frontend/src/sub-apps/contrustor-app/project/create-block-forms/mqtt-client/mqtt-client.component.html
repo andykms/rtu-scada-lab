@@ -97,7 +97,7 @@
   @if (!isDemoMode()) {
     <constructor-block-connections-ribbon
       direction="inputs"
-      [matchDataType]="matchResponseType()"
+      [matchDataType]="matchRequestType()"
       [excludeBlockId]="blockId"
       [selectedIds]="inputBlocks()"
       (selectedIdsChange)="onInputBlocksChange($event)"
@@ -106,7 +106,7 @@
 
     <constructor-block-connections-ribbon
       direction="outputs"
-      [matchDataType]="matchRequestType()"
+      [matchDataType]="matchResponseType()"
       [excludeBlockId]="blockId"
       [selectedIds]="outputBlocks()"
       (selectedIdsChange)="onOutputBlocksChange($event)"

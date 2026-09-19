@@ -1,0 +1,24 @@
+<svg width="400" height="400" xmlns="http://www.w3.org/2000/svg">
+ <g>
+  <title>Layer 1</title>
+  <g id="svg_3">
+   <rect fill="#007fff" stroke="#000" stroke-width="0" x="0" y="0" width="400" height="400" id="svg_1" rx="65"/>
+   <rect transform="rotate(-47 110.564 286.586)" fill="#ffffff" stroke-width="0" x="21.24189" y="246.58578" width="178.64326" height="80" id="svg_2" rx="40" stroke="#000"/>
+   <rect transform="rotate(12 186.366 243.515)" fill="#ffffff" stroke-width="0" x="126.13009" y="226.09003" width="120.47273" height="34.85023" id="svg_4" rx="15" stroke="#000"/>
+   <rect transform="rotate(72 147.979 205.408)" fill="#ffffff" stroke-width="0" x="87.74276" y="187.06043" width="120.47273" height="36.69433" id="svg_5" rx="15" stroke="#000"/>
+   <rect transform="rotate(45 264.761 225.617)" fill="#ffffff" stroke-width="0" x="253.14298" y="170.18561" width="23.23512" height="110.86367" id="svg_6" rx="11" stroke="#000"/>
+   <rect transform="rotate(45 162.297 129)" fill="#ffffff" stroke-width="0" x="151.25886" y="73.56785" width="22.0771" height="110.86367" id="svg_7" rx="11" stroke="#000"/>
+   <rect transform="rotate(45 161.186 127.333)" fill="#ffffff" stroke-width="0" x="150.14775" y="71.9012" width="22.0771" height="110.86367" id="svg_10" rx="11" stroke="#000"/>
+   <rect transform="rotate(-47 152.053 242.094)" fill="#ffffff" stroke-width="0" x="123.56596" y="202.09442" width="56.97359" height="80" id="svg_13" stroke="#000"/>
+   <ellipse fill="#b2b2b2" stroke="#000" stroke-width="0" cx="222.08856" cy="165.91965" id="svg_14" rx="49.99947" ry="49.28005"/>
+   <ellipse fill="#ffffff" stroke-width="0" cx="222.08858" cy="166.63904" id="svg_16" rx="37" ry="37" stroke="#000"/>
+   <rect transform="rotate(-30 308.485 100.469)" fill="#b2b2b2" stroke-width="0" x="239.79632" y="94.25554" width="137.3781" height="12.42622" id="svg_17" stroke="#000"/>
+   <ellipse fill="#e5e5e5" stroke-width="0" cx="363.28105" cy="67.89865" id="svg_19" rx="16.56011" ry="17" stroke="#000"/>
+   <rect transform="rotate(61 281.04 292.357)" fill="#b2b2b2" stroke-width="0" x="182.86366" y="282.90267" width="196.35297" height="18.90868" id="svg_20" stroke="#000"/>
+   <ellipse fill="#e5e5e5" stroke-width="0" cx="325.52747" cy="367.91432" id="svg_21" rx="23.87724" ry="23.58369" stroke="#000"/>
+   <rect transform="rotate(18 108.771 110.978)" fill="#b2b2b2" stroke-width="0" x="25.17857" y="106.82397" width="167.18443" height="8.30894" id="svg_22" stroke="#000"/>
+   <ellipse fill="#e5e5e5" stroke-width="0" cx="26.09184" cy="82.59191" id="svg_23" rx="11.49682" ry="11.51477" stroke="#000"/>
+  </g>
+ </g>
+
+</svg>

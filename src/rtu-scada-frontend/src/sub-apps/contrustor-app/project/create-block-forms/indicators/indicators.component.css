@@ -1,0 +1,89 @@
+.flags-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-block: 24px;
+}
+
+.section-title {
+  margin: 0;
+  color: var(--text-color);
+  font-weight: 600;
+}
+
+.hint {
+  margin: 0;
+  color: var(--text-color);
+  opacity: 0.7;
+}
+
+.indicators-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-block-end: 16px;
+}
+
+.indicator-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+}
+
+.indicator-card-head,
+.trigger-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.indicator-id {
+  margin: 0;
+  color: var(--text-color);
+}
+
+.sub-title {
+  margin: 0;
+  color: var(--text-color);
+  opacity: 0.85;
+  font-weight: 600;
+}
+
+.triggers-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-block-start: 4px;
+}
+
+.triggers-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.trigger-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid color-mix(in srgb, var(--text-color) 18%, transparent);
+  border-radius: 8px;
+}
+
+.range-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+paper-textfield {
+  max-inline-size: 497px;
+}
+
+.range-grid paper-textfield {
+  max-inline-size: none;
+  flex: 1 1 180px;
+}

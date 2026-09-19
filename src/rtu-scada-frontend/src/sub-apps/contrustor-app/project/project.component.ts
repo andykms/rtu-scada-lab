@@ -17,12 +17,13 @@ import type { IComBlock } from '../../../../../electron/types/blocks/network-blo
 import type { IDatabaseBlock } from '../../../../../electron/types/blocks/network-blocks/database/database.type';
 import type { IConverterBlock } from '../../../../../electron/types/blocks/internal-blocks/converter/converter.type';
 import type { IGraphBlock } from '../../../../../electron/types/blocks/internal-blocks/graphs/graphs.type';
-import type { IIndicatorsBlock } from '../../../../../electron/types/blocks/internal-blocks/indicators/indicators.type';
-import type { IMediaBlock } from '../../../../../electron/types/blocks/internal-blocks/media/media.type';
 import {
   ICreateBlockDialogData,
   ICreateBlockFormResult,
   ICreateHttpClientFormResult,
+  ICreateGraphsFormResult,
+  ICreateIndicatorsFormResult,
+  ICreateMediaFormResult,
 } from './create-block-forms/shared/create-block-dialog.model';
 import { TcpServerComponent } from './create-block-forms/tcp-server/tcp-server.component';
 import { TcpClientComponent } from './create-block-forms/tcp-client/tcp-client.component';
@@ -166,41 +167,47 @@ export class ProjectComponent extends LanguageProvider implements OnInit {
         ),
     );
 
-  readonly openGraphsDialog = () =>
-    this.openCreateBlockDialog<IGraphBlock>(
-      GraphsComponent,
-      this.labels().graphs,
-      (result) =>
-        this.projectService.createGraphBlock(
-          result.block,
-          result.inputBlocks,
-          result.outputBlocks,
-        ),
-    );
+  readonly openGraphsDialog = () => {
+    const blockId = this.projectService.nextBlockId();
+    this.dialogService
+      .open<ICreateGraphsFormResult, ICreateBlockDialogData>(GraphsComponent, {
+        label: this.labels().graphs,
+        size: 'l',
+        data: { blockId },
+        mainActionLabel: this.labels().save,
+        secondaryActionLabel: this.labels().cancel,
+      })
+      .pipe(switchMap((result) => this.projectService.createGraphBlocks(result.blocks)))
+      .subscribe();
+  };
 
-  readonly openIndicatorsDialog = () =>
-    this.openCreateBlockDialog<IIndicatorsBlock>(
-      IndicatorsComponent,
-      this.labels().indicators,
-      (result) =>
-        this.projectService.createIndicatorsBlock(
-          result.block,
-          result.inputBlocks,
-          result.outputBlocks,
-        ),
-    );
+  readonly openIndicatorsDialog = () => {
+    const blockId = this.projectService.nextBlockId();
+    this.dialogService
+      .open<ICreateIndicatorsFormResult, ICreateBlockDialogData>(IndicatorsComponent, {
+        label: this.labels().indicators,
+        size: 'l',
+        data: { blockId },
+        mainActionLabel: this.labels().save,
+        secondaryActionLabel: this.labels().cancel,
+      })
+      .pipe(switchMap((result) => this.projectService.createIndicatorsBlocks(result.blocks)))
+      .subscribe();
+  };
 
-  readonly openMediaDialog = () =>
-    this.openCreateBlockDialog<IMediaBlock>(
-      MediaComponent,
-      this.labels().media,
-      (result) =>
-        this.projectService.createMediaBlock(
-          result.block,
-          result.inputBlocks,
-          result.outputBlocks,
-        ),
-    );
+  readonly openMediaDialog = () => {
+    const blockId = this.projectService.nextBlockId();
+    this.dialogService
+      .open<ICreateMediaFormResult, ICreateBlockDialogData>(MediaComponent, {
+        label: this.labels().media,
+        size: 'l',
+        data: { blockId },
+        mainActionLabel: this.labels().save,
+        secondaryActionLabel: this.labels().cancel,
+      })
+      .pipe(switchMap((result) => this.projectService.createMediaBlocks(result.blocks)))
+      .subscribe();
+  };
 
   private openCreateBlockDialog<T>(
     component: Type<unknown>,

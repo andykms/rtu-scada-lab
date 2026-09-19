@@ -1,37 +1,92 @@
-<section class="create-block-form">
+<section class="create-block-form media-form">
   <form [formGroup]="form">
-    <paper-textfield size="m">
-      <label paperLabel>{{ labels().blockId }}</label>
-      <input paperInput type="number" formControlName="blockId" />
-    </paper-textfield>
-
     <paper-textfield size="m">
       <label paperLabel>{{ labels().blockName }}</label>
       <input paperInput type="text" formControlName="blockName" autocomplete="off" />
     </paper-textfield>
 
-    <paper-textfield size="m">
-      <paper-select-list
-        formControlName="typeRequestData"
-        [variants]="dataTypeVariants"
-        [labelResolver]="resolveDataTypeLabel"
-      >
-        <label paperLabel>{{ labels().typeRequestData }}</label>
-        <input paperInput readonly #inputList />
-      </paper-select-list>
-    </paper-textfield>
+    <div class="flags-container">
+      <paper-diving-line />
+      <p class="section-title" paperText size="m">{{ labels().mediaListTitle }}</p>
+      <p class="hint" paperText size="s">{{ labels().mediaListHint }}</p>
+      <paper-diving-line />
+    </div>
 
-    <paper-textfield size="m">
-      <label paperLabel>{{ labels().maxStoredItems }}</label>
-      <input paperInput type="number" formControlName="maxStoredItems" />
-    </paper-textfield>
+    <div formArrayName="items" class="media-list">
+      @for (item of items.controls; track item.value.blockId; let mi = $index) {
+        <div class="media-card" paperCard [formGroupName]="mi">
+          <div class="media-card-head">
+            <p class="media-id" paperText size="s">
+              {{ labels().blockId }}: {{ item.value.blockId }}
+            </p>
+            <button type="button" paperButton size="s" (click)="removeItem(mi)">
+              {{ labels().removeBlock }}
+            </button>
+          </div>
+
+          <paper-textfield size="m">
+            <paper-select-list
+              formControlName="sourceBlockId"
+              [variants]="sourceBlockVariants()"
+              [labelResolver]="resolveSourceBlockLabel"
+            >
+              <label paperLabel>{{ labels().mediaSourceBlock }}</label>
+              <input paperInput readonly #inputList />
+            </paper-select-list>
+          </paper-textfield>
+
+          @if (behaviorHintKey($any(item)); as hintKey) {
+            <p class="hint behavior-hint" paperText size="s">
+              {{ $any(labels())[hintKey] }}
+            </p>
+          }
+
+          @if (sourceTypeOf($any(item)) != null) {
+            <paper-textfield size="m">
+              <label paperLabel>{{ labels().maxStoredItems }}</label>
+              <input paperInput type="number" formControlName="maxStoredItems" min="1" />
+            </paper-textfield>
+          }
+
+          @if (isDownloadType($any(item))) {
+            <div class="download-section">
+              <paper-diving-line />
+              <p class="sub-title" paperText size="s">{{ labels().mediaDownloadSettings }}</p>
+              <p class="hint" paperText size="s">{{ labels().mediaDownloadHint }}</p>
+
+              <paper-textfield size="m">
+                <label paperLabel>{{ labels().mediaDownloadDir }}</label>
+                <input
+                  paperInput
+                  type="text"
+                  formControlName="defaultDownloadDirectoryPath"
+                  autocomplete="off"
+                />
+              </paper-textfield>
+
+              <div class="download-grid">
+                <paper-textfield size="m">
+                  <label paperLabel>{{ labels().mediaFileName }}</label>
+                  <input paperInput type="text" formControlName="fileName" autocomplete="off" />
+                </paper-textfield>
+                <paper-textfield size="m">
+                  <label paperLabel>{{ labels().mediaFileExtension }}</label>
+                  <input
+                    paperInput
+                    type="text"
+                    formControlName="fileExtension"
+                    autocomplete="off"
+                  />
+                </paper-textfield>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+
+    <button type="button" paperButton size="m" (click)="addItem()">
+      {{ labels().mediaAdd }}
+    </button>
   </form>
-
-  <constructor-block-connections-ribbon
-    direction="inputs"
-    [matchDataType]="matchRequestType()"
-    [excludeBlockId]="blockId"
-    [(selectedIds)]="inputBlocks"
-    [title]="labels().inputBlocks"
-  />
 </section>
