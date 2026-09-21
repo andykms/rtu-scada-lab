@@ -1,5 +1,5 @@
 <section class="create-block-form graphs-form">
-  <form [formGroup]="form">
+  <form [formGroup]="form" (input)="onFormDomEvent()" (change)="onFormDomEvent()">
     <paper-textfield size="m">
       <label paperLabel>{{ labels().blockName }}</label>
       <input paperInput type="text" formControlName="blockName" autocomplete="off" />

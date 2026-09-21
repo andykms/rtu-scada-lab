@@ -15,6 +15,7 @@ import { IHttpClientBlock } from "../../types/blocks/network-blocks/http-client/
 import { IModbusRtuBlock } from "../../types/blocks/network-blocks/modbus/modbus-rtu.type";
 import { IModbusTcpBlock } from "../../types/blocks/network-blocks/modbus/modbus-tcp.type";
 import { IMqttClientBlock } from "../../types/blocks/network-blocks/mqtt-client/mqtt-client.type";
+import { ENonRealtimeSettingOption } from "../../types/blocks/network-blocks/non-realtime-network-block.type";
 import { ITcpClientBlock } from "../../types/blocks/network-blocks/tcp-client/tcp-client.type";
 import { ITcpServerBlock } from "../../types/blocks/network-blocks/tcp-server/tcp-server.type";
 import { EDataTypes } from "../../types/data-types/base-data-type.type";
@@ -33,6 +34,12 @@ export abstract class ProjectContructorTools {
     this.currProjectState = projectState;
     if (path) {
       this.currProjectState.path = path;
+    }
+    if (!this.currProjectState.projectData.scene) {
+      this.currProjectState.projectData.scene = { nodePositions: {} };
+    }
+    if (!this.currProjectState.projectData.scene.nodePositions) {
+      this.currProjectState.projectData.scene.nodePositions = {};
     }
     this.refreshBlockCatalogKeys();
   }
@@ -69,6 +76,9 @@ export abstract class ProjectContructorTools {
           },
         },
         edges: {},
+        scene: {
+          nodePositions: {},
+        },
       },
     };
     return project;
@@ -183,6 +193,12 @@ export abstract class ProjectContructorTools {
             }
             case "httpClients": {
               const httpBlock = findedBlock as IHttpClientBlock;
+              if (
+                httpBlock.timeRequestSettings.timeRequestOption ===
+                ENonRealtimeSettingOption.BY_SIGNAL
+              ) {
+                break;
+              }
               if (httpBlock.requestData.typeRequestData != currOutputDataType) {
                 return Promise.reject(
                   new AppError(
@@ -197,6 +213,13 @@ export abstract class ProjectContructorTools {
               break;
             }
             case "modbusRtu": {
+              const modbusBlock = findedBlock as IModbusRtuBlock;
+              if (
+                modbusBlock.timeRequestSettings.timeRequestOption ===
+                ENonRealtimeSettingOption.BY_SIGNAL
+              ) {
+                break;
+              }
               return Promise.reject(
                 new AppError(
                   `Блок протокола Modbus RTU с id ${findedBlock.blockId} не принимает данные`,
@@ -205,6 +228,13 @@ export abstract class ProjectContructorTools {
               );
             }
             case "modbusTcp": {
+              const modbusBlock = findedBlock as IModbusTcpBlock;
+              if (
+                modbusBlock.timeRequestSettings.timeRequestOption ===
+                ENonRealtimeSettingOption.BY_SIGNAL
+              ) {
+                break;
+              }
               return Promise.reject(
                 new AppError(
                   `Блок протокола Modbus TCP с id ${findedBlock.blockId} не принимает данные`,
@@ -824,22 +854,41 @@ export abstract class ProjectContructorTools {
       this.currProjectState.projectData.edges[currBlockId] =
         newEdgesOutputBlocks;
 
-      for (const inputBlockId of newEdgesInputBlocks) {
-        if (!this.currProjectState.projectData.edges[inputBlockId]) {
-          this.currProjectState.projectData.edges[inputBlockId] = [];
-        }
-        if (
-          !this.currProjectState.projectData.edges[inputBlockId].some(
-            (edge) => edge == currBlockId,
-          )
-        ) {
-          this.currProjectState.projectData.edges[inputBlockId].push(
-            currBlockId,
-          );
-        }
-      }
+      this.replaceIncomingEdges(currBlockId, newEdgesInputBlocks);
     } catch (error) {
       return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Replaces all edges that target `currBlockId` with edges from `inputBlockIds`.
+   * Without removing stale producers, ribbon input removals would not disconnect.
+   */
+  protected replaceIncomingEdges(
+    currBlockId: number,
+    inputBlockIds: number[],
+  ): void {
+    const desired = new Set(inputBlockIds);
+    const edges = this.currProjectState.projectData.edges;
+
+    for (const fromKey of Object.keys(edges)) {
+      const fromId = Number(fromKey);
+      const targets = edges[fromId] ?? [];
+      if (!targets.includes(currBlockId)) {
+        continue;
+      }
+      if (!desired.has(fromId)) {
+        edges[fromId] = targets.filter((toId) => toId !== currBlockId);
+      }
+    }
+
+    for (const inputBlockId of inputBlockIds) {
+      if (!edges[inputBlockId]) {
+        edges[inputBlockId] = [];
+      }
+      if (!edges[inputBlockId].some((edge) => edge === currBlockId)) {
+        edges[inputBlockId].push(currBlockId);
+      }
     }
   }
 

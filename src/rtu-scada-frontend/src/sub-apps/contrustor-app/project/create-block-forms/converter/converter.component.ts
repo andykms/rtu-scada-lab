@@ -53,6 +53,7 @@ import {
 } from '../shared/create-block-dialog.model';
 import { dataTypeLabelKey, dataTypeValues } from '../shared/data-type-options';
 import { BlockConnectionsRibbonComponent } from '../shared/block-connections-ribbon/block-connections-ribbon.component';
+import { createFormRevisionTracker } from '../shared/form-revision';
 
 const INPUT_TYPES = [
   EDataTypes.STRING,
@@ -86,8 +87,14 @@ const OUTPUT_BY_INPUT: Partial<Record<EDataTypes, EDataTypes[]>> = {
   [EDataTypes.JSON]: [
     EDataTypes.JSON,
     EDataTypes.STRING,
+    EDataTypes.NUMBER,
     EDataTypes.BYTES,
     EDataTypes.ARRAY_NUMBERS,
+    EDataTypes.IMAGE,
+    EDataTypes.VIDEO,
+    EDataTypes.AUDIO,
+    EDataTypes.ANY_FILE,
+    EDataTypes.PDF,
   ],
   [EDataTypes.ARRAY_NUMBERS]: [
     EDataTypes.ARRAY_NUMBERS,
@@ -97,18 +104,12 @@ const OUTPUT_BY_INPUT: Partial<Record<EDataTypes, EDataTypes[]>> = {
   ],
 };
 
-const JSON_FIELD_TYPES: EDataTypes[] = [
+/** JSON→X: field path is optional (checkbox). Other JSON outputs require a path. */
+const JSON_OPTIONAL_PATH_OUTPUTS = new Set<EDataTypes>([
   EDataTypes.STRING,
-  EDataTypes.NUMBER,
-  EDataTypes.JSON,
-  EDataTypes.ARRAY_NUMBERS,
   EDataTypes.BYTES,
-  EDataTypes.IMAGE,
-  EDataTypes.VIDEO,
-  EDataTypes.AUDIO,
-  EDataTypes.ANY_FILE,
-  EDataTypes.PDF,
-];
+  EDataTypes.ARRAY_NUMBERS,
+]);
 
 const JSON_FILTER_FIELD_TYPES: EDataTypes[] = [
   EDataTypes.STRING,
@@ -186,12 +187,11 @@ type TJsonFilterFieldType =
 export class ConverterComponent extends LanguageProvider {
   private readonly context = injectDialogContext<
     ICreateBlockFormResult<IConverterBlock>,
-    ICreateBlockDialogData
+    ICreateBlockDialogData<IConverterBlock>
   >();
   private readonly fb = new FormBuilder();
 
   readonly inputTypeVariants = dataTypeValues([...INPUT_TYPES]);
-  readonly jsonFieldTypeVariants = dataTypeValues(JSON_FIELD_TYPES);
   readonly jsonFilterFieldTypeVariants = dataTypeValues(JSON_FILTER_FIELD_TYPES);
   readonly arrayNumberOpVariants = [...ARRAY_NUMBER_OPS];
   readonly stringValueOpVariants = [...STRING_VALUE_OPS];
@@ -214,7 +214,6 @@ export class ConverterComponent extends LanguageProvider {
     outputDataType: [EDataTypes.STRING as EDataTypes, Validators.required],
     jsonExtractField: [false],
     jsonFieldPath: [''],
-    jsonFieldType: [EDataTypes.STRING as EDataTypes, Validators.required],
     arrayNumberOp: [
       EConverterInputArrayNumbersOutputNumberType.INDEX as EConverterInputArrayNumbersOutputNumberType,
       Validators.required,
@@ -254,6 +253,7 @@ export class ConverterComponent extends LanguageProvider {
     merge(this.form.valueChanges, this.form.statusChanges).pipe(startWith(null)),
     { initialValue: null },
   );
+  private readonly formRx = createFormRevisionTracker(this.form);
 
   readonly inputDataType = toSignal(
     this.form.controls.inputDataType.valueChanges.pipe(
@@ -274,13 +274,6 @@ export class ConverterComponent extends LanguageProvider {
       startWith(this.form.controls.jsonExtractField.value),
     ),
     { initialValue: false },
-  );
-
-  readonly jsonFieldType = toSignal(
-    this.form.controls.jsonFieldType.valueChanges.pipe(
-      startWith(this.form.controls.jsonFieldType.value),
-    ),
-    { initialValue: EDataTypes.STRING as EDataTypes },
   );
 
   readonly arrayNumberOp = toSignal(
@@ -311,19 +304,34 @@ export class ConverterComponent extends LanguageProvider {
 
   /** Effective block output after type conversion — driven only by signals. */
   readonly effectiveOutputType = computed(() => {
-    const input = this.inputDataType();
-    const output = this.outputDataType();
-    if (input === EDataTypes.JSON && output === EDataTypes.JSON && this.jsonExtractField()) {
-      return this.jsonFieldType();
-    }
-    return output;
+    return this.outputDataType();
   });
 
-  readonly showJsonFieldOptions = computed(
+  readonly showJsonPathCheckbox = computed(
     () =>
       this.inputDataType() === EDataTypes.JSON &&
-      this.outputDataType() === EDataTypes.JSON,
+      JSON_OPTIONAL_PATH_OUTPUTS.has(this.outputDataType()),
   );
+
+  readonly showJsonPathField = computed(() => {
+    if (this.inputDataType() !== EDataTypes.JSON) {
+      return false;
+    }
+    if (JSON_OPTIONAL_PATH_OUTPUTS.has(this.outputDataType())) {
+      return this.jsonExtractField();
+    }
+    return true;
+  });
+
+  readonly jsonPathRequired = computed(() => {
+    if (this.inputDataType() !== EDataTypes.JSON) {
+      return false;
+    }
+    if (JSON_OPTIONAL_PATH_OUTPUTS.has(this.outputDataType())) {
+      return this.jsonExtractField();
+    }
+    return true;
+  });
 
   readonly showArrayNumberOp = computed(
     () =>
@@ -446,21 +454,13 @@ export class ConverterComponent extends LanguageProvider {
 
   readonly canSave = computed(() => {
     this.formSnapshot();
+    this.formRx.formRev();
     this.connectionsDirty();
     this.effectiveOutputType();
-    const dirty = this.form.dirty || this.connectionsDirty();
-    if (!dirty) {
-      return false;
-    }
     if (!this.form.controls.blockName.value.trim()) {
       return false;
     }
-    if (
-      this.inputDataType() === EDataTypes.JSON &&
-      this.jsonExtractField() &&
-      this.outputDataType() === EDataTypes.JSON &&
-      !this.form.controls.jsonFieldPath.value.trim()
-    ) {
+    if (this.jsonPathRequired() && !this.form.controls.jsonFieldPath.value.trim()) {
       return false;
     }
     return true;
@@ -567,6 +567,9 @@ export class ConverterComponent extends LanguageProvider {
     this.form.controls.inputDataType.valueChanges
       .pipe(takeUntilDestroyed())
       .subscribe((input) => {
+        if (this.skipTypeSideEffects) {
+          return;
+        }
         const outputs = OUTPUT_BY_INPUT[input] ?? [EDataTypes.STRING];
         if (!outputs.includes(this.form.controls.outputDataType.value)) {
           this.form.controls.outputDataType.setValue(outputs[0]);
@@ -579,7 +582,10 @@ export class ConverterComponent extends LanguageProvider {
     this.form.controls.outputDataType.valueChanges
       .pipe(takeUntilDestroyed())
       .subscribe((output) => {
-        if (output !== EDataTypes.JSON) {
+        if (this.skipTypeSideEffects) {
+          return;
+        }
+        if (!JSON_OPTIONAL_PATH_OUTPUTS.has(output)) {
           this.form.controls.jsonExtractField.setValue(false, { emitEvent: false });
         }
       });
@@ -594,12 +600,17 @@ export class ConverterComponent extends LanguageProvider {
         }
       });
 
+    this.applyInitialState();
+
     effect(() => {
       this.context.setMainActionEnabled(this.canSave());
     });
 
     // Drop value steps that no longer match the effective output type.
     effect(() => {
+      if (this.skipTypeSideEffects) {
+        return;
+      }
       const type = this.effectiveOutputType();
       if (type !== EDataTypes.STRING && this.stringValueSteps.length > 0) {
         this.replaceStringValueSteps([]);
@@ -613,6 +624,12 @@ export class ConverterComponent extends LanguageProvider {
     });
 
     this.context.mainAction$.pipe(takeUntilDestroyed()).subscribe(() => this.submit());
+  }
+
+  private skipTypeSideEffects = false;
+
+  protected onFormDomEvent(): void {
+    this.formRx.onFormDomEvent();
   }
 
   get stringValueSteps(): FormArray {
@@ -635,6 +652,180 @@ export class ConverterComponent extends LanguageProvider {
   protected onOutputBlocksChange(ids: number[]): void {
     this.outputBlocks.set(ids);
     this.connectionsDirty.set(true);
+  }
+
+  private applyInitialState(): void {
+    const data = this.context.data;
+    if (data.inputBlocks?.length) {
+      this.inputBlocks.set([...data.inputBlocks]);
+    }
+    if (data.outputBlocks?.length) {
+      this.outputBlocks.set([...data.outputBlocks]);
+    }
+    const block = data.initialBlock;
+    if (!block) {
+      return;
+    }
+
+    this.skipTypeSideEffects = true;
+    const { outputDataType, jsonExtractField, jsonFieldPath, arrayNumberOp, arrayNumberIndex } =
+      this.readTypeConfig(block);
+
+    this.form.patchValue({
+        blockName: block.blockName,
+        inputDataType: block.inputDataType,
+        outputDataType,
+        jsonExtractField,
+        jsonFieldPath,
+        arrayNumberOp,
+        arrayNumberIndex,
+      });
+
+    this.applyValueConfig(block.convertValueConfig);
+    this.applyFilterConfig(block.filterConfig);
+    this.formRx.bump();
+    queueMicrotask(() => {
+      this.skipTypeSideEffects = false;
+    });
+  }
+
+  private readTypeConfig(block: IConverterBlock): {
+    outputDataType: EDataTypes;
+    jsonExtractField: boolean;
+    jsonFieldPath: string;
+    arrayNumberOp: EConverterInputArrayNumbersOutputNumberType;
+    arrayNumberIndex: number;
+  } {
+    const cfg = block.convertTypeConfig;
+    const defaults = {
+      outputDataType: EDataTypes.STRING as EDataTypes,
+      jsonExtractField: false,
+      jsonFieldPath: '',
+      arrayNumberOp: EConverterInputArrayNumbersOutputNumberType.INDEX,
+      arrayNumberIndex: 0,
+    };
+    switch (block.inputDataType) {
+      case EDataTypes.STRING:
+        return { ...defaults, outputDataType: cfg.inputTypeString?.outputType ?? EDataTypes.STRING };
+      case EDataTypes.NUMBER:
+        return { ...defaults, outputDataType: cfg.inputTypeNumber?.outputType ?? EDataTypes.NUMBER };
+      case EDataTypes.BYTES:
+        return { ...defaults, outputDataType: cfg.inputTypeBytes?.outputType ?? EDataTypes.BYTES };
+      case EDataTypes.IMAGE:
+        return { ...defaults, outputDataType: cfg.inputTypeImage?.outputType ?? EDataTypes.IMAGE };
+      case EDataTypes.VIDEO:
+        return { ...defaults, outputDataType: cfg.inputTypeVideo?.outputType ?? EDataTypes.VIDEO };
+      case EDataTypes.AUDIO:
+        return { ...defaults, outputDataType: cfg.inputTypeAudio?.outputType ?? EDataTypes.AUDIO };
+      case EDataTypes.ANY_FILE:
+        return { ...defaults, outputDataType: cfg.inputTypeAnyFile?.outputType ?? EDataTypes.ANY_FILE };
+      case EDataTypes.JSON: {
+        const json = cfg.inputTypeJson;
+        const path = json?.jsonFieldConfig?.path?.trim() ?? '';
+        const fieldType = json?.jsonFieldConfig?.outputType;
+        const topType = json?.outputType;
+        // Prefer field type when a path was stored (edit restores extract settings).
+        const outputDataType =
+          (path ? fieldType : null) ?? topType ?? fieldType ?? EDataTypes.JSON;
+        const optional = JSON_OPTIONAL_PATH_OUTPUTS.has(outputDataType);
+        return {
+          ...defaults,
+          outputDataType,
+          jsonExtractField: optional ? !!path : false,
+          jsonFieldPath: path,
+        };
+      }
+      case EDataTypes.ARRAY_NUMBERS: {
+        const arr = cfg.inputTypeArrayNumbers;
+        return {
+          ...defaults,
+          outputDataType: arr?.outputType ?? EDataTypes.ARRAY_NUMBERS,
+          arrayNumberOp:
+            arr?.numberConfig?.outputType ?? EConverterInputArrayNumbersOutputNumberType.INDEX,
+          arrayNumberIndex: arr?.numberConfig?.index ?? 0,
+        };
+      }
+      default:
+        return defaults;
+    }
+  }
+
+  private applyValueConfig(config: IConverterValueConfig): void {
+    const stringRows = (config.stringTypeConfig ?? []).map((step) => ({
+      convertType: step.convertType,
+      addedString:
+        step.addStringLeftConfig?.addedString ??
+        step.addStringRightConfig?.addedString ??
+        '',
+      startIndex: step.cutStringConfig?.startIndex ?? 0,
+      endIndex: step.cutStringConfig?.endIndex ?? 0,
+    }));
+    const numberRows = (config.numberTypeConfig ?? []).map((step) => ({
+      convertType: step.convertType,
+      argument: step.argument ?? '',
+      inputInBase: step.logConfig?.inputInBase ?? false,
+    }));
+    this.replaceStringValueSteps(stringRows);
+    this.replaceNumberValueSteps(numberRows);
+  }
+
+  private applyFilterConfig(config: ICoverterFilterConfig): void {
+    const stringCfg = config.stringTypeConfig;
+    const numberCfg = config.numberTypeConfig;
+    const jsonCfg = config.jsonTypeConfig;
+    const hasFilter = !!(stringCfg || numberCfg || jsonCfg);
+    this.form.patchValue(
+      {
+        enableFilter: hasFilter,
+        useMinLength: stringCfg?.minLength != null,
+        minLength: stringCfg?.minLength ?? 0,
+        useMaxLength: stringCfg?.maxLength != null,
+        maxLength: stringCfg?.maxLength ?? 0,
+        useExactLength: stringCfg?.length != null,
+        exactLength: stringCfg?.length ?? 0,
+        useIsNumber: stringCfg?.isNumber === true,
+        useRegex: !!stringCfg?.regularExpression,
+        regexPreset: 'custom' as (typeof REGEX_PRESETS)[number],
+        regularExpression: stringCfg?.regularExpression ?? '',
+        useMoreThan: numberCfg?.moreThan != null,
+        moreThan: numberCfg?.moreThan ?? null,
+        useLessThan: numberCfg?.lessThan != null,
+        lessThan: numberCfg?.lessThan ?? null,
+        useMoreOrEqual: numberCfg?.moreOrEqualThan != null,
+        moreOrEqualThan: numberCfg?.moreOrEqualThan ?? null,
+        useLessOrEqual: numberCfg?.lessOrEqualThan != null,
+        lessOrEqualThan: numberCfg?.lessOrEqualThan ?? null,
+        useEqual: numberCfg?.equal != null,
+        equal: numberCfg?.equal ?? null,
+        useNotEqual: numberCfg?.notEqual != null,
+        notEqual: numberCfg?.notEqual ?? null,
+      },
+      { emitEvent: false },
+    );
+
+    this.jsonFilterFields.clear();
+    for (const field of jsonCfg?.fields ?? []) {
+      this.jsonFilterFields.push(
+        this.fb.nonNullable.group({
+          fieldName: [field.fieldName, Validators.required],
+          isRequired: [field.isRequired],
+          type: [field.type as TJsonFilterFieldType, Validators.required],
+          minLength: [
+            field.stringTypeConfig?.minLength ??
+              field.arrayAnyTypeConfig?.filters?.minLength ??
+              null,
+          ],
+          maxLength: [
+            field.stringTypeConfig?.maxLength ??
+              field.arrayAnyTypeConfig?.filters?.maxLength ??
+              null,
+          ],
+          regularExpression: [field.stringTypeConfig?.regularExpression ?? ''],
+          moreOrEqualThan: [field.numberTypeConfig?.moreOrEqualThan ?? null],
+          lessOrEqualThan: [field.numberTypeConfig?.lessOrEqualThan ?? null],
+        }),
+      );
+    }
   }
 
   protected addStringValueStep(): void {
@@ -878,17 +1069,17 @@ export class ConverterComponent extends LanguageProvider {
       case EDataTypes.ANY_FILE:
         return { ...empty, inputTypeAnyFile: { outputType: output as never } };
       case EDataTypes.JSON: {
-        const extract =
-          raw.jsonExtractField && raw.outputDataType === EDataTypes.JSON;
-        const path = extract ? raw.jsonFieldPath.trim() : '';
-        const fieldType = extract ? raw.jsonFieldType : raw.outputDataType;
+        const output = raw.outputDataType;
+        const usePath =
+          !JSON_OPTIONAL_PATH_OUTPUTS.has(output) || raw.jsonExtractField;
+        const path = usePath ? raw.jsonFieldPath.trim() : '';
         return {
           ...empty,
           inputTypeJson: {
-            outputType: raw.outputDataType as never,
+            outputType: output as never,
             jsonFieldConfig: {
               path,
-              outputType: fieldType as never,
+              outputType: output as never,
             },
           },
         };

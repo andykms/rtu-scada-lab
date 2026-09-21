@@ -1,0 +1,34 @@
+<div class="actions-bar">
+  <button
+    type="button"
+    class="action-btn"
+    [class.active]="mode() === 'link'"
+    (click)="enterLink()"
+    title="Link"
+  >
+    <paper-icon icon="top-right-arrow" size="m"></paper-icon>
+  </button>
+    <button
+      type="button"
+      class="action-btn"
+      [class.active]="mode() === 'delete'"
+      (click)="enterDelete()"
+      title="Delete"
+    >
+      <paper-icon icon="delete" size="m"></paper-icon>
+    </button>
+    <button
+      type="button"
+      class="action-btn"
+      [class.active]="mode() === 'edit'"
+      (click)="enterEdit()"
+      title="Edit"
+    >
+      <paper-icon icon="edit" size="m"></paper-icon>
+    </button>
+  @if (mode() !== 'idle') {
+    <button type="button" class="action-btn" (click)="exitMode()" title="Cancel">
+      <paper-icon icon="close" size="m"></paper-icon>
+    </button>
+  }
+</div>

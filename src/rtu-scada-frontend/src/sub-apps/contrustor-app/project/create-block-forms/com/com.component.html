@@ -1,5 +1,5 @@
 <section class="create-block-form">
-  <form [formGroup]="form">
+  <form [formGroup]="form" (input)="onFormDomEvent()" (change)="onFormDomEvent()">
     <paper-textfield size="m">
       <label paperLabel>{{ labels().blockId }}</label>
       <input paperInput type="number" formControlName="blockId" />

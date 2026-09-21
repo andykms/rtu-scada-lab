@@ -12,6 +12,12 @@ import { ITcpClientBlock } from "../../blocks/network-blocks/tcp-client/tcp-clie
 import { ITcpServerBlock } from "../../blocks/network-blocks/tcp-server/tcp-server.type";
 import { IProjectFileInfo } from "./project-file-info.type";
 
+export interface IProjectSceneState {
+  nodePositions: {
+    [nodeId: string]: { x: number; y: number };
+  };
+}
+
 export interface IProjectFile extends IProjectFileInfo {
   projectData: {
     blocks: {
@@ -37,5 +43,6 @@ export interface IProjectFile extends IProjectFileInfo {
     edges: {
       [key in number]: number[];
     };
+    scene: IProjectSceneState;
   };
 }

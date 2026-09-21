@@ -27,6 +27,10 @@ export class ElectronAPIService {
     return from(window.electronAPI.openProjectFile(filePath));
   }
 
+  pickAndOpenProjectFile(): Observable<IProjectFile | null> {
+    return from(window.electronAPI.pickAndOpenProjectFile());
+  }
+
   createProject(projectName: string): Observable<IProjectFile> {
     return from(window.electronAPI.createProject(projectName));
   }
@@ -223,8 +227,48 @@ export class ElectronAPIService {
     );
   }
 
-  saveProject(projectId: number): Observable<void> {
+  connectBlocks(
+    projectId: number,
+    fromBlockId: number,
+    toBlockId: number,
+  ): Observable<IProjectFile> {
+    return from(
+      window.electronAPI.connectBlocks(projectId, fromBlockId, toBlockId),
+    );
+  }
+
+  disconnectBlocks(
+    projectId: number,
+    fromBlockId: number,
+    toBlockId: number,
+  ): Observable<IProjectFile> {
+    return from(
+      window.electronAPI.disconnectBlocks(projectId, fromBlockId, toBlockId),
+    );
+  }
+
+  deleteBlocks(
+    projectId: number,
+    blockIds: number[],
+  ): Observable<IProjectFile> {
+    return from(window.electronAPI.deleteBlocks(projectId, blockIds));
+  }
+
+  setSceneNodePositions(
+    projectId: number,
+    positions: { [nodeId: string]: { x: number; y: number } },
+  ): Observable<IProjectFile> {
+    return from(
+      window.electronAPI.setSceneNodePositions(projectId, positions),
+    );
+  }
+
+  saveProject(projectId: number): Observable<string | null> {
     return from(window.electronAPI.saveProject(projectId));
+  }
+
+  saveProjectAs(projectId: number): Observable<string | null> {
+    return from(window.electronAPI.saveProjectAs(projectId));
   }
 
   openDemoMode(projectId: number): Observable<void> {

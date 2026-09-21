@@ -1,10 +1,12 @@
 import {
   AfterViewInit,
   ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
   Injector,
   ViewChild,
   ViewContainerRef,
+  effect,
   inject,
 } from '@angular/core';
 import { PaperModalComponent } from '../../paper-ui/layout/modal/modal.component';
@@ -22,7 +24,7 @@ import { DIALOG_CONFIG } from './dialog-config';
       [secondaryActionLabel]="config.options.secondaryActionLabel ?? 'Отмена'"
       [otherActionLabels]="config.options.otherActionLabels ?? []"
       [showActions]="config.options.showActions ?? true"
-      [mainActionDisabled]="config.mainActionDisabled()"
+      [mainActionDisabled]="mainActionDisabled()"
       (close)="config.onDismiss()"
       (onSecondaryAction)="config.onDismiss()"
       (onMainAction)="config.onMainAction()"
@@ -37,9 +39,20 @@ import { DIALOG_CONFIG } from './dialog-config';
 export class DialogHostComponent implements AfterViewInit {
   readonly config = inject(DIALOG_CONFIG);
   private readonly injector = inject(Injector);
+  private readonly cdr = inject(ChangeDetectorRef);
+
+  /** Stable signal ref so the modal button tracks enable/disable reliably. */
+  readonly mainActionDisabled = this.config.mainActionDisabled;
 
   @ViewChild('componentHost', { read: ViewContainerRef })
   private readonly componentHost!: ViewContainerRef;
+
+  constructor() {
+    effect(() => {
+      this.mainActionDisabled();
+      this.cdr.markForCheck();
+    });
+  }
 
   ngAfterViewInit(): void {
     this.componentHost.createComponent(this.config.component, {

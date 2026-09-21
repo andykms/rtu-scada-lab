@@ -2,14 +2,21 @@
     padding-block-start: 23px;
 }
 
+.empty {
+    padding-block-start: 61px;
+    margin: 0;
+}
+
 .list {
     padding-block-start: 61px;
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 23px;
+    margin-block-end: 100px;
 }
 
 .project {
+    position: relative;
     block-size: 167px;
     inline-size: 100%;
     display: flex;
@@ -17,10 +24,35 @@
     justify-content: space-between;
 }
 
+.project h3 {
+    padding-inline-end: 28px;
+}
+
+.project-remove {
+    position: absolute;
+    inset-block-start: 10px;
+    inset-inline-end: 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+    padding: 4px;
+    border: 0;
+    border-radius: 4px;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+}
+
+.project-remove:hover {
+    background: color-mix(in srgb, var(--text-color) 10%, transparent);
+}
+
 .project-about {
     display: flex;
     flex-direction: column;
     gap: 11px;
+    padding-inline-end: 28px;
 }
 
 @media (width <= 1300px) {

@@ -1,5 +1,5 @@
 <section class="create-block-form http-client-form">
-  <form [formGroup]="form">
+  <form [formGroup]="form" (input)="onFormDomEvent()" (change)="onFormDomEvent()">
     <paper-textfield size="m">
       <label paperLabel>{{ labels().blockName }}</label>
       <input paperInput type="text" formControlName="blockName" autocomplete="off" />
@@ -498,7 +498,16 @@
     }
   </form>
 
-  @if (!isDemoMode() && matchRequestType()) {
+  @if (!isDemoMode() && showSignalBlocks()) {
+    <constructor-block-connections-ribbon
+      direction="inputs"
+      [matchAny]="true"
+      [excludeBlockId]="startBlockId"
+      [selectedIds]="inputBlocks()"
+      (selectedIdsChange)="onInputBlocksChange($event)"
+      [title]="labels().signalBlocks"
+    />
+  } @else if (!isDemoMode() && matchRequestType()) {
     <constructor-block-connections-ribbon
       direction="inputs"
       [matchDataType]="matchRequestType()"

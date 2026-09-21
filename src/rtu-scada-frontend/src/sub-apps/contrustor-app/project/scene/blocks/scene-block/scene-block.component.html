@@ -1,0 +1,55 @@
+@if (node(); as n) {
+  <div
+    class="scene-block"
+    [class.dimmed]="dimmed()"
+    [class.deletable]="deleteMode()"
+    [class.editable]="editMode()"
+    [attr.data-node-id]="n.nodeId"
+    (pointerdown)="onBlockPointerDown($event)"
+  >
+    <div class="scene-block-head" (pointerdown)="onHeaderPointerDown($event)">
+      <p class="block-id" paperText size="s">#{{ n.primaryBlockId }}</p>
+      <p class="block-kind" paperText size="s">{{ n.kindLabel }}</p>
+      <p class="block-name" paperText size="m">{{ n.blockName }}</p>
+    </div>
+
+    @if (n.traits.length) {
+      <div class="scene-block-traits">
+        @for (trait of n.traits; track $index) {
+          <p class="trait" paperText size="s" [title]="trait">{{ trait }}</p>
+        }
+      </div>
+    }
+
+    <div class="scene-block-ports">
+      <div class="ports-col left">
+        @for (port of leftPorts(); track port.portId) {
+          <button
+            type="button"
+            class="port-row"
+            [class.highlight]="highlightPortId() === port.portId"
+            [attr.data-port-id]="port.portId"
+            (pointerdown)="onPortPointerDown($event, port)"
+          >
+            <span class="port-dot"></span>
+            <span class="port-label" paperText size="s">{{ port.label }}</span>
+          </button>
+        }
+      </div>
+      <div class="ports-col right">
+        @for (port of rightPorts(); track port.portId) {
+          <button
+            type="button"
+            class="port-row"
+            [class.highlight]="highlightPortId() === port.portId"
+            [attr.data-port-id]="port.portId"
+            (pointerdown)="onPortPointerDown($event, port)"
+          >
+            <span class="port-label" paperText size="s">{{ port.label }}</span>
+            <span class="port-dot"></span>
+          </button>
+        }
+      </div>
+    </div>
+  </div>
+}

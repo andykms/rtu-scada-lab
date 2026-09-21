@@ -2,9 +2,14 @@
   <h1 paperText size="xl" class="title">{{ labels().constructorApp }}</h1>
   <constructor-app-home-menu
     (onCreateProject)="onCreateProject()"
+    (onOpenProject)="onOpenProject()"
   ></constructor-app-home-menu>
   <paper-diving-line></paper-diving-line>
-  <contructor-project-list [projects]="PROJECTS_MOCK"></contructor-project-list>
+  <contructor-project-list
+    [projects]="recentProjects()"
+    (openProject)="onOpenRecentProject($event)"
+    (removeProject)="onRemoveRecentProject($event)"
+  ></contructor-project-list>
 </section>
 
 <paper-modal

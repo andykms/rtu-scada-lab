@@ -47,6 +47,7 @@ import {
   ICreateHttpClientFormResult,
 } from '../shared/create-block-dialog.model';
 import { dataTypeLabelKey, dataTypeValues } from '../shared/data-type-options';
+import { createFormRevisionTracker } from '../shared/form-revision';
 import { BlockConnectionsRibbonComponent } from '../shared/block-connections-ribbon/block-connections-ribbon.component';
 import { PaperCard } from '../../../../../paper-ui/layout/card/card.directive';
 
@@ -135,7 +136,7 @@ const COUNT_MODES = ['always', 'once', 'count'] as const;
 export class HttpClientComponent extends LanguageProvider {
   private readonly context = injectDialogContext<
     ICreateHttpClientFormResult,
-    ICreateBlockDialogData
+    ICreateBlockDialogData<IHttpClientBlock>
   >();
   private readonly fb = new FormBuilder();
   private nextAllocatedId = this.context.data.blockId;
@@ -198,6 +199,7 @@ export class HttpClientComponent extends LanguageProvider {
     merge(this.form.valueChanges, this.form.statusChanges).pipe(startWith(null)),
     { initialValue: null },
   );
+  private readonly formRx = createFormRevisionTracker(this.form);
 
   readonly isDemoMode = toSignal(
     this.form.controls.isDemoMode.valueChanges.pipe(
@@ -301,6 +303,12 @@ export class HttpClientComponent extends LanguageProvider {
     );
   });
 
+  readonly showSignalBlocks = computed(
+    () =>
+      !this.isDemoMode() &&
+      this.timeRequestOption() === ENonRealtimeSettingOption.BY_SIGNAL,
+  );
+
   readonly showPeriod = computed(() => {
     const option = this.timeRequestOption();
     return (
@@ -312,11 +320,8 @@ export class HttpClientComponent extends LanguageProvider {
 
   readonly canSave = computed(() => {
     this.formSnapshot();
+    this.formRx.formRev();
     this.connectionsDirty();
-    const dirty = this.form.dirty || this.connectionsDirty();
-    if (!dirty) {
-      return false;
-    }
     if (this.form.controls.isDemoMode.value) {
       return !!this.form.controls.blockName.value.trim();
     }
@@ -411,11 +416,16 @@ export class HttpClientComponent extends LanguageProvider {
 
     this.form.controls.bodyBlockId.setValue(this.allocateId(), { emitEvent: false });
 
+    this.applyInitialState();
+
     effect(() => {
       this.context.setMainActionEnabled(this.canSave());
     });
 
     effect(() => {
+      if (this.skipBodyKindSideEffects) {
+        return;
+      }
       const kind = this.bodyKind();
       if (kind === 'json') {
         this.form.controls.nonFormBodyType.setValue(EDataTypes.JSON, { emitEvent: false });
@@ -440,6 +450,12 @@ export class HttpClientComponent extends LanguageProvider {
     });
 
     this.context.mainAction$.pipe(takeUntilDestroyed()).subscribe(() => this.submit());
+  }
+
+  private skipBodyKindSideEffects = false;
+
+  protected onFormDomEvent(): void {
+    this.formRx.onFormDomEvent();
   }
 
   get responseHeaders(): FormArray {
@@ -469,6 +485,202 @@ export class HttpClientComponent extends LanguageProvider {
   protected onInputBlocksChange(ids: number[]): void {
     this.inputBlocks.set(ids);
     this.connectionsDirty.set(true);
+  }
+
+  private applyInitialState(): void {
+    const data = this.context.data;
+    const blocks = data.initialBlocks;
+    if (!blocks?.length) {
+      return;
+    }
+
+    this.skipBodyKindSideEffects = true;
+    const primary = blocks[0];
+    const time = primary.timeRequestSettings;
+    const countMode =
+      time.countRequest == null
+        ? ('always' as const)
+        : time.countRequest === 1 &&
+            (time.timeRequestOption === ENonRealtimeSettingOption.ONCE ||
+              time.timeRequestOption === ENonRealtimeSettingOption.BY_SIGNAL ||
+              time.timeRequestOption === ENonRealtimeSettingOption.BY_INPUT_DATA)
+          ? ('once' as const)
+          : time.countRequest != null
+            ? ('count' as const)
+            : ('always' as const);
+
+    const timeOption =
+      time.timeRequestOption === ENonRealtimeSettingOption.ONCE
+        ? ENonRealtimeSettingOption.BY_INPUT_DATA
+        : time.timeRequestOption;
+
+    const req = primary.requestData;
+    const autoContentType =
+      req.typeRequestData === EDataTypes.NOTHING
+        ? null
+        : this.resolveContentType(req.requestBody.type, req.typeRequestData);
+
+    this.form.patchValue({
+      blockName: primary.blockName,
+      httpMethod: primary.httpMethod as (typeof HTTP_METHODS)[number],
+      httpUrlWithoutQueryParams: primary.httpUrlWithoutQueryParams,
+      typeRequestData: req.typeRequestData,
+      isDemoMode: primary.blockOptions.isDemoMode,
+      isCanUserSendData: primary.blockOptions.isCanUserSendData,
+      timeRequestOption: timeOption,
+      countMode,
+      countRequest: time.countRequest ?? 1,
+      period: time.period ?? 1000,
+      requestBodyType: req.requestBody.type,
+      jsonMessage: req.requestBody.jsonConfiguration?.message ?? '{\n  \n}',
+    });
+
+    this.requestHeaders.clear();
+    for (const header of req.requestHeaders) {
+      if (
+        autoContentType &&
+        header.headerName.trim().toLowerCase() === 'content-type'
+      ) {
+        continue;
+      }
+      this.requestHeaders.push(
+        this.fb.nonNullable.group({
+          headerName: [header.headerName],
+          headerValue: [header.headerValue ?? ''],
+          isInsertedFromBlock: [header.isInsertedFromBlock],
+        }),
+      );
+    }
+    if (!this.requestHeaders.length) {
+      this.requestHeaders.push(this.createRequestHeaderRowWithoutAlloc());
+    }
+
+    this.requestFormData.clear();
+    for (const row of req.requestBody.formDataConfiguration ?? []) {
+      this.requestFormData.push(
+        this.fb.nonNullable.group({
+          formDataKey: [row.formDataKey],
+          inlineValue: [''],
+          isInsertedFromBlock: [row.isInsertedFromBlock],
+        }),
+      );
+    }
+    if (!this.requestFormData.length) {
+      this.requestFormData.push(this.createRequestFormDataRowWithoutAlloc());
+    }
+
+    this.responseHeaders.clear();
+    this.responseCookies.clear();
+    this.responseFormData.clear();
+
+    let extractHeaders = false;
+    let extractBody = false;
+    let extractCookies = false;
+    let bodyKind: TResponseBodyKind = 'json';
+    let bodyBlockId = primary.blockId;
+    let nonFormBodyType: THttpClientReponseBodyNonFormData = EDataTypes.JSON;
+    const usedIds: number[] = [];
+
+    for (const block of blocks) {
+      usedIds.push(block.blockId);
+      const response = block.responseData;
+      if (response.type === EHttpClientResponseDataType.FROM_HEADERS && response.fromHeaders) {
+        extractHeaders = true;
+        this.responseHeaders.push(
+          this.fb.nonNullable.group({
+            blockId: [block.blockId],
+            headerName: [response.fromHeaders.headerName],
+          }),
+        );
+      } else if (
+        response.type === EHttpClientResponseDataType.FROM_COOKIE &&
+        response.fromCookies
+      ) {
+        extractCookies = true;
+        this.responseCookies.push(
+          this.fb.nonNullable.group({
+            blockId: [block.blockId],
+            cookieFieldName: [response.fromCookies.cookieFieldName],
+          }),
+        );
+      } else if (response.type === EHttpClientResponseDataType.FROM_BODY && response.fromBody) {
+        extractBody = true;
+        if (
+          response.fromBody.type === EHttpClientResponseDataBodyType.FORM_DATA &&
+          response.fromBody.formData
+        ) {
+          bodyKind = 'formData';
+          this.responseFormData.push(
+            this.fb.nonNullable.group({
+              blockId: [block.blockId],
+              formDataKey: [response.fromBody.formData.formDataKey],
+              typeRequestData: [
+                response.fromBody.formData.typeRequestData as THttpClientReponseBodyFormData,
+              ],
+            }),
+          );
+        } else if (response.fromBody.nonFormData) {
+          bodyBlockId = block.blockId;
+          const type = response.fromBody.nonFormData.typeRequestData;
+          nonFormBodyType = type as THttpClientReponseBodyNonFormData;
+          if (type === EDataTypes.JSON) {
+            bodyKind = 'json';
+          } else if (type === EDataTypes.STRING) {
+            bodyKind = 'string';
+          } else if (RESPONSE_FILE_TYPES.includes(type as THttpClientReponseBodyNonFormData)) {
+            bodyKind = 'file';
+          } else {
+            bodyKind = 'bytes';
+          }
+        }
+      }
+    }
+
+    this.nextAllocatedId = Math.max(...usedIds, this.nextAllocatedId, bodyBlockId) + 1;
+
+    if (!this.responseHeaders.length) {
+      this.responseHeaders.push(this.createHeaderRow());
+    }
+    if (!this.responseCookies.length) {
+      this.responseCookies.push(this.createCookieRow());
+    }
+    if (!this.responseFormData.length) {
+      this.responseFormData.push(this.createFormDataRow());
+    }
+
+    this.form.patchValue({
+      extractHeaders,
+      extractBody,
+      extractCookies,
+      bodyKind,
+      bodyBlockId,
+      nonFormBodyType,
+    });
+
+    if (data.inputBlocks?.length) {
+      this.inputBlocks.set([...data.inputBlocks]);
+    }
+
+    this.formRx.bump();
+    queueMicrotask(() => {
+      this.skipBodyKindSideEffects = false;
+    });
+  }
+
+  private createRequestHeaderRowWithoutAlloc() {
+    return this.fb.nonNullable.group({
+      headerName: [''],
+      headerValue: [''],
+      isInsertedFromBlock: [false],
+    });
+  }
+
+  private createRequestFormDataRowWithoutAlloc() {
+    return this.fb.nonNullable.group({
+      formDataKey: [''],
+      inlineValue: [''],
+      isInsertedFromBlock: [false],
+    });
   }
 
   protected setActiveResponseTab(tab: 'headers' | 'body' | 'cookies'): void {

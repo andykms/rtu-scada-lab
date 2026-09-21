@@ -57,7 +57,7 @@ function createWindow() {
       preload: path.join(__dirname, "preload.js"),
       nodeIntegration: false,
       contextIsolation: true,
-    },
+    }
   });
 
   const devServerUrl = process.env.ELECTRON_START_URL;
@@ -88,6 +88,10 @@ function registerConstructorModeHandlers(
 ): void {
   ipcMain.handle("openProjectFile", async (_event, filePath: string) => {
     return apiEntryConstructorMode.openProjectFile(filePath);
+  });
+
+  ipcMain.handle("pickAndOpenProjectFile", async () => {
+    return apiEntryConstructorMode.pickAndOpenProjectFile();
   });
 
   ipcMain.handle("createProject", async (_event, projectName: string) => {
@@ -310,8 +314,62 @@ function registerConstructorModeHandlers(
     },
   );
 
+  ipcMain.handle(
+    "connectBlocks",
+    async (
+      _event,
+      projectId: number,
+      fromBlockId: number,
+      toBlockId: number,
+    ) => {
+      return apiEntryConstructorMode.connectBlocks(
+        projectId,
+        fromBlockId,
+        toBlockId,
+      );
+    },
+  );
+
+  ipcMain.handle(
+    "disconnectBlocks",
+    async (
+      _event,
+      projectId: number,
+      fromBlockId: number,
+      toBlockId: number,
+    ) => {
+      return apiEntryConstructorMode.disconnectBlocks(
+        projectId,
+        fromBlockId,
+        toBlockId,
+      );
+    },
+  );
+
+  ipcMain.handle(
+    "deleteBlocks",
+    async (_event, projectId: number, blockIds: number[]) => {
+      return apiEntryConstructorMode.deleteBlocks(projectId, blockIds);
+    },
+  );
+
+  ipcMain.handle(
+    "setSceneNodePositions",
+    async (
+      _event,
+      projectId: number,
+      positions: { [nodeId: string]: { x: number; y: number } },
+    ) => {
+      return apiEntryConstructorMode.setSceneNodePositions(projectId, positions);
+    },
+  );
+
   ipcMain.handle("saveProject", async () => {
     return apiEntryConstructorMode.saveProjectFile();
+  });
+
+  ipcMain.handle("saveProjectAs", async () => {
+    return apiEntryConstructorMode.saveProjectFileAs();
   });
 }
 

@@ -1,0 +1,88 @@
+:host {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  min-block-size: 480px;
+}
+
+.scene-viewport {
+  position: relative;
+  inline-size: 100%;
+  block-size: 100%;
+  min-block-size: 480px;
+  overflow: hidden;
+  border-radius: 12px;
+  border: 1px solid color-mix(in srgb, var(--text-color) 16%, transparent);
+  background:
+    radial-gradient(color-mix(in srgb, var(--text-color) 10%, transparent) 1px, transparent 1px);
+  background-size: 18px 18px;
+  touch-action: none;
+  cursor: grab;
+}
+
+.scene-viewport:active {
+  cursor: grabbing;
+}
+
+.scene-toolbar {
+  position: absolute;
+  inset-block-start: 12px;
+  inset-inline-start: 50%;
+  transform: translateX(-50%);
+  z-index: 5;
+}
+
+.scene-world {
+  position: absolute;
+  inset: 0;
+  transform-origin: 0 0;
+  will-change: transform;
+}
+
+.scene-edges {
+  position: absolute;
+  inset: 0;
+  inline-size: 4000px;
+  block-size: 4000px;
+  overflow: visible;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.scene-world.delete-mode .scene-edges {
+  z-index: 6;
+}
+
+.edge-line {
+  fill: none;
+  stroke: var(--primary-color);
+  stroke-width: 2;
+  pointer-events: none;
+}
+
+.edge-line.deletable {
+  cursor: pointer;
+  stroke-width: 3;
+  pointer-events: stroke;
+}
+
+.edge-hit {
+  fill: none;
+  stroke: transparent;
+  stroke-width: 14;
+  pointer-events: none;
+}
+
+.edge-hit.active {
+  pointer-events: stroke;
+  cursor: pointer;
+}
+
+.edge-preview {
+  fill: none;
+  stroke: var(--primary-color);
+  stroke-width: 2;
+  stroke-dasharray: 6 4;
+  opacity: 0.7;
+  pointer-events: none;
+}

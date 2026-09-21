@@ -60,7 +60,7 @@ function createWindow() {
             preload: path.join(__dirname, "preload.js"),
             nodeIntegration: false,
             contextIsolation: true,
-        },
+        }
     });
     const devServerUrl = process.env.ELECTRON_START_URL;
     if (devServerUrl) {
@@ -78,6 +78,9 @@ function createWindow() {
 function registerConstructorModeHandlers(apiEntryConstructorMode) {
     electron_1.ipcMain.handle("openProjectFile", async (_event, filePath) => {
         return apiEntryConstructorMode.openProjectFile(filePath);
+    });
+    electron_1.ipcMain.handle("pickAndOpenProjectFile", async () => {
+        return apiEntryConstructorMode.pickAndOpenProjectFile();
     });
     electron_1.ipcMain.handle("createProject", async (_event, projectName) => {
         return apiEntryConstructorMode.createNewProject(projectName);
@@ -118,8 +121,23 @@ function registerConstructorModeHandlers(apiEntryConstructorMode) {
     electron_1.ipcMain.handle("setMediaBlock", async (_event, projectId, data, inputBlocks, outputBlocks) => {
         return apiEntryConstructorMode.setMediaBlock(projectId, data, inputBlocks, outputBlocks);
     });
+    electron_1.ipcMain.handle("connectBlocks", async (_event, projectId, fromBlockId, toBlockId) => {
+        return apiEntryConstructorMode.connectBlocks(projectId, fromBlockId, toBlockId);
+    });
+    electron_1.ipcMain.handle("disconnectBlocks", async (_event, projectId, fromBlockId, toBlockId) => {
+        return apiEntryConstructorMode.disconnectBlocks(projectId, fromBlockId, toBlockId);
+    });
+    electron_1.ipcMain.handle("deleteBlocks", async (_event, projectId, blockIds) => {
+        return apiEntryConstructorMode.deleteBlocks(projectId, blockIds);
+    });
+    electron_1.ipcMain.handle("setSceneNodePositions", async (_event, projectId, positions) => {
+        return apiEntryConstructorMode.setSceneNodePositions(projectId, positions);
+    });
     electron_1.ipcMain.handle("saveProject", async () => {
         return apiEntryConstructorMode.saveProjectFile();
+    });
+    electron_1.ipcMain.handle("saveProjectAs", async () => {
+        return apiEntryConstructorMode.saveProjectFileAs();
     });
 }
 electron_1.app.whenReady().then(async () => {

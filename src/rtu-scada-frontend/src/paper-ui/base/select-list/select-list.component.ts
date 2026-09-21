@@ -13,12 +13,7 @@ import {
   signal,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import {
-  AbstractControl,
-  ControlContainer,
-  ControlValueAccessor,
-  NG_VALUE_ACCESSOR,
-} from '@angular/forms';
+import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { filter, fromEvent, merge, Subscription } from 'rxjs';
 
 @Component({
@@ -36,18 +31,11 @@ import { filter, fromEvent, merge, Subscription } from 'rxjs';
 })
 export class PaperSelectList<T> implements OnInit, AfterContentInit, OnDestroy, ControlValueAccessor {
   private readonly destroyRef$ = inject(DestroyRef);
-
-  control!: AbstractControl | null;
+  private readonly elementRef = inject(ElementRef);
 
   private clickSubs?: Subscription;
   private openSubs?: Subscription;
 
-  constructor(
-    private readonly controlContainer: ControlContainer,
-    private readonly elementRef: ElementRef,
-  ) {}
-
-  readonly formControlName = input.required<string>();
   readonly variants = input.required<Array<T>>();
   readonly labelResolver = input<(value: T) => string>((value: T) => String(value));
 
@@ -61,8 +49,6 @@ export class PaperSelectList<T> implements OnInit, AfterContentInit, OnDestroy, 
   private _onTouched: () => void = () => {};
 
   ngOnInit() {
-    this.control = this.controlContainer.control?.get(this.formControlName()) ?? null;
-
     this.clickSubs = fromEvent(document, 'click')
       .pipe(
         takeUntilDestroyed(this.destroyRef$),
@@ -101,8 +87,14 @@ export class PaperSelectList<T> implements OnInit, AfterContentInit, OnDestroy, 
     this._onChange(variant);
     this._onTouched();
     this.opened.set(false);
-    this.control?.setValue(variant);
     this.syncInputLabel();
+    // Bubble to parent <form (input)/(change)> so create-block canSave refreshes
+    this.elementRef.nativeElement.dispatchEvent(
+      new Event('input', { bubbles: true }),
+    );
+    this.elementRef.nativeElement.dispatchEvent(
+      new Event('change', { bubbles: true }),
+    );
   }
 
   writeValue(value: T | null): void {

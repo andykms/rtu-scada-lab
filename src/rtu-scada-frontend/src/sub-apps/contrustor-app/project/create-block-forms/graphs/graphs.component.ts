@@ -39,6 +39,7 @@ import {
   ICreateGraphsFormResult,
 } from '../shared/create-block-dialog.model';
 import { dataTypeLabelKey } from '../shared/data-type-options';
+import { createFormRevisionTracker } from '../shared/form-revision';
 
 const GRAPH_TYPES = [
   EGraphType.LINE,
@@ -71,7 +72,7 @@ const SOURCE_TYPES = new Set<EDataTypes>([EDataTypes.NUMBER, EDataTypes.STRING])
 export class GraphsComponent extends LanguageProvider {
   private readonly context = injectDialogContext<
     ICreateGraphsFormResult,
-    ICreateBlockDialogData
+    ICreateBlockDialogData<IGraphBlock>
   >();
   private readonly fb = new FormBuilder();
   private readonly projectService = inject(ProjectService);
@@ -86,6 +87,8 @@ export class GraphsComponent extends LanguageProvider {
     blockName: ['', Validators.required],
     graphs: this.fb.nonNullable.array([this.createGraphGroup()]),
   });
+
+  private readonly formRx = createFormRevisionTracker(this.form);
 
   private readonly formSnapshot = toSignal(
     merge(this.form.valueChanges, this.form.statusChanges).pipe(startWith(null)),
@@ -108,10 +111,8 @@ export class GraphsComponent extends LanguageProvider {
 
   readonly canSave = computed(() => {
     this.formSnapshot();
+    this.formRx.formRev();
     this.formDirtyExtra();
-    if (!this.form.dirty && !this.formDirtyExtra()) {
-      return false;
-    }
     if (!this.form.controls.blockName.value.trim()) {
       return false;
     }
@@ -151,6 +152,7 @@ export class GraphsComponent extends LanguageProvider {
 
   constructor() {
     super();
+    this.applyInitialState();
 
     effect(() => {
       this.context.setMainActionEnabled(this.canSave());
@@ -159,8 +161,27 @@ export class GraphsComponent extends LanguageProvider {
     this.context.mainAction$.pipe(takeUntilDestroyed()).subscribe(() => this.submit());
   }
 
+  protected onFormDomEvent(): void {
+    this.formRx.onFormDomEvent();
+  }
+
   get graphs(): FormArray {
     return this.form.controls.graphs;
+  }
+
+  private applyInitialState(): void {
+    const blocks = this.context.data.initialBlocks;
+    if (!blocks?.length) {
+      return;
+    }
+    this.form.controls.blockName.setValue(blocks[0].blockName);
+    this.graphs.clear();
+    for (const block of blocks) {
+      this.graphs.push(this.createGraphGroupFromBlock(block));
+    }
+    this.nextAllocatedId =
+      Math.max(...blocks.map((b) => b.blockId), this.nextAllocatedId) + 1;
+    this.formRx.bump();
   }
 
   protected graphTypeOf(group: FormGroup): EGraphType {
@@ -231,6 +252,76 @@ export class GraphsComponent extends LanguageProvider {
       defaultStartValue: [0, Validators.required],
       defaultEndValue: [100, Validators.required],
       defaultStep: [10, [Validators.required, Validators.min(0.000001)]],
+    });
+  }
+
+  private createGraphGroupFromBlock(block: IGraphBlock): FormGroup {
+    const sources = this.fb.nonNullable.array([] as FormGroup[]);
+    const columns = this.fb.nonNullable.array([] as FormGroup[]);
+    let defaultStartValue = 0;
+    let defaultEndValue = 100;
+    let defaultStep = 10;
+
+    if (block.graphType === EGraphType.LINE && block.lineConfig) {
+      for (const source of block.lineConfig.sources) {
+        sources.push(
+          this.fb.nonNullable.group({
+            sourceBlockId: [source.sourceBlockId],
+            typeRequestData: [source.typeRequestData],
+            unit: [source.unit ?? ''],
+          }),
+        );
+      }
+    } else if (block.graphType === EGraphType.BAR && block.barConfig) {
+      for (const column of block.barConfig.columns) {
+        columns.push(
+          this.fb.nonNullable.group({
+            columnName: [column.columnName],
+            sourceBlockId: [column.sourceBlockId],
+            typeRequestData: [column.typeRequestData],
+          }),
+        );
+      }
+    } else if (block.graphType === EGraphType.GROUPED_BAR && block.groupedBarConfig) {
+      for (const source of block.groupedBarConfig.sources) {
+        sources.push(
+          this.fb.nonNullable.group({
+            sourceBlockId: [source.sourceBlockId],
+            typeRequestData: [source.typeRequestData],
+            unit: [''],
+          }),
+        );
+      }
+    } else if (block.graphType === EGraphType.HISTOGRAM && block.histogramConfig) {
+      for (const source of block.histogramConfig.sources) {
+        sources.push(
+          this.fb.nonNullable.group({
+            sourceBlockId: [source.sourceBlockId],
+            typeRequestData: [source.typeRequestData],
+            unit: [''],
+          }),
+        );
+      }
+      defaultStartValue = block.histogramConfig.defaultStartValue;
+      defaultEndValue = block.histogramConfig.defaultEndValue;
+      defaultStep = block.histogramConfig.defaultStep;
+    }
+
+    if (!sources.length) {
+      sources.push(this.createSourceRow());
+    }
+    if (!columns.length) {
+      columns.push(this.createColumnRow());
+    }
+
+    return this.fb.nonNullable.group({
+      blockId: [block.blockId],
+      graphType: [block.graphType as EGraphType, Validators.required],
+      sources,
+      columns,
+      defaultStartValue: [defaultStartValue, Validators.required],
+      defaultEndValue: [defaultEndValue, Validators.required],
+      defaultStep: [defaultStep, [Validators.required, Validators.min(0.000001)]],
     });
   }
 

@@ -1,6 +1,11 @@
-.setting {
+.setting, .checkbox-setting {
     padding: 37px 0;
     display: flex;
     flex-direction: column;
     gap: 17px;
+}
+
+.checkbox-setting {
+    flex-direction: row;
+    align-items: center;
 }

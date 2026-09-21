@@ -32,7 +32,7 @@ export class DialogService {
       let hostRef: ComponentRef<DialogHostComponent> | null = null;
       const mainAction$ = new Subject<void>();
       const otherAction$ = new Subject<string>();
-      const mainActionDisabled = signal(false);
+      const mainActionDisabled = signal(true);
 
       const destroy = (): void => {
         mainAction$.complete();

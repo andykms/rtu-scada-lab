@@ -28,6 +28,14 @@ export class ApiEntryConstructorMode {
     return this.projectContructorManager.currProjectState;
   }
 
+  async pickAndOpenProjectFile(): Promise<IProjectFile | null> {
+    const filePath = await this.fileManager.pickProjectFilePath();
+    if (!filePath) {
+      return null;
+    }
+    return this.openProjectFile(filePath);
+  }
+
   async createNewProject(projectName: string): Promise<IProjectFile> {
     const projectFile = this.projectContructorManager.createNewProject(projectName);
     this.projectContructorManager.setProjectState(projectFile);
@@ -214,9 +222,61 @@ export class ApiEntryConstructorMode {
     return this.projectContructorManager.currProjectState;
   }
 
-  async saveProjectFile(): Promise<void> {
-    await this.fileManager.saveProjectFile(
+  async connectBlocks(
+    projectId: number,
+    fromBlockId: number,
+    toBlockId: number,
+  ): Promise<IProjectFile> {
+    await this.projectContructorManager.connectBlocks(
+      projectId,
+      fromBlockId,
+      toBlockId,
+    );
+    return this.projectContructorManager.currProjectState;
+  }
+
+  async disconnectBlocks(
+    projectId: number,
+    fromBlockId: number,
+    toBlockId: number,
+  ): Promise<IProjectFile> {
+    await this.projectContructorManager.disconnectBlocks(
+      projectId,
+      fromBlockId,
+      toBlockId,
+    );
+    return this.projectContructorManager.currProjectState;
+  }
+
+  async deleteBlocks(
+    projectId: number,
+    blockIds: number[],
+  ): Promise<IProjectFile> {
+    await this.projectContructorManager.deleteBlocks(projectId, blockIds);
+    return this.projectContructorManager.currProjectState;
+  }
+
+  async setSceneNodePositions(
+    projectId: number,
+    positions: { [nodeId: string]: { x: number; y: number } },
+  ): Promise<IProjectFile> {
+    await this.projectContructorManager.setSceneNodePositions(
+      projectId,
+      positions,
+    );
+    return this.projectContructorManager.currProjectState;
+  }
+
+  async saveProjectFile(): Promise<string | null> {
+    return this.fileManager.saveProjectFile(
       this.projectContructorManager.currProjectState,
+    );
+  }
+
+  async saveProjectFileAs(): Promise<string | null> {
+    return this.fileManager.saveProjectFile(
+      this.projectContructorManager.currProjectState,
+      { forceDialog: true },
     );
   }
 }

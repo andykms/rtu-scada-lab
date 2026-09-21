@@ -56,7 +56,20 @@ export interface IConverterInputJsonTypeConfig extends IConverterOutputTypeConfi
   | EDataTypes.STRING
   | EDataTypes.BYTES
   | EDataTypes.ARRAY_NUMBERS
+  | EDataTypes.NUMBER
+  | EDataTypes.ANY_FILE
+  | EDataTypes.AUDIO
+  | EDataTypes.VIDEO
+  | EDataTypes.IMAGE
+  | EDataTypes.PDF
 > {
+  /**
+   * Field navigation inside JSON.
+   * - `path` empty: convert the whole JSON value to `outputType`
+   *   (allowed for STRING / BYTES / ARRAY_NUMBERS; for other types path is required).
+   * - `path` set: extract that field; effective type is `jsonFieldConfig.outputType`
+   *   (normally same as top-level `outputType`).
+   */
   jsonFieldConfig: IConverterOutputTypeConfig<
     | EDataTypes.JSON
     | EDataTypes.STRING

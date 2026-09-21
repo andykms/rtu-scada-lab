@@ -7,4 +7,6 @@ export enum PAPER_ICONS {
     EXIT="exit",
     TOP_RIGHT_ARROW="top-right-arrow",
     DELETE="delete",
+    CLOSE="close",
+    EDIT="edit",
 }

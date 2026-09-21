@@ -26,6 +26,7 @@ import {
   ICreateBlockFormResult,
 } from '../shared/create-block-dialog.model';
 import { dataTypeLabelKey, dataTypeValues } from '../shared/data-type-options';
+import { createFormRevisionTracker } from '../shared/form-revision';
 import { BlockConnectionsRibbonComponent } from '../shared/block-connections-ribbon/block-connections-ribbon.component';
 import { DEFAULT_ON_DISCONNECT } from '../shared/network-block.defaults';
 
@@ -76,7 +77,7 @@ const ON_DISCONNECT_ACTIONS = [
 export class ComComponent extends LanguageProvider {
   private readonly context = injectDialogContext<
     ICreateBlockFormResult<IComBlock>,
-    ICreateBlockDialogData
+    ICreateBlockDialogData<IComBlock>
   >();
   private readonly fb = new FormBuilder();
 
@@ -107,6 +108,7 @@ export class ComComponent extends LanguageProvider {
     merge(this.form.valueChanges, this.form.statusChanges).pipe(startWith(null)),
     { initialValue: null },
   );
+  private readonly formRx = createFormRevisionTracker(this.form);
 
   readonly isDemoMode = toSignal(
     this.form.controls.isDemoMode.valueChanges.pipe(
@@ -131,12 +133,9 @@ export class ComComponent extends LanguageProvider {
 
   readonly canSave = computed(() => {
     this.formSnapshot();
+    this.formRx.formRev();
     this.connectionsDirty();
     const demo = this.form.controls.isDemoMode.value;
-    const dirty = this.form.dirty || this.connectionsDirty();
-    if (!dirty) {
-      return false;
-    }
     if (demo) {
       return !!this.form.controls.blockName.value.trim();
     }
@@ -161,12 +160,17 @@ export class ComComponent extends LanguageProvider {
 
   constructor() {
     super();
+    this.applyInitialState();
 
     effect(() => {
       this.context.setMainActionEnabled(this.canSave());
     });
 
     this.context.mainAction$.pipe(takeUntilDestroyed()).subscribe(() => this.submit());
+  }
+
+  protected onFormDomEvent(): void {
+    this.formRx.onFormDomEvent();
   }
 
   protected onInputBlocksChange(ids: number[]): void {
@@ -177,6 +181,33 @@ export class ComComponent extends LanguageProvider {
   protected onOutputBlocksChange(ids: number[]): void {
     this.outputBlocks.set(ids);
     this.connectionsDirty.set(true);
+  }
+
+  private applyInitialState(): void {
+    const data = this.context.data;
+    if (data.inputBlocks?.length) {
+      this.inputBlocks.set([...data.inputBlocks]);
+    }
+    if (data.outputBlocks?.length) {
+      this.outputBlocks.set([...data.outputBlocks]);
+    }
+    const block = data.initialBlock;
+    if (!block) {
+      return;
+    }
+    this.form.patchValue({
+      blockName: block.blockName,
+      comPort: block.comPort,
+      baudRate: block.baudRate,
+      isParity: block.isParity,
+      dataBits: block.dataBits,
+      stopBits: block.stopBits,
+      typeRequestData: block.typeRequestData,
+      typeResponseData: block.typeResponseData,
+      isDemoMode: block.blockOptions.isDemoMode,
+      onDisconnectAction: block.onDisconnect.action,
+      isCanUserReconnect: block.onDisconnect.isCanUserReconnect,
+    });
   }
 
   private submit(): void {

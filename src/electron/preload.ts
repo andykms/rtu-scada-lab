@@ -18,6 +18,8 @@ contextBridge.exposeInMainWorld("electronAPI", {
   openProjectFile: (filePath: string) =>
     ipcRenderer.invoke("openProjectFile", filePath),
 
+  pickAndOpenProjectFile: () => ipcRenderer.invoke("pickAndOpenProjectFile"),
+
   createProject: (projectName: string) =>
     ipcRenderer.invoke("createProject", projectName),
 
@@ -179,8 +181,32 @@ contextBridge.exposeInMainWorld("electronAPI", {
       outputBlocks,
     ),
 
+  connectBlocks: (
+    projectId: number,
+    fromBlockId: number,
+    toBlockId: number,
+  ) => ipcRenderer.invoke("connectBlocks", projectId, fromBlockId, toBlockId),
+
+  disconnectBlocks: (
+    projectId: number,
+    fromBlockId: number,
+    toBlockId: number,
+  ) =>
+    ipcRenderer.invoke("disconnectBlocks", projectId, fromBlockId, toBlockId),
+
+  deleteBlocks: (projectId: number, blockIds: number[]) =>
+    ipcRenderer.invoke("deleteBlocks", projectId, blockIds),
+
+  setSceneNodePositions: (
+    projectId: number,
+    positions: { [nodeId: string]: { x: number; y: number } },
+  ) => ipcRenderer.invoke("setSceneNodePositions", projectId, positions),
+
   saveProject: (projectId: number) =>
     ipcRenderer.invoke("saveProject", projectId),
+
+  saveProjectAs: (projectId: number) =>
+    ipcRenderer.invoke("saveProjectAs", projectId),
 
   openDemoMode: (projectId: number) =>
     ipcRenderer.invoke("openDemoMode", projectId),

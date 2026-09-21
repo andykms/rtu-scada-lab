@@ -13,12 +13,7 @@ import {
   signal,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import {
-  AbstractControl,
-  ControlContainer,
-  ControlValueAccessor,
-  NG_VALUE_ACCESSOR,
-} from '@angular/forms';
+import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { filter, fromEvent, Subscription } from 'rxjs';
 
 @Component({
@@ -32,22 +27,14 @@ import { filter, fromEvent, Subscription } from 'rxjs';
       multi: true,
     },
   ],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PaperDataList<T> implements OnInit, AfterContentInit, OnDestroy, ControlValueAccessor {
   private readonly destroyRef$ = inject(DestroyRef);
+  private readonly elementRef = inject(ElementRef);
 
-  control!: AbstractControl | null;
-
-  clickSubs?: Subscription;
-  changeInputSubs?: Subscription;
-
-  constructor(
-    private readonly controlContainer: ControlContainer,
-    private readonly elementRef: ElementRef,
-  ) {}
-
-  readonly formControlName = input.required<string>();
+  private clickSubs?: Subscription;
+  private changeInputSubs?: Subscription;
 
   readonly variants = input.required<Array<T>>();
   readonly labelResolver = input<(value: T | null) => string>((value: T | null) => String(value));
@@ -63,23 +50,25 @@ export class PaperDataList<T> implements OnInit, AfterContentInit, OnDestroy, Co
   private _onTouched: () => void = () => {};
 
   ngOnInit() {
-    this.control = this.controlContainer.control?.get(this.formControlName()) ?? null;
-
     this.clickSubs = fromEvent(document, 'click')
-      .pipe(takeUntilDestroyed(this.destroyRef$))
-      .pipe(filter((event) => !this.elementRef.nativeElement.contains(event.target as Node)))
+      .pipe(
+        takeUntilDestroyed(this.destroyRef$),
+        filter((event) => !this.elementRef.nativeElement.contains(event.target as Node)),
+      )
       .subscribe(() => this.opened.set(false));
   }
 
   ngAfterContentInit() {
-    if (this.inputRef) {
-      this.changeInputSubs = fromEvent<InputEvent>(this.inputRef.nativeElement, 'input')
-        .pipe(takeUntilDestroyed(this.destroyRef$))
-        .subscribe((event) => {
-          const inputValue = (event.target as HTMLInputElement).value;
-          this.changeRecommended(inputValue);
-        });
+    if (!this.inputRef) {
+      return;
     }
+
+    this.changeInputSubs = fromEvent<InputEvent>(this.inputRef.nativeElement, 'input')
+      .pipe(takeUntilDestroyed(this.destroyRef$))
+      .subscribe((event) => {
+        const inputValue = (event.target as HTMLInputElement).value;
+        this.changeRecommended(inputValue);
+      });
   }
 
   ngOnDestroy() {
@@ -101,12 +90,18 @@ export class PaperDataList<T> implements OnInit, AfterContentInit, OnDestroy, Co
   protected selectVariant(variant: T) {
     this._value = variant;
     this._onChange(variant);
+    this._onTouched();
     this.opened.set(false);
-    this.control?.setValue(variant);
 
     if (this.inputRef) {
       this.inputRef.nativeElement.value = this.labelResolver()(variant);
     }
+    this.elementRef.nativeElement.dispatchEvent(
+      new Event('input', { bubbles: true }),
+    );
+    this.elementRef.nativeElement.dispatchEvent(
+      new Event('change', { bubbles: true }),
+    );
   }
 
   writeValue(value: T | null): void {

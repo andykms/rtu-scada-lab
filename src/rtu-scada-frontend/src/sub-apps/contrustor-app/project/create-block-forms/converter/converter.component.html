@@ -1,5 +1,5 @@
 <section class="create-block-form converter-form">
-  <form [formGroup]="form">
+  <form [formGroup]="form" (input)="onFormDomEvent()" (change)="onFormDomEvent()">
     <paper-textfield size="m">
       <label paperLabel>{{ labels().blockId }}</label>
       <input paperInput type="number" formControlName="blockId" />
@@ -41,29 +41,18 @@
         </paper-select-list>
       </paper-textfield>
 
-      @if (showJsonFieldOptions()) {
+      @if (showJsonPathCheckbox()) {
         <label class="flag-row compact" paperText size="s">
           <input paperCheckbox size="m" type="checkbox" formControlName="jsonExtractField" />
           {{ labels().converterJsonExtractField }}
         </label>
+      }
 
-        @if (jsonExtractField()) {
-          <paper-textfield size="m">
-            <label paperLabel>{{ labels().converterJsonFieldPath }}</label>
-            <input paperInput type="text" formControlName="jsonFieldPath" autocomplete="off" />
-          </paper-textfield>
-
-          <paper-textfield size="m">
-            <paper-select-list
-              formControlName="jsonFieldType"
-              [variants]="jsonFieldTypeVariants"
-              [labelResolver]="resolveDataTypeLabel"
-            >
-              <label paperLabel>{{ labels().converterJsonFieldType }}</label>
-              <input paperInput readonly #inputList />
-            </paper-select-list>
-          </paper-textfield>
-        }
+      @if (showJsonPathField()) {
+        <paper-textfield size="m">
+          <label paperLabel>{{ labels().converterJsonFieldPath }}</label>
+          <input paperInput type="text" formControlName="jsonFieldPath" autocomplete="off" />
+        </paper-textfield>
       }
 
       @if (showArrayNumberOp()) {

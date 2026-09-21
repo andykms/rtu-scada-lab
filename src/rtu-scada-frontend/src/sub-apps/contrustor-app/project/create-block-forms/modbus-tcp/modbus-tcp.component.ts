@@ -25,6 +25,7 @@ import {
   ICreateBlockFormResult,
 } from '../shared/create-block-dialog.model';
 import { BlockConnectionsRibbonComponent } from '../shared/block-connections-ribbon/block-connections-ribbon.component';
+import { createFormRevisionTracker } from '../shared/form-revision';
 
 const TIME_OPTIONS = [
   ENonRealtimeSettingOption.INTERVAL,
@@ -53,7 +54,7 @@ const TIME_OPTIONS = [
 export class ModbusTcpComponent extends LanguageProvider {
   private readonly context = injectDialogContext<
     ICreateBlockFormResult<IModbusTcpBlock>,
-    ICreateBlockDialogData
+    ICreateBlockDialogData<IModbusTcpBlock>
   >();
   private readonly fb = new FormBuilder();
 
@@ -90,6 +91,7 @@ export class ModbusTcpComponent extends LanguageProvider {
     merge(this.form.valueChanges, this.form.statusChanges).pipe(startWith(null)),
     { initialValue: null },
   );
+  private readonly formRx = createFormRevisionTracker(this.form);
 
   readonly isDemoMode = toSignal(
     this.form.controls.isDemoMode.valueChanges.pipe(
@@ -122,12 +124,9 @@ export class ModbusTcpComponent extends LanguageProvider {
 
   readonly canSave = computed(() => {
     this.formSnapshot();
+    this.formRx.formRev();
     this.connectionsDirty();
     const demo = this.form.controls.isDemoMode.value;
-    const dirty = this.form.dirty || this.connectionsDirty();
-    if (!dirty) {
-      return false;
-    }
     if (demo) {
       return !!this.form.controls.blockName.value.trim();
     }
@@ -174,11 +173,17 @@ export class ModbusTcpComponent extends LanguageProvider {
     this.form.controls.period.setValidators([Validators.required, Validators.min(1)]);
     this.form.controls.period.updateValueAndValidity({ emitEvent: false });
 
+    this.applyInitialState();
+
     effect(() => {
       this.context.setMainActionEnabled(this.canSave());
     });
 
     this.context.mainAction$.pipe(takeUntilDestroyed()).subscribe(() => this.submit());
+  }
+
+  protected onFormDomEvent(): void {
+    this.formRx.onFormDomEvent();
   }
 
   protected onSignalBlocksChange(ids: number[]): void {
@@ -189,6 +194,39 @@ export class ModbusTcpComponent extends LanguageProvider {
   protected onOutputBlocksChange(ids: number[]): void {
     this.outputBlocks.set(ids);
     this.connectionsDirty.set(true);
+  }
+
+  private applyInitialState(): void {
+    const data = this.context.data;
+    if (data.outputBlocks?.length) {
+      this.outputBlocks.set([...data.outputBlocks]);
+    }
+    const block = data.initialBlock;
+    if (!block) {
+      return;
+    }
+    const time = block.timeRequestSettings;
+    if (time.timeRequestOption === ENonRealtimeSettingOption.BY_SIGNAL) {
+      this.signalBlocks.set([...(data.inputBlocks ?? [])]);
+      this.form.controls.period.clearValidators();
+      this.form.controls.period.updateValueAndValidity({ emitEvent: false });
+    }
+    const cmd = block.command;
+    this.form.patchValue({
+      blockName: block.blockName,
+      isDemoMode: block.blockOptions.isDemoMode,
+      tcpHost: block.tcpHost,
+      tcpPort: block.tcpPort,
+      slaveId: cmd.slaveId,
+      codeFunction: cmd.codeFunction,
+      address: cmd.address,
+      length: cmd.length,
+      value: cmd.value ?? null,
+      typeData: cmd.typeData ?? null,
+      timeRequestOption: time.timeRequestOption,
+      period: time.period ?? 1000,
+      countRequest: time.countRequest,
+    });
   }
 
   private syncCommandValidators(isFullInput: boolean): void {

@@ -1,25 +1,31 @@
-.menu {
+.container {
     position: fixed;
-    top: 50px;
-    left: 50px;
-    bottom: 50px;
-    block-size: 90vh;
-    inline-size: 297px;
+    top: 0;
+    left: 0;
+    block-size: 100%;
+    inline-size: 343px;
+    background: var(--menu-background);
+    box-shadow: inset -1px 0 1px 0px var(--box-shadow-color);
+}
+
+.menu {
+    inline-size: 100%;
     display: flex;
     flex-direction: column;
+    padding: 37px 0;
 }
 
 .menu-option {
     display: flex;
     justify-content: space-between;
-    padding: 16px 7px;
-    transition: background-color 0.3s ease;
+    padding: 29px;
+    transition: background-color 0.3s ease, border-radius 0.3s ease;
 }
 
 .menu-option:hover {
     background-color: var(--dropdown-color-hover);
     box-shadow: inset 0 0 4px 2px var(--box-shadow-color);
-    border-radius: 7px;
+    border-radius: 17px;
 }
 
 .extended-text {
@@ -35,6 +41,10 @@
 }
 
 @media (width <= 1300px) {
+    .container {
+        inline-size: auto;
+    }
+
     .menu {
         inline-size: auto;
         left: 5px;

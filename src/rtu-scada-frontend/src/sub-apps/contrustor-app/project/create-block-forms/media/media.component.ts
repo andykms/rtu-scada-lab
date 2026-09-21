@@ -39,6 +39,7 @@ import {
   ICreateMediaFormResult,
 } from '../shared/create-block-dialog.model';
 import { dataTypeLabelKey } from '../shared/data-type-options';
+import { createFormRevisionTracker } from '../shared/form-revision';
 
 const SOURCE_TYPES = new Set<EDataTypes>([
   EDataTypes.IMAGE,
@@ -73,7 +74,7 @@ const DOWNLOAD_TYPES = new Set<EDataTypes>([EDataTypes.ANY_FILE, EDataTypes.BYTE
 export class MediaComponent extends LanguageProvider {
   private readonly context = injectDialogContext<
     ICreateMediaFormResult,
-    ICreateBlockDialogData
+    ICreateBlockDialogData<IMediaBlock>
   >();
   private readonly fb = new FormBuilder();
   private readonly projectService = inject(ProjectService);
@@ -87,6 +88,8 @@ export class MediaComponent extends LanguageProvider {
     blockName: ['', Validators.required],
     items: this.fb.nonNullable.array([this.createItemGroup()]),
   });
+
+  private readonly formRx = createFormRevisionTracker(this.form);
 
   private readonly formSnapshot = toSignal(
     merge(this.form.valueChanges, this.form.statusChanges).pipe(startWith(null)),
@@ -109,10 +112,8 @@ export class MediaComponent extends LanguageProvider {
 
   readonly canSave = computed(() => {
     this.formSnapshot();
+    this.formRx.formRev();
     this.formDirtyExtra();
-    if (!this.form.dirty && !this.formDirtyExtra()) {
-      return false;
-    }
     if (!this.form.controls.blockName.value.trim()) {
       return false;
     }
@@ -156,6 +157,7 @@ export class MediaComponent extends LanguageProvider {
 
   constructor() {
     super();
+    this.applyInitialState();
 
     effect(() => {
       this.context.setMainActionEnabled(this.canSave());
@@ -164,8 +166,27 @@ export class MediaComponent extends LanguageProvider {
     this.context.mainAction$.pipe(takeUntilDestroyed()).subscribe(() => this.submit());
   }
 
+  protected onFormDomEvent(): void {
+    this.formRx.onFormDomEvent();
+  }
+
   get items(): FormArray {
     return this.form.controls.items;
+  }
+
+  private applyInitialState(): void {
+    const blocks = this.context.data.initialBlocks;
+    if (!blocks?.length) {
+      return;
+    }
+    this.form.controls.blockName.setValue(blocks[0].blockName);
+    this.items.clear();
+    for (const block of blocks) {
+      this.items.push(this.createItemGroupFromBlock(block));
+    }
+    this.nextAllocatedId =
+      Math.max(...blocks.map((b) => b.blockId), this.nextAllocatedId) + 1;
+    this.formRx.bump();
   }
 
   protected sourceTypeOf(group: FormGroup): EDataTypes | null {
@@ -226,6 +247,19 @@ export class MediaComponent extends LanguageProvider {
       defaultDownloadDirectoryPath: [''],
       fileName: [''],
       fileExtension: [''],
+    });
+  }
+
+  private createItemGroupFromBlock(block: IMediaBlock): FormGroup {
+    const sourceBlockId = this.context.data.inputBlocks?.[0] ?? 0;
+    const download = block.downloadConfig;
+    return this.fb.nonNullable.group({
+      blockId: [block.blockId],
+      sourceBlockId: [sourceBlockId],
+      maxStoredItems: [block.maxStoredItems],
+      defaultDownloadDirectoryPath: [download?.defaultDownloadDirectoryPath ?? ''],
+      fileName: [download?.fileName ?? ''],
+      fileExtension: [download?.fileExtension ?? ''],
     });
   }
 

@@ -1,15 +1,44 @@
 <section class="projects-list">
   <h2 paperText size="xl">{{ labels().recentProjects }}</h2>
-  <div class="list">
-    @for (project of projects(); track $index) {
-      <div paperCard size="m" class="project" [pointer]="true">
-        <h3 paperText size="m">{{ project.projectName }}</h3>
-        <div class="project-about">
-            <span paperText size="s" [subtext]="true">{{ labels().projectCreatedAt }}: {{ project.createdAt | date: 'd MMMM yyyy' : 'ru-RU' }}</span>
-            <span paperText size="s" [subtext]="true">{{ labels().projectUpdatedAt }}: {{ project.updatedAt | date: 'd MMMM yyyy' : 'ru-RU' }}</span>
-            <span paperText size="s" [subtext]="true" [ellipsis]="true">{{ labels().projectFilePath }}: {{ project.path }}</span>
+
+  @if (projects().length === 0) {
+    <p class="empty" paperText size="m" [subtext]="true">
+      {{ labels().noRecentProjects }}
+    </p>
+  } @else {
+    <div class="list">
+      @for (project of projects(); track project.path) {
+        <div
+          paperCard
+          size="m"
+          class="project"
+          [pointer]="true"
+          (click)="onCardClick(project)"
+        >
+          <button
+            type="button"
+            class="project-remove"
+            [attr.aria-label]="labels().delete"
+            (click)="onRemoveClick($event, project)"
+          >
+            <paper-icon size="s" icon="close" [primary]="false"></paper-icon>
+          </button>
+          <h3 paperText size="m">{{ project.projectName }}</h3>
+          <div class="project-about">
+            <span paperText size="s" [subtext]="true">
+              {{ labels().projectCreatedAt }}:
+              {{ project.createdAt | date: 'd MMMM yyyy' }}
+            </span>
+            <span paperText size="s" [subtext]="true">
+              {{ labels().projectUpdatedAt }}:
+              {{ project.updatedAt | date: 'd MMMM yyyy' }}
+            </span>
+            <span paperText size="s" [subtext]="true" [ellipsis]="true">
+              {{ labels().projectFilePath }}: {{ project.path }}
+            </span>
+          </div>
         </div>
-      </div>
-    }
-  </div>
+      }
+    </div>
+  }
 </section>

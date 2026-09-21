@@ -53,6 +53,7 @@ import {
   DEFAULT_BLOCK_OPTIONS,
   DEFAULT_TIME_REQUEST_SETTINGS,
 } from '../shared/network-block.defaults';
+import { createFormRevisionTracker } from '../shared/form-revision';
 
 const RAW_TYPES: TDatabaseRawDataTypes[] = [
   EDataTypes.STRING,
@@ -131,7 +132,7 @@ type TValueSource = 'inline' | 'fromBlock';
 export class DatabaseComponent extends LanguageProvider {
   private readonly context = injectDialogContext<
     ICreateBlockFormResult<IDatabaseBlock>,
-    ICreateBlockDialogData
+    ICreateBlockDialogData<IDatabaseBlock>
   >();
   private readonly fb = new FormBuilder();
 
@@ -196,8 +197,10 @@ export class DatabaseComponent extends LanguageProvider {
     updateDatabase: [''],
     updateTypeRequestData: [EDataTypes.STRING as TDatabaseUpdateDataTypes, Validators.required],
     updateValues: this.fb.nonNullable.array([this.createValueRow()]),
-    updateFilters: this.fb.nonNullable.array([this.createFilterRow(false)]),
+    updateFilters: this.fb.nonNullable.array([] as FormGroup[]),
   });
+
+  private readonly formRx = createFormRevisionTracker(this.form);
 
   private readonly formSnapshot = toSignal(
     merge(this.form.valueChanges, this.form.statusChanges).pipe(startWith(null)),
@@ -292,13 +295,9 @@ export class DatabaseComponent extends LanguageProvider {
 
   readonly canSave = computed(() => {
     this.formSnapshot();
+    this.formRx.formRev();
     this.connectionsDirty();
-    this.inputBlocks();
-    const dirty = this.form.dirty || this.connectionsDirty();
-    if (!dirty) {
-      return false;
-    }
-    if (!this.form.controls.blockName.value.trim()) {
+    if (!String(this.form.controls.blockName.value ?? '').trim()) {
       return false;
     }
     if (this.isDemoMode()) {
@@ -309,42 +308,45 @@ export class DatabaseComponent extends LanguageProvider {
     }
     const qt = this.queryType();
     if (qt === EDatabaseQueryType.RAW) {
-      if (!this.form.controls.rawQuery.value.trim()) {
+      if (!String(this.form.controls.rawQuery.value ?? '').trim()) {
         return false;
       }
       if (this.rawTimeOption() === ENonRealtimeSettingOption.INTERVAL) {
         return Number(this.form.controls.rawPeriod.value) > 0;
       }
-      return this.inputBlocks().length > 0;
+      return true;
     }
     if (qt === EDatabaseQueryType.INSERT) {
-      if (!this.form.controls.insertTable.value.trim()) {
+      if (!String(this.form.controls.insertTable.value ?? '').trim()) {
         return false;
       }
-      if (this.inputBlocks().length === 0) {
-        return false;
-      }
-      return this.insertValues.controls.every((row) =>
-        this.isValueRowValid(row as FormGroup, this.insertTypeRequestData()),
+      const dataType = this.insertTypeRequestData();
+      const rows = this.insertValues.controls.filter(
+        (row) => !this.isValueRowEmpty(row as FormGroup),
       );
+      if (rows.length === 0) {
+        return false;
+      }
+      return rows.every((row) => this.isValueRowValid(row as FormGroup, dataType));
     }
     if (qt === EDatabaseQueryType.UPDATE) {
-      if (!this.form.controls.updateTable.value.trim()) {
+      if (!String(this.form.controls.updateTable.value ?? '').trim()) {
         return false;
       }
-      if (this.inputBlocks().length === 0) {
-        return false;
-      }
-      if (
-        !this.updateValues.controls.every((row) =>
-          this.isValueRowValid(row as FormGroup, this.updateTypeRequestData()),
-        )
-      ) {
-        return false;
-      }
-      return this.updateFilters.controls.every((row) =>
-        this.isFilterRowValid(row as FormGroup),
+      const dataType = this.updateTypeRequestData();
+      const valueRows = this.updateValues.controls.filter(
+        (row) => !this.isValueRowEmpty(row as FormGroup),
       );
+      if (valueRows.length === 0) {
+        return false;
+      }
+      if (!valueRows.every((row) => this.isValueRowValid(row as FormGroup, dataType))) {
+        return false;
+      }
+      const filterRows = this.updateFilters.controls.filter(
+        (row) => !this.isFilterRowEmpty(row as FormGroup),
+      );
+      return filterRows.every((row) => this.isFilterRowValid(row as FormGroup));
     }
     return false;
   });
@@ -444,15 +446,27 @@ export class DatabaseComponent extends LanguageProvider {
     this.form.controls.queryType.valueChanges
       .pipe(takeUntilDestroyed())
       .subscribe(() => {
+        if (this.skipQueryTypeSideEffects) {
+          return;
+        }
         this.inputBlocks.set([]);
         this.connectionsDirty.set(true);
+        this.formRx.bump();
       });
+
+    this.applyInitialState();
 
     effect(() => {
       this.context.setMainActionEnabled(this.canSave());
     });
 
     this.context.mainAction$.pipe(takeUntilDestroyed()).subscribe(() => this.submit());
+  }
+
+  private skipQueryTypeSideEffects = false;
+
+  protected onFormDomEvent(): void {
+    this.formRx.onFormDomEvent();
   }
 
   get insertValues(): FormArray {
@@ -470,6 +484,136 @@ export class DatabaseComponent extends LanguageProvider {
   protected onInputBlocksChange(ids: number[]): void {
     this.inputBlocks.set(ids);
     this.connectionsDirty.set(true);
+  }
+
+  private applyInitialState(): void {
+    const data = this.context.data;
+    const block = data.initialBlock;
+    if (!block) {
+      return;
+    }
+
+    this.skipQueryTypeSideEffects = true;
+    this.form.patchValue({
+        blockName: block.blockName,
+        isDemoMode: block.blockOptions.isDemoMode,
+        databaseVariant: block.databaseVariant,
+        host: block.connectionConfig.host ?? 'localhost',
+        port: block.connectionConfig.port ?? 5432,
+        username: block.connectionConfig.username ?? '',
+        password: block.connectionConfig.password ?? '',
+        databaseName: block.connectionConfig.databaseName ?? '',
+        queryType: block.queryType,
+      });
+
+    if (block.queryType === EDatabaseQueryType.RAW && block.rawQueryConfig) {
+      const time = block.timeRequestSettings;
+      this.form.patchValue({
+          rawQuery: block.rawQueryConfig.query,
+          rawTypeRequestData: block.rawQueryConfig.typeRequestData,
+          rawTimeOption: time.timeRequestOption,
+          rawPeriod: time.period ?? 1000,
+        });
+    } else if (block.queryType === EDatabaseQueryType.INSERT && block.insertQueryConfig) {
+      const cfg = block.insertQueryConfig;
+      this.form.patchValue({
+          insertTable: cfg.table,
+          insertSchema: cfg.schema ?? '',
+          insertDatabase: cfg.database ?? '',
+          insertTypeRequestData: cfg.typeRequestData,
+        });
+      this.insertValues.clear();
+      for (const value of cfg.values) {
+        this.insertValues.push(this.createValueRowFromQueryValue(value, cfg.typeRequestData));
+      }
+      if (!this.insertValues.length) {
+        this.insertValues.push(this.createValueRow());
+      }
+    } else if (block.queryType === EDatabaseQueryType.UPDATE && block.updateQueryConfig) {
+      const cfg = block.updateQueryConfig;
+      this.form.patchValue({
+          updateTable: cfg.table,
+          updateSchema: cfg.schema ?? '',
+          updateDatabase: cfg.database ?? '',
+          updateTypeRequestData: cfg.typeRequestData,
+        });
+      this.updateValues.clear();
+      for (const value of cfg.updatedValues) {
+        this.updateValues.push(this.createValueRowFromQueryValue(value, cfg.typeRequestData));
+      }
+      if (!this.updateValues.length) {
+        this.updateValues.push(this.createValueRow());
+      }
+      this.updateFilters.clear();
+      cfg.filters.forEach((filter, index) => {
+        this.updateFilters.push(
+          this.createFilterRowFromFilter(filter, index < cfg.filters.length - 1),
+        );
+      });
+    }
+
+    if (data.inputBlocks?.length) {
+      this.inputBlocks.set([...data.inputBlocks]);
+    }
+    this.formRx.bump();
+    queueMicrotask(() => {
+      this.skipQueryTypeSideEffects = false;
+    });
+  }
+
+  private createValueRowFromQueryValue(
+    value: IDatabaseQueryValue,
+    dataType: EDataTypes,
+  ): FormGroup {
+    const fromBlock = value.isInsertedFromBlock;
+    let jsonPath = '';
+    let inlineValue = '';
+    if (fromBlock) {
+      const raw = String(value.value ?? '');
+      jsonPath = raw.startsWith(JSON_PREFIX) ? raw.slice(JSON_PREFIX.length) : raw;
+      if (jsonPath.startsWith('.')) {
+        jsonPath = jsonPath.slice(1);
+      }
+    } else {
+      inlineValue = String(value.value ?? '');
+    }
+    void dataType;
+    return this.fb.nonNullable.group({
+      fieldName: [value.fieldName],
+      valueSource: [(fromBlock ? 'fromBlock' : 'inline') as TValueSource],
+      inlineValue: [inlineValue],
+      jsonPath: [jsonPath],
+    });
+  }
+
+  private createFilterRowFromFilter(
+    filter: IDatabaseUpdateQueryFilter,
+    withOperator: boolean,
+  ): FormGroup {
+    const fromBlock = filter.isInsertedFromBlock;
+    let jsonPath = '';
+    let inlineValue = '';
+    if (fromBlock) {
+      const raw = String(filter.filterValue ?? '');
+      jsonPath = raw.startsWith(JSON_PREFIX) ? raw.slice(JSON_PREFIX.length) : raw;
+      if (jsonPath.startsWith('.')) {
+        jsonPath = jsonPath.slice(1);
+      }
+    } else {
+      inlineValue = String(filter.filterValue ?? '');
+    }
+    return this.fb.nonNullable.group({
+      fieldName: [filter.fieldName],
+      filterType: [filter.filterType as EDatabaseFilterTypes, Validators.required],
+      valueSource: [(fromBlock ? 'fromBlock' : 'inline') as TValueSource],
+      inlineValue: [inlineValue],
+      jsonPath: [jsonPath],
+      operatorNextFilter: [
+        withOperator
+          ? (filter.operatorNextFilter ?? (EDatabaseOperatorTypes.AND as EDatabaseOperatorTypes | null))
+          : null,
+      ],
+    });
   }
 
   protected addInsertValue(): void {
@@ -519,10 +663,11 @@ export class DatabaseComponent extends LanguageProvider {
 
   private applyVariantDefaults(variant: EDatabaseVariants): void {
     if (variant === EDatabaseVariants.POSTGRESQL) {
-      this.form.controls.port.setValue(5432);
+      this.form.controls.port.setValue(5432, { emitEvent: true });
     } else if (variant === EDatabaseVariants.MYSQL) {
-      this.form.controls.port.setValue(3306);
+      this.form.controls.port.setValue(3306, { emitEvent: true });
     }
+    this.formRx.bump();
   }
 
   private createValueRow(): FormGroup {
@@ -560,17 +705,26 @@ export class DatabaseComponent extends LanguageProvider {
     );
   }
 
-  private isValueRowValid(group: FormGroup, dataType: EDataTypes): boolean {
+  private isValueRowEmpty(group: FormGroup): boolean {
+    return (
+      !String(group.controls['fieldName'].value ?? '').trim() &&
+      !String(group.controls['inlineValue'].value ?? '').trim() &&
+      !String(group.controls['jsonPath'].value ?? '').trim()
+    );
+  }
+
+  private isFilterRowEmpty(group: FormGroup): boolean {
+    return this.isValueRowEmpty(group);
+  }
+
+  private isValueRowValid(group: FormGroup, _dataType: EDataTypes): boolean {
     if (!String(group.controls['fieldName'].value ?? '').trim()) {
       return false;
     }
     if (group.controls['valueSource'].value === 'inline') {
       return String(group.controls['inlineValue'].value ?? '').trim().length > 0;
     }
-    // from block — path optional for JSON (whole doc), file/bytes/string/number OK empty
-    if (PATH_TYPES.has(dataType) || dataType === EDataTypes.JSON) {
-      return true;
-    }
+    // from block — json path optional (whole payload); file/bytes/string/number OK empty
     return true;
   }
 
@@ -748,7 +902,14 @@ export class DatabaseComponent extends LanguageProvider {
         valueSource: TValueSource;
         inlineValue: string;
         jsonPath: string;
-      }>).map((row) => this.buildQueryValue(row, raw.insertTypeRequestData));
+      }>)
+        .filter(
+          (row) =>
+            row.fieldName.trim() ||
+            row.inlineValue.trim() ||
+            row.jsonPath.trim(),
+        )
+        .map((row) => this.buildQueryValue(row, raw.insertTypeRequestData));
       block = {
         ...base,
         insertQueryConfig: {
@@ -765,15 +926,29 @@ export class DatabaseComponent extends LanguageProvider {
         valueSource: TValueSource;
         inlineValue: string;
         jsonPath: string;
-      }>).map((row) => this.buildQueryValue(row, raw.updateTypeRequestData));
-      const filterRows = raw.updateFilters as Array<{
-        fieldName: string;
-        filterType: EDatabaseFilterTypes;
-        valueSource: TValueSource;
-        inlineValue: string;
-        jsonPath: string;
-        operatorNextFilter: EDatabaseOperatorTypes | null;
-      }>;
+      }>)
+        .filter(
+          (row) =>
+            row.fieldName.trim() ||
+            row.inlineValue.trim() ||
+            row.jsonPath.trim(),
+        )
+        .map((row) => this.buildQueryValue(row, raw.updateTypeRequestData));
+      const filterRows = (
+        raw.updateFilters as Array<{
+          fieldName: string;
+          filterType: EDatabaseFilterTypes;
+          valueSource: TValueSource;
+          inlineValue: string;
+          jsonPath: string;
+          operatorNextFilter: EDatabaseOperatorTypes | null;
+        }>
+      ).filter(
+        (row) =>
+          row.fieldName.trim() ||
+          row.inlineValue.trim() ||
+          row.jsonPath.trim(),
+      );
       const filters = filterRows.map((row, index) =>
         this.buildFilter(row, index === filterRows.length - 1, raw.updateTypeRequestData),
       );

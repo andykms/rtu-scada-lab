@@ -1,49 +1,128 @@
 <constructor-app-project-bar></constructor-app-project-bar>
 <section class="project-page">
-  <aside class="blocks-sidebar">
-    <h1 paperText size="l" class="sidebar-title">
-      {{ labels().availableBlocks }}
-    </h1>
-
+  <aside [class]="`blocks-sidebar ${!openedList() ? 'blocks-sidebar_hide' : ''}`">
     <div class="blocks-list">
-      <div paperCard size="m" [pointer]="true" class="block-card" (click)="openTcpServerDialog()">
-        <span>{{ labels().tcpServer }}</span><span class="add-icon">+</span>
+      <div class="block-list-heading">
+        <h1 paperText size="l" class="list-heading">{{ labels().apps }}</h1>
+        <button class="toggle-list" (click)="openedList.set(!openedList())">
+          <span paperText size="m">{{openedList() ? labels().hide : labels().show }}</span>
+        </button>
       </div>
-      <div paperCard size="m" [pointer]="true" class="block-card" (click)="openTcpClientDialog()">
-        <span>{{ labels().tcpClient }}</span><span class="add-icon">+</span>
-      </div>
-      <div paperCard size="m" [pointer]="true" class="block-card" (click)="openMqttClientDialog()">
-        <span>{{ labels().mqttClient }}</span><span class="add-icon">+</span>
-      </div>
-      <div paperCard size="m" [pointer]="true" class="block-card" (click)="openHttpClientDialog()">
-        <span>{{ labels().httpClient }}</span><span class="add-icon">+</span>
-      </div>
-      <div paperCard size="m" [pointer]="true" class="block-card" (click)="openModbusRtuDialog()">
-        <span>{{ labels().modbusRtu }}</span><span class="add-icon">+</span>
-      </div>
-      <div paperCard size="m" [pointer]="true" class="block-card" (click)="openModbusTcpDialog()">
-        <span>{{ labels().modbusTcp }}</span><span class="add-icon">+</span>
-      </div>
-      <div paperCard size="m" [pointer]="true" class="block-card" (click)="openComDialog()">
-        <span>{{ labels().comPort }}</span><span class="add-icon">+</span>
-      </div>
-      <div paperCard size="m" [pointer]="true" class="block-card" (click)="openDatabaseDialog()">
-        <span>{{ labels().database }}</span><span class="add-icon">+</span>
-      </div>
-      <div paperCard size="m" [pointer]="true" class="block-card" (click)="openConverterDialog()">
-        <span>{{ labels().converter }}</span><span class="add-icon">+</span>
-      </div>
-      <div paperCard size="m" [pointer]="true" class="block-card" (click)="openGraphsDialog()">
-        <span>{{ labels().graphs }}</span><span class="add-icon">+</span>
-      </div>
-      <div paperCard size="m" [pointer]="true" class="block-card" (click)="openIndicatorsDialog()">
-        <span>{{ labels().indicators }}</span><span class="add-icon">+</span>
-      </div>
-      <div paperCard size="m" [pointer]="true" class="block-card" (click)="openMediaDialog()">
-        <span>{{ labels().media }}</span><span class="add-icon">+</span>
-      </div>
+      @if (openedList()) {
+        <h2 paperText size="s" class="group-heading">{{ labels().networkBlocks }}</h2>
+        <div class="blocks-group">
+          <div
+            paperCard
+            size="m"
+            [pointer]="true"
+            class="block-card"
+            (click)="openTcpServerDialog()"
+          >
+            <span>{{ labels().tcpServer }}</span
+            ><span class="add-icon">+</span>
+          </div>
+          <div
+            paperCard
+            size="m"
+            [pointer]="true"
+            class="block-card"
+            (click)="openTcpClientDialog()"
+          >
+            <span>{{ labels().tcpClient }}</span
+            ><span class="add-icon">+</span>
+          </div>
+          <div
+            paperCard
+            size="m"
+            [pointer]="true"
+            class="block-card"
+            (click)="openMqttClientDialog()"
+          >
+            <span>{{ labels().mqttClient }}</span
+            ><span class="add-icon">+</span>
+          </div>
+          <div
+            paperCard
+            size="m"
+            [pointer]="true"
+            class="block-card"
+            (click)="openHttpClientDialog()"
+          >
+            <span>{{ labels().httpClient }}</span
+            ><span class="add-icon">+</span>
+          </div>
+          <div
+            paperCard
+            size="m"
+            [pointer]="true"
+            class="block-card"
+            (click)="openModbusRtuDialog()"
+          >
+            <span>{{ labels().modbusRtu }}</span
+            ><span class="add-icon">+</span>
+          </div>
+          <div
+            paperCard
+            size="m"
+            [pointer]="true"
+            class="block-card"
+            (click)="openModbusTcpDialog()"
+          >
+            <span>{{ labels().modbusTcp }}</span
+            ><span class="add-icon">+</span>
+          </div>
+          <div paperCard size="m" [pointer]="true" class="block-card" (click)="openComDialog()">
+            <span>{{ labels().comPort }}</span
+            ><span class="add-icon">+</span>
+          </div>
+          <div
+            paperCard
+            size="m"
+            [pointer]="true"
+            class="block-card"
+            (click)="openDatabaseDialog()"
+          >
+            <span>{{ labels().database }}</span
+            ><span class="add-icon">+</span>
+          </div>
+        </div>
+        <paper-diving-line></paper-diving-line>
+        <h2 paperText size="s" class="group-heading">{{ labels().internalBlocks }}</h2>
+        <div class="blocks-group">
+          <div
+            paperCard
+            size="m"
+            [pointer]="true"
+            class="block-card"
+            (click)="openConverterDialog()"
+          >
+            <span>{{ labels().converter }}</span
+            ><span class="add-icon">+</span>
+          </div>
+          <div paperCard size="m" [pointer]="true" class="block-card" (click)="openGraphsDialog()">
+            <span>{{ labels().graphs }}</span
+            ><span class="add-icon">+</span>
+          </div>
+          <div
+            paperCard
+            size="m"
+            [pointer]="true"
+            class="block-card"
+            (click)="openIndicatorsDialog()"
+          >
+            <span>{{ labels().indicators }}</span
+            ><span class="add-icon">+</span>
+          </div>
+          <div paperCard size="m" [pointer]="true" class="block-card" (click)="openMediaDialog()">
+            <span>{{ labels().media }}</span
+            ><span class="add-icon">+</span>
+          </div>
+        </div>
+      }
     </div>
   </aside>
 
-  <main class="project-workspace"></main>
+  <main class="project-workspace">
+    <constructor-app-scene (editNode)="openEditBlock($event)" />
+  </main>
 </section>

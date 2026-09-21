@@ -18,4 +18,5 @@ import { LanguageProvider } from '../../../../libraries/language/language.direct
 })
 export class MenuComponent extends LanguageProvider {
     readonly onCreateProject = output<void>();
+    readonly onOpenProject = output<void>();
 }

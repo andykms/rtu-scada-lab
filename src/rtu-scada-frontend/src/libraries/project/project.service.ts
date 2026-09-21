@@ -18,6 +18,7 @@ import type { ITcpClientBlock } from '../../../../electron/types/blocks/network-
 import type { ITcpServerBlock } from '../../../../electron/types/blocks/network-blocks/tcp-server/tcp-server.type';
 import type { IProjectFile } from '../../../../electron/types/project/project-file/project-file.type';
 import { ElectronAPIService } from '../electron-api/electron-api.service';
+import { RecentProjectsService } from '../recent-projects/recent-projects.service';
 import { IProjectBlockInfo } from './project-block-info.type';
 
 @Injectable({
@@ -25,9 +26,12 @@ import { IProjectBlockInfo } from './project-block-info.type';
 })
 export class ProjectService {
   private readonly electronApi = inject(ElectronAPIService);
+  private readonly recentProjects = inject(RecentProjectsService);
 
   readonly projectFile = signal<IProjectFile | null>(null);
   readonly projectId = signal<number | null>(null);
+  /** True when in-memory project differs from last successful save. */
+  readonly isDirty = signal(false);
 
   setProjectId(id: number | null): void {
     this.projectId.set(id);
@@ -35,6 +39,90 @@ export class ProjectService {
 
   setProjectFile(file: IProjectFile | null): void {
     this.projectFile.set(file);
+    this.isDirty.set(false);
+  }
+
+  markDirty(): void {
+    this.isDirty.set(true);
+  }
+
+  saveProject(): Observable<string | null> {
+    return this.runSave((projectId) => this.electronApi.saveProject(projectId));
+  }
+
+  saveProjectAs(): Observable<string | null> {
+    return this.runSave((projectId) => this.electronApi.saveProjectAs(projectId));
+  }
+
+  openProject(): Observable<IProjectFile | null> {
+    return this.electronApi.pickAndOpenProjectFile().pipe(
+      tap((file) => {
+        if (!file) {
+          return;
+        }
+        this.applyOpenedFile(file);
+      }),
+    );
+  }
+
+  openProjectByPath(filePath: string): Observable<IProjectFile> {
+    return this.electronApi.openProjectFile(filePath).pipe(
+      tap((file) => this.applyOpenedFile(file)),
+    );
+  }
+
+  createProject(projectName: string): Observable<IProjectFile> {
+    return this.electronApi.createProject(projectName).pipe(
+      tap((file) => {
+        this.setProjectFile(file);
+        this.setProjectId(file.projectId);
+      }),
+    );
+  }
+
+  /** True when the project has never been saved to disk or has local edits. */
+  needsSavePrompt(): boolean {
+    const file = this.projectFile();
+    if (!file) {
+      return false;
+    }
+    return this.isDirty() || !file.path?.trim();
+  }
+
+  private applyOpenedFile(file: IProjectFile): void {
+    this.setProjectFile(file);
+    this.setProjectId(file.projectId);
+    this.recentProjects.remember(file);
+  }
+
+  private runSave(
+    call: (projectId: number) => Observable<string | null>,
+  ): Observable<string | null> {
+    const projectId = this.projectId();
+    if (projectId == null || !this.projectFile()) {
+      return throwError(() => new Error('Project is not loaded'));
+    }
+    return call(projectId).pipe(
+      tap((filePath) => {
+        if (!filePath) {
+          return;
+        }
+        this.projectFile.update((file) =>
+          file
+            ? {
+                ...file,
+                path: filePath,
+                updatedAt: new Date().toISOString(),
+              }
+            : file,
+        );
+        this.isDirty.set(false);
+        const saved = this.projectFile();
+        if (saved) {
+          this.recentProjects.remember(saved);
+        }
+      }),
+    );
   }
 
   nextBlockId(): number {
@@ -136,6 +224,104 @@ export class ProjectService {
       (block) =>
         block.typeRequestData != null &&
         (excludeBlockId == null || block.blockId !== excludeBlockId),
+    );
+  }
+
+  findBlockById(blockId: number):
+    | { kind: 'tcpServer'; block: ITcpServerBlock }
+    | { kind: 'tcpClient'; block: ITcpClientBlock }
+    | { kind: 'mqttClient'; block: IMqttClientBlock }
+    | { kind: 'httpClient'; block: IHttpClientBlock }
+    | { kind: 'modbusRtu'; block: IModbusRtuBlock }
+    | { kind: 'modbusTcp'; block: IModbusTcpBlock }
+    | { kind: 'comPort'; block: IComBlock }
+    | { kind: 'database'; block: IDatabaseBlock }
+    | { kind: 'converter'; block: IConverterBlock }
+    | { kind: 'graphs'; block: IGraphBlock }
+    | { kind: 'indicators'; block: IIndicatorsBlock }
+    | { kind: 'media'; block: IMediaBlock }
+    | null {
+    const file = this.projectFile();
+    if (!file) {
+      return null;
+    }
+    const { networkBlocks, internalBlocks } = file.projectData.blocks;
+    const tcpServer = networkBlocks.tcpServers.find((b) => b.blockId === blockId);
+    if (tcpServer) {
+      return { kind: 'tcpServer', block: tcpServer };
+    }
+    const tcpClient = networkBlocks.tcpClients.find((b) => b.blockId === blockId);
+    if (tcpClient) {
+      return { kind: 'tcpClient', block: tcpClient };
+    }
+    const mqttClient = networkBlocks.mqttClients.find((b) => b.blockId === blockId);
+    if (mqttClient) {
+      return { kind: 'mqttClient', block: mqttClient };
+    }
+    const httpClient = networkBlocks.httpClients.find((b) => b.blockId === blockId);
+    if (httpClient) {
+      return { kind: 'httpClient', block: httpClient };
+    }
+    const modbusRtu = networkBlocks.modbusRtu.find((b) => b.blockId === blockId);
+    if (modbusRtu) {
+      return { kind: 'modbusRtu', block: modbusRtu };
+    }
+    const modbusTcp = networkBlocks.modbusTcp.find((b) => b.blockId === blockId);
+    if (modbusTcp) {
+      return { kind: 'modbusTcp', block: modbusTcp };
+    }
+    const comPort = networkBlocks.com.find((b) => b.blockId === blockId);
+    if (comPort) {
+      return { kind: 'comPort', block: comPort };
+    }
+    const database = networkBlocks.database.find((b) => b.blockId === blockId);
+    if (database) {
+      return { kind: 'database', block: database };
+    }
+    const converter = internalBlocks.converters.find((b) => b.blockId === blockId);
+    if (converter) {
+      return { kind: 'converter', block: converter };
+    }
+    const graphs = internalBlocks.graphs.find((b) => b.blockId === blockId);
+    if (graphs) {
+      return { kind: 'graphs', block: graphs };
+    }
+    const indicators = internalBlocks.indicators.find((b) => b.blockId === blockId);
+    if (indicators) {
+      return { kind: 'indicators', block: indicators };
+    }
+    const media = internalBlocks.media.find((b) => b.blockId === blockId);
+    if (media) {
+      return { kind: 'media', block: media };
+    }
+    return null;
+  }
+
+  getBlockConnections(blockId: number): { inputBlocks: number[]; outputBlocks: number[] } {
+    const file = this.projectFile();
+    if (!file) {
+      return { inputBlocks: [], outputBlocks: [] };
+    }
+    const edges = file.projectData.edges ?? {};
+    const outputBlocks = [...(edges[blockId] ?? [])];
+    const inputBlocks: number[] = [];
+    for (const [fromKey, targets] of Object.entries(edges)) {
+      const fromId = Number(fromKey);
+      if ((targets ?? []).includes(blockId)) {
+        inputBlocks.push(fromId);
+      }
+    }
+    return { inputBlocks, outputBlocks };
+  }
+
+  getHttpBlocksByIds(blockIds: number[]): IHttpClientBlock[] {
+    const file = this.projectFile();
+    if (!file) {
+      return [];
+    }
+    const idSet = new Set(blockIds);
+    return file.projectData.blocks.networkBlocks.httpClients.filter((block) =>
+      idSet.has(block.blockId),
     );
   }
 
@@ -331,6 +517,48 @@ export class ProjectService {
     );
   }
 
+  connectBlocks(fromBlockId: number, toBlockId: number): Observable<IProjectFile> {
+    const projectId = this.projectId();
+    if (projectId == null) {
+      return throwError(() => new Error('Project is not loaded'));
+    }
+    return this.electronApi
+      .connectBlocks(projectId, fromBlockId, toBlockId)
+      .pipe(tap((file) => this.applyProjectMutation(file)));
+  }
+
+  disconnectBlocks(fromBlockId: number, toBlockId: number): Observable<IProjectFile> {
+    const projectId = this.projectId();
+    if (projectId == null) {
+      return throwError(() => new Error('Project is not loaded'));
+    }
+    return this.electronApi
+      .disconnectBlocks(projectId, fromBlockId, toBlockId)
+      .pipe(tap((file) => this.applyProjectMutation(file)));
+  }
+
+  deleteBlocks(blockIds: number[]): Observable<IProjectFile> {
+    const projectId = this.projectId();
+    if (projectId == null) {
+      return throwError(() => new Error('Project is not loaded'));
+    }
+    return this.electronApi
+      .deleteBlocks(projectId, blockIds)
+      .pipe(tap((file) => this.applyProjectMutation(file)));
+  }
+
+  setSceneNodePositions(positions: {
+    [nodeId: string]: { x: number; y: number };
+  }): Observable<IProjectFile> {
+    const projectId = this.projectId();
+    if (projectId == null) {
+      return throwError(() => new Error('Project is not loaded'));
+    }
+    return this.electronApi
+      .setSceneNodePositions(projectId, positions)
+      .pipe(tap((file) => this.applyProjectMutation(file)));
+  }
+
   private callCreate(
     call: (projectId: number) => Observable<IProjectFile>,
   ): Observable<IProjectFile> {
@@ -338,7 +566,12 @@ export class ProjectService {
     if (projectId == null || !this.projectFile()) {
       return throwError(() => new Error('Project is not loaded'));
     }
-    return call(projectId).pipe(tap((file) => this.projectFile.set(file)));
+    return call(projectId).pipe(tap((file) => this.applyProjectMutation(file)));
+  }
+
+  private applyProjectMutation(file: IProjectFile): void {
+    this.projectFile.set(file);
+    this.isDirty.set(true);
   }
 
   private toInfo(

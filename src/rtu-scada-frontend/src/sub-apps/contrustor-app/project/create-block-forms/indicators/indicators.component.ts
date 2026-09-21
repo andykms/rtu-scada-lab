@@ -44,6 +44,7 @@ import {
   ICreateIndicatorsFormResult,
 } from '../shared/create-block-dialog.model';
 import { dataTypeLabelKey } from '../shared/data-type-options';
+import { createFormRevisionTracker } from '../shared/form-revision';
 
 const SOURCE_TYPES = new Set<EDataTypes>([
   EDataTypes.NUMBER,
@@ -80,7 +81,7 @@ const TRIGGER_TYPES = [
 export class IndicatorsComponent extends LanguageProvider {
   private readonly context = injectDialogContext<
     ICreateIndicatorsFormResult,
-    ICreateBlockDialogData
+    ICreateBlockDialogData<IIndicatorsBlock>
   >();
   private readonly fb = new FormBuilder();
   private readonly projectService = inject(ProjectService);
@@ -96,6 +97,8 @@ export class IndicatorsComponent extends LanguageProvider {
     blockName: ['', Validators.required],
     indicators: this.fb.nonNullable.array([this.createIndicatorGroup()]),
   });
+
+  private readonly formRx = createFormRevisionTracker(this.form);
 
   private readonly formSnapshot = toSignal(
     merge(this.form.valueChanges, this.form.statusChanges).pipe(startWith(null)),
@@ -135,10 +138,7 @@ export class IndicatorsComponent extends LanguageProvider {
 
   readonly canSave = computed(() => {
     this.formSnapshot();
-    this.formDirtyExtra();
-    if (!this.form.dirty && !this.formDirtyExtra()) {
-      return false;
-    }
+    this.formRx.formRev();
     if (!this.form.controls.blockName.value.trim()) {
       return false;
     }
@@ -151,6 +151,9 @@ export class IndicatorsComponent extends LanguageProvider {
         return false;
       }
       const sourceType = this.sourceTypeOf(group as FormGroup);
+      if (sourceType == null || !SOURCE_TYPES.has(sourceType)) {
+        return false;
+      }
       if (sourceType === EDataTypes.ARRAY_NUMBERS) {
         const index = Number(group.value.valueIndex);
         if (!Number.isFinite(index) || index < 0) {
@@ -216,6 +219,7 @@ export class IndicatorsComponent extends LanguageProvider {
 
   constructor() {
     super();
+    this.applyInitialState();
 
     effect(() => {
       this.context.setMainActionEnabled(this.canSave());
@@ -224,8 +228,27 @@ export class IndicatorsComponent extends LanguageProvider {
     this.context.mainAction$.pipe(takeUntilDestroyed()).subscribe(() => this.submit());
   }
 
+  protected onFormDomEvent(): void {
+    this.formRx.onFormDomEvent();
+  }
+
   get indicators(): FormArray {
     return this.form.controls.indicators;
+  }
+
+  private applyInitialState(): void {
+    const blocks = this.context.data.initialBlocks;
+    if (!blocks?.length) {
+      return;
+    }
+    this.form.controls.blockName.setValue(blocks[0].blockName);
+    this.indicators.clear();
+    for (const block of blocks) {
+      this.indicators.push(this.createIndicatorGroupFromBlock(block));
+    }
+    this.nextAllocatedId =
+      Math.max(...blocks.map((b) => b.blockId), this.nextAllocatedId) + 1;
+    this.formRx.bump();
   }
 
   protected sourceTypeOf(group: FormGroup): EDataTypes | null {
@@ -284,6 +307,48 @@ export class IndicatorsComponent extends LanguageProvider {
       unit: [''],
       valueIndex: [0, [Validators.required, Validators.min(0)]],
       triggers: this.fb.nonNullable.array([] as FormGroup[]),
+    });
+  }
+
+  private createIndicatorGroupFromBlock(block: IIndicatorsBlock): FormGroup {
+    const sourceBlockId = this.context.data.inputBlocks?.[0] ?? 0;
+    let unit = '';
+    let valueIndex = 0;
+    const triggers = this.fb.nonNullable.array([] as FormGroup[]);
+
+    if (block.stringConfig) {
+      unit = block.stringConfig.unit ?? '';
+    } else if (block.arrayNumbersConfig) {
+      valueIndex = block.arrayNumbersConfig.valueIndex;
+      unit = block.arrayNumbersConfig.numberConfig.unit ?? '';
+      for (const trigger of block.arrayNumbersConfig.numberConfig.triggers) {
+        triggers.push(this.createTriggerGroupFromTrigger(trigger));
+      }
+    } else if (block.numberConfig) {
+      unit = block.numberConfig.unit ?? '';
+      for (const trigger of block.numberConfig.triggers) {
+        triggers.push(this.createTriggerGroupFromTrigger(trigger));
+      }
+    }
+
+    return this.fb.nonNullable.group({
+      blockId: [block.blockId],
+      sourceBlockId: [sourceBlockId],
+      unit: [unit],
+      valueIndex: [valueIndex, [Validators.required, Validators.min(0)]],
+      triggers,
+    });
+  }
+
+  private createTriggerGroupFromTrigger(trigger: IIndicatorTrigger): FormGroup {
+    return this.fb.nonNullable.group({
+      triggerType: [trigger.triggerType as EIndicatorTriggerType, Validators.required],
+      outputBlockId: [trigger.outputBlockId],
+      maxValue: [trigger.maxConfig?.maxValue ?? 0, Validators.required],
+      minValue: [trigger.minConfig?.minValue ?? 0, Validators.required],
+      rangeMin: [trigger.rangeConfig?.minValue ?? 0, Validators.required],
+      rangeMax: [trigger.rangeConfig?.maxValue ?? 0, Validators.required],
+      exactValue: [trigger.exactValueConfig?.value ?? 0, Validators.required],
     });
   }
 

@@ -16,9 +16,11 @@
             {{ action_title }}
           </button>
         }
-        <button class="modal_action" (click)="onSecondaryAction.emit()">
-          {{ secondaryActionLabel() }}
-        </button>
+        @if (secondaryActionLabel()) {
+          <button class="modal_action" (click)="onSecondaryAction.emit()">
+            {{ secondaryActionLabel() }}
+          </button>
+        }
         <button
           class="modal_action"
           [disabled]="mainActionDisabled()"

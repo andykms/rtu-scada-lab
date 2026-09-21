@@ -1,11 +1,51 @@
 .project-page {
   min-block-size: 100vh;
-  padding: 50px;
+  padding: 50px 10px 10px 20px;
+  display: flex;
+  gap: 24px;
+  box-sizing: border-box;
 }
 
 .blocks-sidebar {
-  inline-size: 300px;
+  inline-size: 453px;
+  flex: 0 0 253px;
   position: fixed;
+  inset-block-start: 50px;
+  align-self: flex-start;
+  block-size: calc(100vh - 84px);
+  margin-block-start: 12px;
+  margin-inline-start: 12px;
+  overflow: auto;
+  z-index: 3;
+  background-color: var(--modal-color);
+  border-radius: 12px;
+  padding: 11px;
+  box-shadow: inset 0 0 2px 2px var(--box-shadow-color);
+  transition: block-size 0.3s ease-in-out;
+  backdrop-filter: blur(2px);
+}
+
+.blocks-sidebar_hide {
+  block-size: auto;
+}
+
+.block-list-heading {
+  padding-block-end: 3px;
+  font-weight: bold;
+  display: flex;
+  justify-content: space-between;
+}
+
+.toggle-list {
+  font-weight: normal;
+  padding: 3px 17px;
+  border-radius: 0 0 10px 10px;
+  border: none;
+  outline: none;
+  background-color: inherit;
+  box-shadow: inset 0 -4px 4px 0 rgba(0,0,0,0.25);
+  color: var(--primary-color);
+  cursor: pointer;
 }
 
 .sidebar-title {
@@ -13,9 +53,23 @@
   color: var(--primary-color);
 }
 
+.group-heading, .list-heading {
+  padding-inline-start: 15px;
+}
+
+.group-heading {
+  padding-block-start: 15px;
+}
+
 .blocks-list {
   display: flex;
   flex-direction: column;
+  gap: 10px;
+}
+
+.blocks-group {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
   gap: 10px;
 }
 
@@ -33,5 +87,7 @@
 }
 
 .project-workspace {
+  flex: 1 1 auto;
   min-inline-size: 0;
+  min-block-size: calc(100vh - 100px);
 }

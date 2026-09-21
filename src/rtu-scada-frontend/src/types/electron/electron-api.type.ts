@@ -18,6 +18,8 @@ export interface IElectronAPI {
 
   openProjectFile: (filePath: string) => Promise<IProjectFile>;
 
+  pickAndOpenProjectFile: () => Promise<IProjectFile | null>;
+
   createProject: (projectName: string) => Promise<IProjectFile>;
 
   setTcpServerBlock: (
@@ -104,7 +106,31 @@ export interface IElectronAPI {
     outputBlocks: number[],
   ) => Promise<IProjectFile>;
 
-  saveProject: (projectId: number) => Promise<void>;
+  connectBlocks: (
+    projectId: number,
+    fromBlockId: number,
+    toBlockId: number,
+  ) => Promise<IProjectFile>;
+
+  disconnectBlocks: (
+    projectId: number,
+    fromBlockId: number,
+    toBlockId: number,
+  ) => Promise<IProjectFile>;
+
+  deleteBlocks: (
+    projectId: number,
+    blockIds: number[],
+  ) => Promise<IProjectFile>;
+
+  setSceneNodePositions: (
+    projectId: number,
+    positions: { [nodeId: string]: { x: number; y: number } },
+  ) => Promise<IProjectFile>;
+
+  saveProject: (projectId: number) => Promise<string | null>;
+
+  saveProjectAs: (projectId: number) => Promise<string | null>;
 
   openDemoMode: (projectId: number) => Promise<void>;
 
