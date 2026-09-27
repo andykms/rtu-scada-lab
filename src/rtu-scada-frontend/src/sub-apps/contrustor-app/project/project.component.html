@@ -3,7 +3,7 @@
   <aside [class]="`blocks-sidebar ${!openedList() ? 'blocks-sidebar_hide' : ''}`">
     <div class="blocks-list">
       <div class="block-list-heading">
-        <h1 paperText size="l" class="list-heading">{{ labels().apps }}</h1>
+        <paper-icon icon="block" size="l"></paper-icon>
         <button class="toggle-list" (click)="openedList.set(!openedList())">
           <span paperText size="m">{{openedList() ? labels().hide : labels().show }}</span>
         </button>

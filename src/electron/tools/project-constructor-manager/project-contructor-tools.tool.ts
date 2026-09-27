@@ -767,6 +767,12 @@ export abstract class ProjectContructorTools {
       case EDataTypes.ARRAY_NUMBERS: {
         return convertTypeConfig.inputTypeArrayNumbers?.outputType ?? null;
       }
+      case EDataTypes.ARRAY_STRINGS: {
+        return convertTypeConfig.inputTypeArrayStrings?.outputType ?? null;
+      }
+      case EDataTypes.BOOLEAN: {
+        return convertTypeConfig.inputTypeBoolean?.outputType ?? null;
+      }
       default: {
         return null;
       }

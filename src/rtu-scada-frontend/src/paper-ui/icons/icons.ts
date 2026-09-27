@@ -9,4 +9,5 @@ export enum PAPER_ICONS {
     DELETE="delete",
     CLOSE="close",
     EDIT="edit",
+    BLOCK="block"
 }

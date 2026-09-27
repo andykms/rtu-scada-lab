@@ -10,7 +10,9 @@ export enum EDataTypes {
     PDF,
     BYTES,
     NOTHING,
-    ARRAY_ANY
+    ARRAY_ANY,
+    BOOLEAN,
+    ARRAY_STRINGS
 }
 
 export interface IBaseDataType {

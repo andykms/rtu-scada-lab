@@ -1,9 +1,10 @@
 import { EDataTypes } from "../../../data-types/base-data-type.type";
 
 export interface ICoverterFilterConfig {
-  stringTypeConfig: IConverterFilterStringConfig | null;
-  numberTypeConfig: IConverterFilterNumberConfig | null;
-  jsonTypeConfig: IConverterFilterJsonConfig | null;
+  stringTypeConfig?: IConverterFilterStringConfig | null;
+  numberTypeConfig?: IConverterFilterNumberConfig | null;
+  jsonTypeConfig?: IConverterFilterJsonConfig | null;
+  booleanTypeConfig?: IConverterFilterBooleanConfig | null;
 }
 
 export interface IConverterFilterStringConfig {
@@ -30,11 +31,12 @@ export interface IConverterFilterJsonConfig {
 export interface IConverterFilterJsonField {
   fieldName: string;
   isRequired: boolean;
-  type: EDataTypes.STRING | EDataTypes.NUMBER | EDataTypes.JSON | EDataTypes.ARRAY_ANY;
-  stringTypeConfig: IConverterFilterStringConfig | null;
-  numberTypeConfig: IConverterFilterNumberConfig | null;
-  jsonTypeConfig: IConverterFilterJsonConfig | null;
-  arrayAnyTypeConfig: IConverterFilterJsonFieldArrayConfig | null;
+  type: EDataTypes.STRING | EDataTypes.NUMBER | EDataTypes.JSON | EDataTypes.ARRAY_ANY | EDataTypes.BOOLEAN;
+  stringTypeConfig?: IConverterFilterStringConfig | null;
+  numberTypeConfig?: IConverterFilterNumberConfig | null;
+  jsonTypeConfig?: IConverterFilterJsonConfig | null;
+  arrayAnyTypeConfig?: IConverterFilterJsonFieldArrayConfig | null;
+  booleanTypeConfig?: IConverterFilterBooleanConfig | null;
 }
 
 export interface IConverterFilterJsonFieldArrayConfig {
@@ -43,9 +45,14 @@ export interface IConverterFilterJsonFieldArrayConfig {
     maxLength: number | null;
     length: number | null;
   };
-  type: EDataTypes.STRING | EDataTypes.NUMBER | EDataTypes.JSON | EDataTypes.ARRAY_ANY;
-  stringTypeConfig: IConverterFilterStringConfig | null;
-  numberTypeConfig: IConverterFilterNumberConfig | null;
-  jsonTypeConfig: IConverterFilterJsonConfig | null;
-  arrayAnyTypeConfig: IConverterFilterJsonFieldArrayConfig | null;
+  type: EDataTypes.STRING | EDataTypes.NUMBER | EDataTypes.JSON | EDataTypes.ARRAY_ANY | EDataTypes.BOOLEAN;
+  stringTypeConfig?: IConverterFilterStringConfig | null;
+  numberTypeConfig?: IConverterFilterNumberConfig | null;
+  jsonTypeConfig?: IConverterFilterJsonConfig | null;
+  arrayAnyTypeConfig?: IConverterFilterJsonFieldArrayConfig | null;
+  booleanTypeConfig?: IConverterFilterBooleanConfig | null;
+}
+
+export interface IConverterFilterBooleanConfig {
+  value: boolean | null;
 }

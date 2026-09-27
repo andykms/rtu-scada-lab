@@ -75,6 +75,65 @@
         }
       }
 
+      @if (showStringSplit()) {
+        <paper-textfield size="m">
+          <label paperLabel>{{ labels().converterSplitSeparator }}</label>
+          <input paperInput type="text" formControlName="stringSplitSeparator" autocomplete="off" />
+        </paper-textfield>
+      }
+
+      @if (showArrayStringsStringOp()) {
+        <paper-textfield size="m">
+          <paper-select-list
+            formControlName="arrayStringsStringOp"
+            [variants]="arrayStringsStringOpVariants"
+            [labelResolver]="resolveArrayStringsStringOpLabel"
+          >
+            <label paperLabel>{{ labels().converterArrayOp }}</label>
+            <input paperInput readonly #inputList />
+          </paper-select-list>
+        </paper-textfield>
+
+        @if (showArrayStringsIndex()) {
+          <paper-textfield size="m">
+            <label paperLabel>{{ labels().converterArrayIndex }}</label>
+            <input paperInput type="number" formControlName="arrayStringsIndex" />
+          </paper-textfield>
+        }
+
+        @if (showArrayStringsJoin()) {
+          <paper-textfield size="m">
+            <label paperLabel>{{ labels().converterJoinSeparator }}</label>
+            <input
+              paperInput
+              type="text"
+              formControlName="arrayStringsJoinSeparator"
+              autocomplete="off"
+            />
+          </paper-textfield>
+        }
+      }
+
+      @if (showArrayStringsOnNotNumber()) {
+        <paper-textfield size="m">
+          <paper-select-list
+            formControlName="arrayStringsOnNotNumber"
+            [variants]="arrayStringsOnNotNumberVariants"
+            [labelResolver]="resolveArrayStringsOnNotNumberLabel"
+          >
+            <label paperLabel>{{ labels().converterOnNotNumber }}</label>
+            <input paperInput readonly #inputList />
+          </paper-select-list>
+        </paper-textfield>
+
+        @if (showArrayStringsSpecialValue()) {
+          <paper-textfield size="m">
+            <label paperLabel>{{ labels().converterSpecialValueNumber }}</label>
+            <input paperInput type="number" formControlName="arrayStringsSpecialValue" />
+          </paper-textfield>
+        }
+      }
+
       <p class="result-type" paperText size="s">
         {{ labels().converterResultType }}:
         <strong>{{ resolveDataTypeLabel(effectiveOutputType()) }}</strong>
@@ -360,6 +419,21 @@
           </div>
         }
 
+        @if (showBooleanFilter()) {
+          <div class="filter-list">
+            <paper-textfield size="m">
+              <paper-select-list
+                formControlName="booleanFilterMode"
+                [variants]="booleanFilterModeVariants"
+                [labelResolver]="resolveBooleanFilterModeLabel"
+              >
+                <label paperLabel>{{ labels().converterBooleanEquals }}</label>
+                <input paperInput readonly #inputList />
+              </paper-select-list>
+            </paper-textfield>
+          </div>
+        }
+
         @if (showJsonFilter()) {
           <div class="json-fields" formArrayName="jsonFilterFields">
             @for (field of jsonFilterFields.controls; track $index; let i = $index) {
@@ -411,6 +485,19 @@
                   <paper-textfield size="s">
                     <label paperLabel>{{ labels().converterLessOrEqual }}</label>
                     <input paperInput type="number" formControlName="lessOrEqualThan" />
+                  </paper-textfield>
+                }
+
+                @if (jsonFilterFieldType($any(field)) === dataTypes.BOOLEAN) {
+                  <paper-textfield size="s">
+                    <paper-select-list
+                      formControlName="booleanFilterMode"
+                      [variants]="booleanFilterModeVariants"
+                      [labelResolver]="resolveBooleanFilterModeLabel"
+                    >
+                      <label paperLabel>{{ labels().converterBooleanEquals }}</label>
+                      <input paperInput readonly #inputList />
+                    </paper-select-list>
                   </paper-textfield>
                 }
 

@@ -422,6 +422,12 @@ export function buildSceneNodes(
       case EDataTypes.ARRAY_NUMBERS:
         output = cfg.inputTypeArrayNumbers?.outputType ?? null;
         break;
+      case EDataTypes.ARRAY_STRINGS:
+        output = cfg.inputTypeArrayStrings?.outputType ?? null;
+        break;
+      case EDataTypes.BOOLEAN:
+        output = cfg.inputTypeBoolean?.outputType ?? null;
+        break;
     }
     push({
       nodeId: String(block.blockId),

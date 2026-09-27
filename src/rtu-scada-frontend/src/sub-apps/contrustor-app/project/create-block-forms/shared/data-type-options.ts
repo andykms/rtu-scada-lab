@@ -18,6 +18,8 @@ const DATA_TYPE_LABEL_KEYS = {
   dataTypeBytes: true,
   dataTypeNothing: true,
   dataTypeArrayAny: true,
+  dataTypeBoolean: true,
+  dataTypeArrayStrings: true,
 } as const;
 
 export const DATA_TYPE_OPTIONS: IDataTypeOption[] = [
@@ -33,6 +35,8 @@ export const DATA_TYPE_OPTIONS: IDataTypeOption[] = [
   { value: EDataTypes.BYTES, labelKey: 'dataTypeBytes' },
   { value: EDataTypes.NOTHING, labelKey: 'dataTypeNothing' },
   { value: EDataTypes.ARRAY_ANY, labelKey: 'dataTypeArrayAny' },
+  { value: EDataTypes.BOOLEAN, labelKey: 'dataTypeBoolean' },
+  { value: EDataTypes.ARRAY_STRINGS, labelKey: 'dataTypeArrayStrings' },
 ];
 
 export function dataTypeOptions(allowed?: readonly EDataTypes[]): IDataTypeOption[] {

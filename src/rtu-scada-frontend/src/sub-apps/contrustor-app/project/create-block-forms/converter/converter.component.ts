@@ -18,6 +18,9 @@ import { merge, startWith } from 'rxjs';
 import { IConverterBlock } from '../../../../../../../electron/types/blocks/internal-blocks/converter/converter.type';
 import {
   EConverterInputArrayNumbersOutputNumberType,
+  EConverterInputArrayStringsOnNotNumberType,
+  EConverterInputArrayStringsOutputStringType,
+  EConverterInputStringOutputArrayStringsType,
   IConverterTypeConfig,
 } from '../../../../../../../electron/types/blocks/internal-blocks/converter/converter.type-config.type';
 import {
@@ -28,6 +31,7 @@ import {
   IConverterValueStringConfig,
 } from '../../../../../../../electron/types/blocks/internal-blocks/converter/converter.value-config.type';
 import {
+  IConverterFilterBooleanConfig,
   IConverterFilterJsonField,
   IConverterFilterNumberConfig,
   IConverterFilterStringConfig,
@@ -65,11 +69,23 @@ const INPUT_TYPES = [
   EDataTypes.ANY_FILE,
   EDataTypes.JSON,
   EDataTypes.ARRAY_NUMBERS,
+  EDataTypes.ARRAY_STRINGS,
+  EDataTypes.BOOLEAN,
 ] as const;
 
 const OUTPUT_BY_INPUT: Partial<Record<EDataTypes, EDataTypes[]>> = {
-  [EDataTypes.STRING]: [EDataTypes.STRING, EDataTypes.NUMBER, EDataTypes.BYTES],
-  [EDataTypes.NUMBER]: [EDataTypes.NUMBER, EDataTypes.STRING, EDataTypes.BYTES],
+  [EDataTypes.STRING]: [
+    EDataTypes.STRING,
+    EDataTypes.NUMBER,
+    EDataTypes.BYTES,
+    EDataTypes.ARRAY_STRINGS,
+  ],
+  [EDataTypes.NUMBER]: [
+    EDataTypes.NUMBER,
+    EDataTypes.STRING,
+    EDataTypes.BYTES,
+    EDataTypes.BOOLEAN,
+  ],
   [EDataTypes.BYTES]: [
     EDataTypes.BYTES,
     EDataTypes.IMAGE,
@@ -90,6 +106,8 @@ const OUTPUT_BY_INPUT: Partial<Record<EDataTypes, EDataTypes[]>> = {
     EDataTypes.NUMBER,
     EDataTypes.BYTES,
     EDataTypes.ARRAY_NUMBERS,
+    EDataTypes.ARRAY_STRINGS,
+    EDataTypes.BOOLEAN,
     EDataTypes.IMAGE,
     EDataTypes.VIDEO,
     EDataTypes.AUDIO,
@@ -101,7 +119,14 @@ const OUTPUT_BY_INPUT: Partial<Record<EDataTypes, EDataTypes[]>> = {
     EDataTypes.JSON,
     EDataTypes.STRING,
     EDataTypes.NUMBER,
+    EDataTypes.ARRAY_STRINGS,
   ],
+  [EDataTypes.ARRAY_STRINGS]: [
+    EDataTypes.ARRAY_STRINGS,
+    EDataTypes.STRING,
+    EDataTypes.ARRAY_NUMBERS,
+  ],
+  [EDataTypes.BOOLEAN]: [EDataTypes.BOOLEAN, EDataTypes.STRING, EDataTypes.NUMBER],
 };
 
 /** JSON→X: field path is optional (checkbox). Other JSON outputs require a path. */
@@ -109,6 +134,7 @@ const JSON_OPTIONAL_PATH_OUTPUTS = new Set<EDataTypes>([
   EDataTypes.STRING,
   EDataTypes.BYTES,
   EDataTypes.ARRAY_NUMBERS,
+  EDataTypes.ARRAY_STRINGS,
 ]);
 
 const JSON_FILTER_FIELD_TYPES: EDataTypes[] = [
@@ -116,6 +142,7 @@ const JSON_FILTER_FIELD_TYPES: EDataTypes[] = [
   EDataTypes.NUMBER,
   EDataTypes.JSON,
   EDataTypes.ARRAY_ANY,
+  EDataTypes.BOOLEAN,
 ];
 
 const ARRAY_NUMBER_OPS = [
@@ -126,6 +153,18 @@ const ARRAY_NUMBER_OPS = [
   EConverterInputArrayNumbersOutputNumberType.AVG,
   EConverterInputArrayNumbersOutputNumberType.MODE,
 ] as const;
+
+const ARRAY_STRINGS_STRING_OPS = [
+  EConverterInputArrayStringsOutputStringType.INDEX,
+  EConverterInputArrayStringsOutputStringType.JOIN,
+] as const;
+
+const ARRAY_STRINGS_ON_NOT_NUMBER = [
+  EConverterInputArrayStringsOnNotNumberType.IGNORE,
+  EConverterInputArrayStringsOnNotNumberType.SPECIAL_VALUE,
+] as const;
+
+const BOOLEAN_FILTER_MODES = ['any', 'true', 'false'] as const;
 
 const STRING_VALUE_OPS = [
   EConverterValueStringType.CLEAR_RIGHT_PADS,
@@ -161,7 +200,10 @@ type TJsonFilterFieldType =
   | EDataTypes.STRING
   | EDataTypes.NUMBER
   | EDataTypes.JSON
-  | EDataTypes.ARRAY_ANY;
+  | EDataTypes.ARRAY_ANY
+  | EDataTypes.BOOLEAN;
+
+type TBooleanFilterMode = (typeof BOOLEAN_FILTER_MODES)[number];
 
 @Component({
   selector: 'constructor-converter',
@@ -194,11 +236,16 @@ export class ConverterComponent extends LanguageProvider {
   readonly inputTypeVariants = dataTypeValues([...INPUT_TYPES]);
   readonly jsonFilterFieldTypeVariants = dataTypeValues(JSON_FILTER_FIELD_TYPES);
   readonly arrayNumberOpVariants = [...ARRAY_NUMBER_OPS];
+  readonly arrayStringsStringOpVariants = [...ARRAY_STRINGS_STRING_OPS];
+  readonly arrayStringsOnNotNumberVariants = [...ARRAY_STRINGS_ON_NOT_NUMBER];
+  readonly booleanFilterModeVariants = [...BOOLEAN_FILTER_MODES];
   readonly stringValueOpVariants = [...STRING_VALUE_OPS];
   readonly numberValueOpVariants = [...NUMBER_VALUE_OPS];
   readonly regexPresetVariants = [...REGEX_PRESETS];
   readonly dataTypes = EDataTypes;
   readonly arrayNumberOps = EConverterInputArrayNumbersOutputNumberType;
+  readonly arrayStringsStringOps = EConverterInputArrayStringsOutputStringType;
+  readonly arrayStringsOnNotNumberOps = EConverterInputArrayStringsOnNotNumberType;
   readonly stringValueOps = EConverterValueStringType;
   readonly numberValueOps = EConverterValueNumberType;
 
@@ -219,6 +266,18 @@ export class ConverterComponent extends LanguageProvider {
       Validators.required,
     ],
     arrayNumberIndex: [0, [Validators.min(0)]],
+    stringSplitSeparator: [''],
+    arrayStringsStringOp: [
+      EConverterInputArrayStringsOutputStringType.INDEX as EConverterInputArrayStringsOutputStringType,
+      Validators.required,
+    ],
+    arrayStringsIndex: [0, [Validators.min(0)]],
+    arrayStringsJoinSeparator: [''],
+    arrayStringsOnNotNumber: [
+      EConverterInputArrayStringsOnNotNumberType.IGNORE as EConverterInputArrayStringsOnNotNumberType,
+      Validators.required,
+    ],
+    arrayStringsSpecialValue: [0],
     enableFilter: [false],
     // string filter
     useMinLength: [false],
@@ -244,6 +303,8 @@ export class ConverterComponent extends LanguageProvider {
     equal: [null as number | null],
     useNotEqual: [false],
     notEqual: [null as number | null],
+    // boolean filter
+    booleanFilterMode: ['any' as TBooleanFilterMode],
     stringValueSteps: this.fb.nonNullable.array([] as never[]),
     numberValueSteps: this.fb.nonNullable.array([] as never[]),
     jsonFilterFields: this.fb.nonNullable.array([] as never[]),
@@ -281,6 +342,20 @@ export class ConverterComponent extends LanguageProvider {
       startWith(this.form.controls.arrayNumberOp.value),
     ),
     { initialValue: EConverterInputArrayNumbersOutputNumberType.INDEX },
+  );
+
+  readonly arrayStringsStringOp = toSignal(
+    this.form.controls.arrayStringsStringOp.valueChanges.pipe(
+      startWith(this.form.controls.arrayStringsStringOp.value),
+    ),
+    { initialValue: EConverterInputArrayStringsOutputStringType.INDEX },
+  );
+
+  readonly arrayStringsOnNotNumber = toSignal(
+    this.form.controls.arrayStringsOnNotNumber.valueChanges.pipe(
+      startWith(this.form.controls.arrayStringsOnNotNumber.value),
+    ),
+    { initialValue: EConverterInputArrayStringsOnNotNumberType.IGNORE },
   );
 
   readonly enableFilter = toSignal(
@@ -345,6 +420,45 @@ export class ConverterComponent extends LanguageProvider {
       this.arrayNumberOp() === EConverterInputArrayNumbersOutputNumberType.INDEX,
   );
 
+  readonly showStringSplit = computed(
+    () =>
+      this.inputDataType() === EDataTypes.STRING &&
+      this.outputDataType() === EDataTypes.ARRAY_STRINGS,
+  );
+
+  readonly showArrayStringsStringOp = computed(
+    () =>
+      this.inputDataType() === EDataTypes.ARRAY_STRINGS &&
+      this.outputDataType() === EDataTypes.STRING,
+  );
+
+  readonly showArrayStringsIndex = computed(
+    () =>
+      this.showArrayStringsStringOp() &&
+      this.arrayStringsStringOp() ===
+        EConverterInputArrayStringsOutputStringType.INDEX,
+  );
+
+  readonly showArrayStringsJoin = computed(
+    () =>
+      this.showArrayStringsStringOp() &&
+      this.arrayStringsStringOp() ===
+        EConverterInputArrayStringsOutputStringType.JOIN,
+  );
+
+  readonly showArrayStringsOnNotNumber = computed(
+    () =>
+      this.inputDataType() === EDataTypes.ARRAY_STRINGS &&
+      this.outputDataType() === EDataTypes.ARRAY_NUMBERS,
+  );
+
+  readonly showArrayStringsSpecialValue = computed(
+    () =>
+      this.showArrayStringsOnNotNumber() &&
+      this.arrayStringsOnNotNumber() ===
+        EConverterInputArrayStringsOnNotNumberType.SPECIAL_VALUE,
+  );
+
   readonly showStringValueSteps = computed(
     () => this.effectiveOutputType() === EDataTypes.STRING,
   );
@@ -369,12 +483,17 @@ export class ConverterComponent extends LanguageProvider {
     () => this.enableFilter() && this.effectiveOutputType() === EDataTypes.JSON,
   );
 
+  readonly showBooleanFilter = computed(
+    () => this.enableFilter() && this.effectiveOutputType() === EDataTypes.BOOLEAN,
+  );
+
   readonly showFilterSection = computed(() => {
     const type = this.effectiveOutputType();
     return (
       type === EDataTypes.STRING ||
       type === EDataTypes.NUMBER ||
-      type === EDataTypes.JSON
+      type === EDataTypes.JSON ||
+      type === EDataTypes.BOOLEAN
     );
   });
 
@@ -488,6 +607,48 @@ export class ConverterComponent extends LanguageProvider {
         return map['converterArrayAvg'] ?? '';
       case EConverterInputArrayNumbersOutputNumberType.MODE:
         return map['converterArrayMode'] ?? '';
+      default:
+        return '';
+    }
+  };
+
+  readonly resolveArrayStringsStringOpLabel = (
+    value: EConverterInputArrayStringsOutputStringType | null,
+  ): string => {
+    const map = this.labels() as Record<string, string>;
+    switch (value) {
+      case EConverterInputArrayStringsOutputStringType.INDEX:
+        return map['converterArrayIndex'] ?? '';
+      case EConverterInputArrayStringsOutputStringType.JOIN:
+        return map['converterArrayJoin'] ?? '';
+      default:
+        return '';
+    }
+  };
+
+  readonly resolveArrayStringsOnNotNumberLabel = (
+    value: EConverterInputArrayStringsOnNotNumberType | null,
+  ): string => {
+    const map = this.labels() as Record<string, string>;
+    switch (value) {
+      case EConverterInputArrayStringsOnNotNumberType.IGNORE:
+        return map['converterIgnoreInvalid'] ?? '';
+      case EConverterInputArrayStringsOnNotNumberType.SPECIAL_VALUE:
+        return map['converterSpecialValue'] ?? '';
+      default:
+        return '';
+    }
+  };
+
+  readonly resolveBooleanFilterModeLabel = (value: string | null): string => {
+    const map = this.labels() as Record<string, string>;
+    switch (value) {
+      case 'true':
+        return map['converterBooleanTrue'] ?? 'true';
+      case 'false':
+        return map['converterBooleanFalse'] ?? 'false';
+      case 'any':
+        return map['converterBooleanAny'] ?? '';
       default:
         return '';
     }
@@ -668,17 +829,22 @@ export class ConverterComponent extends LanguageProvider {
     }
 
     this.skipTypeSideEffects = true;
-    const { outputDataType, jsonExtractField, jsonFieldPath, arrayNumberOp, arrayNumberIndex } =
-      this.readTypeConfig(block);
+    const typeState = this.readTypeConfig(block);
 
     this.form.patchValue({
         blockName: block.blockName,
         inputDataType: block.inputDataType,
-        outputDataType,
-        jsonExtractField,
-        jsonFieldPath,
-        arrayNumberOp,
-        arrayNumberIndex,
+        outputDataType: typeState.outputDataType,
+        jsonExtractField: typeState.jsonExtractField,
+        jsonFieldPath: typeState.jsonFieldPath,
+        arrayNumberOp: typeState.arrayNumberOp,
+        arrayNumberIndex: typeState.arrayNumberIndex,
+        stringSplitSeparator: typeState.stringSplitSeparator,
+        arrayStringsStringOp: typeState.arrayStringsStringOp,
+        arrayStringsIndex: typeState.arrayStringsIndex,
+        arrayStringsJoinSeparator: typeState.arrayStringsJoinSeparator,
+        arrayStringsOnNotNumber: typeState.arrayStringsOnNotNumber,
+        arrayStringsSpecialValue: typeState.arrayStringsSpecialValue,
       });
 
     this.applyValueConfig(block.convertValueConfig);
@@ -695,6 +861,12 @@ export class ConverterComponent extends LanguageProvider {
     jsonFieldPath: string;
     arrayNumberOp: EConverterInputArrayNumbersOutputNumberType;
     arrayNumberIndex: number;
+    stringSplitSeparator: string;
+    arrayStringsStringOp: EConverterInputArrayStringsOutputStringType;
+    arrayStringsIndex: number;
+    arrayStringsJoinSeparator: string;
+    arrayStringsOnNotNumber: EConverterInputArrayStringsOnNotNumberType;
+    arrayStringsSpecialValue: number;
   } {
     const cfg = block.convertTypeConfig;
     const defaults = {
@@ -703,10 +875,22 @@ export class ConverterComponent extends LanguageProvider {
       jsonFieldPath: '',
       arrayNumberOp: EConverterInputArrayNumbersOutputNumberType.INDEX,
       arrayNumberIndex: 0,
+      stringSplitSeparator: '',
+      arrayStringsStringOp: EConverterInputArrayStringsOutputStringType.INDEX,
+      arrayStringsIndex: 0,
+      arrayStringsJoinSeparator: '',
+      arrayStringsOnNotNumber: EConverterInputArrayStringsOnNotNumberType.IGNORE,
+      arrayStringsSpecialValue: 0,
     };
     switch (block.inputDataType) {
-      case EDataTypes.STRING:
-        return { ...defaults, outputDataType: cfg.inputTypeString?.outputType ?? EDataTypes.STRING };
+      case EDataTypes.STRING: {
+        const str = cfg.inputTypeString;
+        return {
+          ...defaults,
+          outputDataType: str?.outputType ?? EDataTypes.STRING,
+          stringSplitSeparator: str?.arrayStringsConfig?.splitConfig?.separator ?? '',
+        };
+      }
       case EDataTypes.NUMBER:
         return { ...defaults, outputDataType: cfg.inputTypeNumber?.outputType ?? EDataTypes.NUMBER };
       case EDataTypes.BYTES:
@@ -719,6 +903,11 @@ export class ConverterComponent extends LanguageProvider {
         return { ...defaults, outputDataType: cfg.inputTypeAudio?.outputType ?? EDataTypes.AUDIO };
       case EDataTypes.ANY_FILE:
         return { ...defaults, outputDataType: cfg.inputTypeAnyFile?.outputType ?? EDataTypes.ANY_FILE };
+      case EDataTypes.BOOLEAN:
+        return {
+          ...defaults,
+          outputDataType: cfg.inputTypeBoolean?.outputType ?? EDataTypes.BOOLEAN,
+        };
       case EDataTypes.JSON: {
         const json = cfg.inputTypeJson;
         const path = json?.jsonFieldConfig?.path?.trim() ?? '';
@@ -743,6 +932,23 @@ export class ConverterComponent extends LanguageProvider {
           arrayNumberOp:
             arr?.numberConfig?.outputType ?? EConverterInputArrayNumbersOutputNumberType.INDEX,
           arrayNumberIndex: arr?.numberConfig?.index ?? 0,
+        };
+      }
+      case EDataTypes.ARRAY_STRINGS: {
+        const arr = cfg.inputTypeArrayStrings;
+        return {
+          ...defaults,
+          outputDataType: arr?.outputType ?? EDataTypes.ARRAY_STRINGS,
+          arrayStringsStringOp:
+            arr?.stringConfig?.outputType ??
+            EConverterInputArrayStringsOutputStringType.INDEX,
+          arrayStringsIndex: arr?.stringConfig?.index ?? 0,
+          arrayStringsJoinSeparator: arr?.stringConfig?.joinConfig?.separator ?? '',
+          arrayStringsOnNotNumber:
+            arr?.arrayNumbersConfig?.onNotNumber ??
+            EConverterInputArrayStringsOnNotNumberType.IGNORE,
+          arrayStringsSpecialValue:
+            arr?.arrayNumbersConfig?.specialValueConfig?.value ?? 0,
         };
       }
       default:
@@ -773,7 +979,14 @@ export class ConverterComponent extends LanguageProvider {
     const stringCfg = config.stringTypeConfig;
     const numberCfg = config.numberTypeConfig;
     const jsonCfg = config.jsonTypeConfig;
-    const hasFilter = !!(stringCfg || numberCfg || jsonCfg);
+    const booleanCfg = config.booleanTypeConfig;
+    const hasFilter = !!(stringCfg || numberCfg || jsonCfg || booleanCfg);
+    const booleanMode: TBooleanFilterMode =
+      booleanCfg?.value === true
+        ? 'true'
+        : booleanCfg?.value === false
+          ? 'false'
+          : 'any';
     this.form.patchValue(
       {
         enableFilter: hasFilter,
@@ -799,6 +1012,7 @@ export class ConverterComponent extends LanguageProvider {
         equal: numberCfg?.equal ?? null,
         useNotEqual: numberCfg?.notEqual != null,
         notEqual: numberCfg?.notEqual ?? null,
+        booleanFilterMode: booleanMode,
       },
       { emitEvent: false },
     );
@@ -823,6 +1037,13 @@ export class ConverterComponent extends LanguageProvider {
           regularExpression: [field.stringTypeConfig?.regularExpression ?? ''],
           moreOrEqualThan: [field.numberTypeConfig?.moreOrEqualThan ?? null],
           lessOrEqualThan: [field.numberTypeConfig?.lessOrEqualThan ?? null],
+          booleanFilterMode: [
+            (field.booleanTypeConfig?.value === true
+              ? 'true'
+              : field.booleanTypeConfig?.value === false
+                ? 'false'
+                : 'any') as TBooleanFilterMode,
+          ],
         }),
       );
     }
@@ -966,6 +1187,7 @@ export class ConverterComponent extends LanguageProvider {
       regularExpression: [''],
       moreOrEqualThan: [null as number | null],
       lessOrEqualThan: [null as number | null],
+      booleanFilterMode: ['any' as TBooleanFilterMode],
     });
   }
 
@@ -1045,6 +1267,8 @@ export class ConverterComponent extends LanguageProvider {
       inputTypeAnyFile: null,
       inputTypeJson: null,
       inputTypeArrayNumbers: null,
+      inputTypeArrayStrings: null,
+      inputTypeBoolean: null,
     };
   }
 
@@ -1055,7 +1279,19 @@ export class ConverterComponent extends LanguageProvider {
 
     switch (input) {
       case EDataTypes.STRING:
-        return { ...empty, inputTypeString: { outputType: output as never } };
+        return {
+          ...empty,
+          inputTypeString: {
+            outputType: output as never,
+            arrayStringsConfig:
+              output === EDataTypes.ARRAY_STRINGS
+                ? {
+                    outputType: EConverterInputStringOutputArrayStringsType.SPLIT,
+                    splitConfig: { separator: String(raw.stringSplitSeparator ?? '') },
+                  }
+                : null,
+          },
+        };
       case EDataTypes.NUMBER:
         return { ...empty, inputTypeNumber: { outputType: output as never } };
       case EDataTypes.BYTES:
@@ -1068,8 +1304,9 @@ export class ConverterComponent extends LanguageProvider {
         return { ...empty, inputTypeAudio: { outputType: output as never } };
       case EDataTypes.ANY_FILE:
         return { ...empty, inputTypeAnyFile: { outputType: output as never } };
+      case EDataTypes.BOOLEAN:
+        return { ...empty, inputTypeBoolean: { outputType: output as never } };
       case EDataTypes.JSON: {
-        const output = raw.outputDataType;
         const usePath =
           !JSON_OPTIONAL_PATH_OUTPUTS.has(output) || raw.jsonExtractField;
         const path = usePath ? raw.jsonFieldPath.trim() : '';
@@ -1097,6 +1334,42 @@ export class ConverterComponent extends LanguageProvider {
                       raw.arrayNumberOp ===
                       EConverterInputArrayNumbersOutputNumberType.INDEX
                         ? Number(raw.arrayNumberIndex)
+                        : null,
+                  }
+                : null,
+          },
+        };
+      case EDataTypes.ARRAY_STRINGS:
+        return {
+          ...empty,
+          inputTypeArrayStrings: {
+            outputType: output as never,
+            stringConfig:
+              output === EDataTypes.STRING
+                ? {
+                    outputType: raw.arrayStringsStringOp,
+                    index:
+                      raw.arrayStringsStringOp ===
+                      EConverterInputArrayStringsOutputStringType.INDEX
+                        ? Number(raw.arrayStringsIndex)
+                        : null,
+                    joinConfig:
+                      raw.arrayStringsStringOp ===
+                      EConverterInputArrayStringsOutputStringType.JOIN
+                        ? {
+                            separator: String(raw.arrayStringsJoinSeparator ?? ''),
+                          }
+                        : null,
+                  }
+                : null,
+            arrayNumbersConfig:
+              output === EDataTypes.ARRAY_NUMBERS
+                ? {
+                    onNotNumber: raw.arrayStringsOnNotNumber,
+                    specialValueConfig:
+                      raw.arrayStringsOnNotNumber ===
+                      EConverterInputArrayStringsOnNotNumberType.SPECIAL_VALUE
+                        ? { value: Number(raw.arrayStringsSpecialValue) }
                         : null,
                   }
                 : null,
@@ -1232,6 +1505,7 @@ export class ConverterComponent extends LanguageProvider {
       regularExpression: string;
       moreOrEqualThan: number | null;
       lessOrEqualThan: number | null;
+      booleanFilterMode: TBooleanFilterMode;
     }>;
     const fields: IConverterFilterJsonField[] = fieldsRaw
       .filter((field) => field.fieldName.trim())
@@ -1278,11 +1552,37 @@ export class ConverterComponent extends LanguageProvider {
                   numberTypeConfig: null,
                   jsonTypeConfig: null,
                   arrayAnyTypeConfig: null,
+                  booleanTypeConfig: null,
                 }
+              : null,
+          booleanTypeConfig:
+            type === EDataTypes.BOOLEAN
+              ? this.toBooleanFilterConfig(field.booleanFilterMode)
               : null,
         };
       });
     return fields.length ? { fields } : null;
+  }
+
+  private buildBooleanFilter(
+    raw: ReturnType<typeof this.form.getRawValue>,
+  ): IConverterFilterBooleanConfig | null {
+    if (!raw.enableFilter || this.effectiveOutputType() !== EDataTypes.BOOLEAN) {
+      return null;
+    }
+    return this.toBooleanFilterConfig(raw.booleanFilterMode as TBooleanFilterMode);
+  }
+
+  private toBooleanFilterConfig(
+    mode: TBooleanFilterMode,
+  ): IConverterFilterBooleanConfig {
+    if (mode === 'true') {
+      return { value: true };
+    }
+    if (mode === 'false') {
+      return { value: false };
+    }
+    return { value: null };
   }
 
   private buildFilterConfig(
@@ -1292,6 +1592,7 @@ export class ConverterComponent extends LanguageProvider {
       stringTypeConfig: this.buildStringFilter(raw),
       numberTypeConfig: this.buildNumberFilter(raw),
       jsonTypeConfig: this.buildJsonFilter(raw),
+      booleanTypeConfig: this.buildBooleanFilter(raw),
     };
   }
 

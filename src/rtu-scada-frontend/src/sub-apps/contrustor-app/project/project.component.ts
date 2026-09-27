@@ -43,6 +43,7 @@ import { MediaComponent } from './create-block-forms/media/media.component';
 import { ConstructorAppSceneComponent } from './scene/scene.component';
 import type { ISceneNode } from './scene/scene.models';
 import { PaperDivingLine } from "../../../paper-ui/layout/diving-line/diving-line.component";
+import { PaperIcon } from '../../../paper-ui/icons/icon.component';
 
 @Component({
   selector: 'constructor-app-project',
@@ -51,6 +52,7 @@ import { PaperDivingLine } from "../../../paper-ui/layout/diving-line/diving-lin
   imports: [
     PaperCard,
     PaperText,
+    PaperIcon,
     ConstructorAppProjectBarComponent,
     ConstructorAppSceneComponent,
     PaperDivingLine
