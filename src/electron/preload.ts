@@ -10,6 +10,7 @@ import { IComBlock } from "./types/blocks/network-blocks/com/com.type";
 import { IConverterBlock } from "./types/blocks/internal-blocks/converter/converter.type";
 import { IGraphBlock } from "./types/blocks/internal-blocks/graphs/graphs.type";
 import { IIndicatorsBlock } from "./types/blocks/internal-blocks/indicators/indicators.type";
+import { IInteractionBlock } from "./types/blocks/internal-blocks/interaction/interaction.type";
 import { IMediaBlock } from "./types/blocks/internal-blocks/media/media.type";
 
 contextBridge.exposeInMainWorld("electronAPI", {
@@ -175,6 +176,20 @@ contextBridge.exposeInMainWorld("electronAPI", {
   ) =>
     ipcRenderer.invoke(
       "setMediaBlock",
+      projectId,
+      data,
+      inputBlocks,
+      outputBlocks,
+    ),
+
+  setInteractionBlock: (
+    projectId: number,
+    data: IInteractionBlock,
+    inputBlocks: number[],
+    outputBlocks: number[],
+  ) =>
+    ipcRenderer.invoke(
+      "setInteractionBlock",
       projectId,
       data,
       inputBlocks,

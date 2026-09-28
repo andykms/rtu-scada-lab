@@ -1,6 +1,7 @@
 import { IConverterBlock } from "../../types/blocks/internal-blocks/converter/converter.type";
 import { IGraphBlock } from "../../types/blocks/internal-blocks/graphs/graphs.type";
 import { IIndicatorsBlock } from "../../types/blocks/internal-blocks/indicators/indicators.type";
+import { IInteractionBlock } from "../../types/blocks/internal-blocks/interaction/interaction.type";
 import { IMediaBlock } from "../../types/blocks/internal-blocks/media/media.type";
 import { IComBlock } from "../../types/blocks/network-blocks/com/com.type";
 import { IDatabaseBlock } from "../../types/blocks/network-blocks/database/database.type";
@@ -214,6 +215,21 @@ export class ApiEntryConstructorMode {
     outputBlocks: number[],
   ): Promise<IProjectFile> {
     await this.projectContructorManager.setMediaBlock(
+      projectId,
+      data,
+      inputBlocks,
+      outputBlocks,
+    );
+    return this.projectContructorManager.currProjectState;
+  }
+
+  async setInteractionBlock(
+    projectId: number,
+    data: IInteractionBlock,
+    inputBlocks: number[],
+    outputBlocks: number[],
+  ): Promise<IProjectFile> {
+    await this.projectContructorManager.setInteractionBlock(
       projectId,
       data,
       inputBlocks,

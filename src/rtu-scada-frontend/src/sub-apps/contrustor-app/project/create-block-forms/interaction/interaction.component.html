@@ -1,0 +1,322 @@
+<section class="create-block-form interaction-form">
+  <form [formGroup]="form" (input)="onFormDomEvent()" (change)="onFormDomEvent()">
+    <paper-textfield size="m">
+      <label paperLabel>{{ labels().blockId }}</label>
+      <input paperInput type="number" formControlName="blockId" />
+    </paper-textfield>
+
+    <paper-textfield size="m">
+      <label paperLabel>{{ labels().blockName }}</label>
+      <input paperInput type="text" formControlName="blockName" autocomplete="off" />
+    </paper-textfield>
+
+    <paper-diving-line />
+
+    <paper-textfield size="m">
+      <paper-select-list
+        formControlName="interactionType"
+        [variants]="interactionTypeVariants"
+        [labelResolver]="resolveInteractionTypeLabel"
+      >
+        <label paperLabel>{{ labels().interactionType }}</label>
+        <input paperInput readonly #inputList />
+      </paper-select-list>
+    </paper-textfield>
+
+    @if (showButton()) {
+      <div class="pipeline-card" paperCard>
+        <p class="section-title" paperText size="m">{{ labels().interactionTypeButton }}</p>
+
+        <paper-textfield size="m">
+          <label paperLabel>{{ labels().interactionButtonLabel }}</label>
+          <input paperInput type="text" formControlName="buttonLabel" autocomplete="off" />
+        </paper-textfield>
+
+        <paper-textfield size="m">
+          <paper-select-list
+            formControlName="buttonPayloadType"
+            [variants]="buttonPayloadTypeVariants"
+            [labelResolver]="resolveDataTypeLabel"
+          >
+            <label paperLabel>{{ labels().interactionPayloadType }}</label>
+            <input paperInput readonly #inputList />
+          </paper-select-list>
+        </paper-textfield>
+
+        @if (buttonPayloadType() === dataTypes.NUMBER) {
+          <paper-textfield size="m">
+            <label paperLabel>{{ labels().interactionPayloadValue }}</label>
+            <input paperInput type="number" formControlName="buttonNumberValue" />
+          </paper-textfield>
+        }
+        @if (buttonPayloadType() === dataTypes.STRING) {
+          <paper-textfield size="m">
+            <label paperLabel>{{ labels().interactionPayloadValue }}</label>
+            <input paperInput type="text" formControlName="buttonStringValue" autocomplete="off" />
+          </paper-textfield>
+        }
+        @if (buttonPayloadType() === dataTypes.JSON) {
+          <paper-textfield size="m">
+            <label paperLabel>{{ labels().interactionPayloadValue }}</label>
+            <input paperInput type="text" formControlName="buttonJsonValue" autocomplete="off" />
+          </paper-textfield>
+        }
+        @if (buttonPayloadType() === dataTypes.BOOLEAN) {
+          <paper-textfield size="m">
+            <paper-select-list
+              formControlName="buttonBooleanValue"
+              [variants]="booleanValueVariants"
+              [labelResolver]="resolveBooleanValueLabel"
+            >
+              <label paperLabel>{{ labels().interactionPayloadValue }}</label>
+              <input paperInput readonly #inputList />
+            </paper-select-list>
+          </paper-textfield>
+        }
+      </div>
+    }
+
+    @if (showInputText()) {
+      <div class="pipeline-card" paperCard>
+        <p class="section-title" paperText size="m">{{ labels().interactionTypeInputText }}</p>
+
+        <paper-textfield size="m">
+          <label paperLabel>{{ labels().interactionFieldLabel }}</label>
+          <input paperInput type="text" formControlName="textFieldLabel" autocomplete="off" />
+        </paper-textfield>
+
+        <label class="flag-row compact" paperText size="s">
+          <input paperCheckbox size="m" type="checkbox" formControlName="enableTextValidation" />
+          {{ labels().interactionEnableValidation }}
+        </label>
+
+        @if (enableTextValidation()) {
+          <div class="filter-list">
+            <div class="filter-criterion">
+              <label class="flag-row compact" paperText size="s">
+                <input paperCheckbox size="m" type="checkbox" formControlName="useTextMinLength" />
+                {{ labels().converterMinLength }}
+              </label>
+              @if (useTextMinLength()) {
+                <paper-textfield size="s">
+                  <input paperInput type="number" formControlName="textMinLength" />
+                </paper-textfield>
+              }
+            </div>
+            <div class="filter-criterion">
+              <label class="flag-row compact" paperText size="s">
+                <input paperCheckbox size="m" type="checkbox" formControlName="useTextMaxLength" />
+                {{ labels().converterMaxLength }}
+              </label>
+              @if (useTextMaxLength()) {
+                <paper-textfield size="s">
+                  <input paperInput type="number" formControlName="textMaxLength" />
+                </paper-textfield>
+              }
+            </div>
+            <div class="filter-criterion">
+              <label class="flag-row compact" paperText size="s">
+                <input paperCheckbox size="m" type="checkbox" formControlName="useTextExactLength" />
+                {{ labels().converterExactLength }}
+              </label>
+              @if (useTextExactLength()) {
+                <paper-textfield size="s">
+                  <input paperInput type="number" formControlName="textExactLength" />
+                </paper-textfield>
+              }
+            </div>
+            <div class="filter-criterion">
+              <label class="flag-row compact" paperText size="s">
+                <input paperCheckbox size="m" type="checkbox" formControlName="useTextRegex" />
+                {{ labels().converterRegex }}
+              </label>
+              @if (useTextRegex()) {
+                <paper-textfield size="s">
+                  <input paperInput type="text" formControlName="textRegex" />
+                </paper-textfield>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    }
+
+    @if (showInputNumber()) {
+      <div class="pipeline-card" paperCard>
+        <p class="section-title" paperText size="m">{{ labels().interactionTypeInputNumber }}</p>
+
+        <paper-textfield size="m">
+          <label paperLabel>{{ labels().interactionFieldLabel }}</label>
+          <input paperInput type="text" formControlName="numberFieldLabel" autocomplete="off" />
+        </paper-textfield>
+
+        <paper-textfield size="m">
+          <label paperLabel>{{ labels().interactionUnit }}</label>
+          <input paperInput type="text" formControlName="numberUnit" autocomplete="off" />
+        </paper-textfield>
+
+        <label class="flag-row compact" paperText size="s">
+          <input paperCheckbox size="m" type="checkbox" formControlName="enableNumberValidation" />
+          {{ labels().interactionEnableValidation }}
+        </label>
+
+        @if (enableNumberValidation()) {
+          <div class="filter-list">
+            <div class="filter-criterion">
+              <label class="flag-row compact" paperText size="s">
+                <input paperCheckbox size="m" type="checkbox" formControlName="useNumberMin" />
+                {{ labels().interactionMin }}
+              </label>
+              @if (useNumberMin()) {
+                <paper-textfield size="s">
+                  <input paperInput type="number" formControlName="numberMin" />
+                </paper-textfield>
+              }
+            </div>
+            <div class="filter-criterion">
+              <label class="flag-row compact" paperText size="s">
+                <input paperCheckbox size="m" type="checkbox" formControlName="useNumberMax" />
+                {{ labels().interactionMax }}
+              </label>
+              @if (useNumberMax()) {
+                <paper-textfield size="s">
+                  <input paperInput type="number" formControlName="numberMax" />
+                </paper-textfield>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    }
+
+    @if (showToggle()) {
+      <div class="pipeline-card" paperCard>
+        <p class="section-title" paperText size="m">{{ labels().interactionTypeToggle }}</p>
+        <paper-textfield size="m">
+          <label paperLabel>{{ labels().interactionToggleLabel }}</label>
+          <input paperInput type="text" formControlName="toggleLabel" autocomplete="off" />
+        </paper-textfield>
+      </div>
+    }
+
+    @if (showGroupSwitch()) {
+      <div class="pipeline-card" paperCard>
+        <p class="section-title" paperText size="m">{{ labels().interactionTypeGroupSwitch }}</p>
+        <paper-textfield size="m">
+          <label paperLabel>{{ labels().interactionToggleLabel }}</label>
+          <input paperInput type="text" formControlName="groupSwitchLabel" autocomplete="off" />
+        </paper-textfield>
+
+        <p class="hint" paperText size="s">{{ labels().interactionPositionsHint }}</p>
+        <div class="positions-list" formArrayName="groupPositions">
+          @for (ctrl of groupPositions.controls; track $index; let i = $index) {
+            <div class="position-row">
+              <paper-textfield size="s">
+                <label paperLabel>{{ labels().interactionPosition }} {{ i + 1 }}</label>
+                <input paperInput type="text" [formControlName]="i" autocomplete="off" />
+              </paper-textfield>
+              @if (groupPositions.length > 2) {
+                <button type="button" paperButton size="s" (click)="removeGroupPosition(i)">
+                  {{ labels().removeBlock }}
+                </button>
+              }
+            </div>
+          }
+        </div>
+        <button type="button" paperButton size="s" (click)="addGroupPosition()">
+          {{ labels().interactionAddPosition }}
+        </button>
+      </div>
+    }
+
+    @if (showCoordinatePlane()) {
+      <div class="pipeline-card" paperCard>
+        <p class="section-title" paperText size="m">{{ labels().interactionTypeCoordinatePlane }}</p>
+        <paper-textfield size="m">
+          <label paperLabel>{{ labels().interactionPlaneName }}</label>
+          <input paperInput type="text" formControlName="planeName" autocomplete="off" />
+        </paper-textfield>
+        <paper-textfield size="m">
+          <label paperLabel>{{ labels().interactionXAxis }}</label>
+          <input paperInput type="text" formControlName="xAxisName" autocomplete="off" />
+        </paper-textfield>
+        <paper-textfield size="m">
+          <label paperLabel>{{ labels().interactionYAxis }}</label>
+          <input paperInput type="text" formControlName="yAxisName" autocomplete="off" />
+        </paper-textfield>
+        <div class="domain-grid">
+          <paper-textfield size="s">
+            <label paperLabel>{{ labels().interactionXMin }}</label>
+            <input paperInput type="number" formControlName="xMin" />
+          </paper-textfield>
+          <paper-textfield size="s">
+            <label paperLabel>{{ labels().interactionXMax }}</label>
+            <input paperInput type="number" formControlName="xMax" />
+          </paper-textfield>
+          <paper-textfield size="s">
+            <label paperLabel>{{ labels().interactionYMin }}</label>
+            <input paperInput type="number" formControlName="yMin" />
+          </paper-textfield>
+          <paper-textfield size="s">
+            <label paperLabel>{{ labels().interactionYMax }}</label>
+            <input paperInput type="number" formControlName="yMax" />
+          </paper-textfield>
+        </div>
+      </div>
+    }
+
+    @if (showSlider()) {
+      <div class="pipeline-card" paperCard>
+        <p class="section-title" paperText size="m">{{ labels().interactionTypeSlider }}</p>
+        <paper-textfield size="m">
+          <label paperLabel>{{ labels().interactionSliderLabel }}</label>
+          <input paperInput type="text" formControlName="sliderLabel" autocomplete="off" />
+        </paper-textfield>
+        <div class="domain-grid">
+          <paper-textfield size="s">
+            <label paperLabel>{{ labels().interactionMin }}</label>
+            <input paperInput type="number" formControlName="sliderMin" />
+          </paper-textfield>
+          <paper-textfield size="s">
+            <label paperLabel>{{ labels().interactionMax }}</label>
+            <input paperInput type="number" formControlName="sliderMax" />
+          </paper-textfield>
+          <paper-textfield size="s">
+            <label paperLabel>{{ labels().interactionStep }}</label>
+            <input paperInput type="number" formControlName="sliderStep" />
+          </paper-textfield>
+          <paper-textfield size="s">
+            <label paperLabel>{{ labels().interactionDefaultValue }}</label>
+            <input paperInput type="number" formControlName="sliderDefault" />
+          </paper-textfield>
+        </div>
+        <paper-textfield size="m">
+          <label paperLabel>{{ labels().interactionUnit }}</label>
+          <input paperInput type="text" formControlName="sliderUnit" autocomplete="off" />
+        </paper-textfield>
+      </div>
+    }
+  </form>
+
+  @if (showFeedbackRibbon() && feedbackDataType() != null) {
+    <constructor-block-connections-ribbon
+      direction="inputs"
+      [matchDataType]="feedbackDataType()!"
+      [excludeBlockId]="blockId"
+      [selectedIds]="inputBlocks()"
+      (selectedIdsChange)="onInputBlocksChange($event)"
+      [title]="labels().interactionFeedbackBlocks"
+    />
+  }
+
+  @if (showOutputRibbon() && outputDataType() != null) {
+    <constructor-block-connections-ribbon
+      direction="outputs"
+      [matchDataType]="outputDataType()!"
+      [excludeBlockId]="blockId"
+      [selectedIds]="outputBlocks()"
+      (selectedIdsChange)="onOutputBlocksChange($event)"
+      [title]="labels().outputBlocks"
+    />
+  }
+</section>

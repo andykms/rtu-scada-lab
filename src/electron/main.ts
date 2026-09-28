@@ -15,6 +15,7 @@ import { IComBlock } from "./types/blocks/network-blocks/com/com.type";
 import { IConverterBlock } from "./types/blocks/internal-blocks/converter/converter.type";
 import { IGraphBlock } from "./types/blocks/internal-blocks/graphs/graphs.type";
 import { IIndicatorsBlock } from "./types/blocks/internal-blocks/indicators/indicators.type";
+import { IInteractionBlock } from "./types/blocks/internal-blocks/interaction/interaction.type";
 import { IMediaBlock } from "./types/blocks/internal-blocks/media/media.type";
 
 let mainWindow: BrowserWindow | null = null;
@@ -306,6 +307,24 @@ function registerConstructorModeHandlers(
       outputBlocks: number[],
     ) => {
       return apiEntryConstructorMode.setMediaBlock(
+        projectId,
+        data,
+        inputBlocks,
+        outputBlocks,
+      );
+    },
+  );
+
+  ipcMain.handle(
+    "setInteractionBlock",
+    async (
+      _event,
+      projectId: number,
+      data: IInteractionBlock,
+      inputBlocks: number[],
+      outputBlocks: number[],
+    ) => {
+      return apiEntryConstructorMode.setInteractionBlock(
         projectId,
         data,
         inputBlocks,

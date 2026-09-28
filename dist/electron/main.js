@@ -121,6 +121,9 @@ function registerConstructorModeHandlers(apiEntryConstructorMode) {
     electron_1.ipcMain.handle("setMediaBlock", async (_event, projectId, data, inputBlocks, outputBlocks) => {
         return apiEntryConstructorMode.setMediaBlock(projectId, data, inputBlocks, outputBlocks);
     });
+    electron_1.ipcMain.handle("setInteractionBlock", async (_event, projectId, data, inputBlocks, outputBlocks) => {
+        return apiEntryConstructorMode.setInteractionBlock(projectId, data, inputBlocks, outputBlocks);
+    });
     electron_1.ipcMain.handle("connectBlocks", async (_event, projectId, fromBlockId, toBlockId) => {
         return apiEntryConstructorMode.connectBlocks(projectId, fromBlockId, toBlockId);
     });

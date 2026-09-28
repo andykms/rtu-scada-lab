@@ -3,6 +3,7 @@ import { from, Observable } from "rxjs";
 import type { IConverterBlock } from "../../../../electron/types/blocks/internal-blocks/converter/converter.type";
 import type { IGraphBlock } from "../../../../electron/types/blocks/internal-blocks/graphs/graphs.type";
 import type { IIndicatorsBlock } from "../../../../electron/types/blocks/internal-blocks/indicators/indicators.type";
+import type { IInteractionBlock } from "../../../../electron/types/blocks/internal-blocks/interaction/interaction.type";
 import type { IMediaBlock } from "../../../../electron/types/blocks/internal-blocks/media/media.type";
 import type { IComBlock } from "../../../../electron/types/blocks/network-blocks/com/com.type";
 import type { IDatabaseBlock } from "../../../../electron/types/blocks/network-blocks/database/database.type";
@@ -219,6 +220,22 @@ export class ElectronAPIService {
   ): Observable<IProjectFile> {
     return from(
       window.electronAPI.setMediaBlock(
+        projectId,
+        data,
+        inputBlocks,
+        outputBlocks,
+      ),
+    );
+  }
+
+  setInteractionBlock(
+    projectId: number,
+    data: IInteractionBlock,
+    inputBlocks: number[],
+    outputBlocks: number[],
+  ): Observable<IProjectFile> {
+    return from(
+      window.electronAPI.setInteractionBlock(
         projectId,
         data,
         inputBlocks,

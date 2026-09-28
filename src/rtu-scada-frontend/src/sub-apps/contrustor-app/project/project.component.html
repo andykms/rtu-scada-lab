@@ -117,6 +117,16 @@
             <span>{{ labels().media }}</span
             ><span class="add-icon">+</span>
           </div>
+          <div
+            paperCard
+            size="m"
+            [pointer]="true"
+            class="block-card"
+            (click)="openInteractionDialog()"
+          >
+            <span>{{ labels().interaction }}</span
+            ><span class="add-icon">+</span>
+          </div>
         </div>
       }
     </div>

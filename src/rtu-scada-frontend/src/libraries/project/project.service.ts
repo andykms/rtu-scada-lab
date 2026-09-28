@@ -4,6 +4,8 @@ import { EDataTypes } from '../../../../electron/types/data-types/base-data-type
 import type { IConverterBlock } from '../../../../electron/types/blocks/internal-blocks/converter/converter.type';
 import type { IGraphBlock } from '../../../../electron/types/blocks/internal-blocks/graphs/graphs.type';
 import type { IIndicatorsBlock } from '../../../../electron/types/blocks/internal-blocks/indicators/indicators.type';
+import type { IInteractionBlock } from '../../../../electron/types/blocks/internal-blocks/interaction/interaction.type';
+import { EInteractionTypes } from '../../../../electron/types/blocks/internal-blocks/interaction/interaction-types.type';
 import type { IMediaBlock } from '../../../../electron/types/blocks/internal-blocks/media/media.type';
 import type { IComBlock } from '../../../../electron/types/blocks/network-blocks/com/com.type';
 import type { IDatabaseBlock } from '../../../../electron/types/blocks/network-blocks/database/database.type';
@@ -189,6 +191,17 @@ export class ProjectService {
     for (const block of internalBlocks.media) {
       blocks.push(this.toInfo(block.blockId, block.blockName, block.typeRequestData, null, 'media'));
     }
+    for (const block of internalBlocks.interactions ?? []) {
+      blocks.push(
+        this.toInfo(
+          block.blockId,
+          block.blockName,
+          this.interactionInputType(block),
+          this.interactionOutputType(block),
+          'interaction',
+        ),
+      );
+    }
 
     return blocks;
   }
@@ -240,6 +253,7 @@ export class ProjectService {
     | { kind: 'graphs'; block: IGraphBlock }
     | { kind: 'indicators'; block: IIndicatorsBlock }
     | { kind: 'media'; block: IMediaBlock }
+    | { kind: 'interaction'; block: IInteractionBlock }
     | null {
     const file = this.projectFile();
     if (!file) {
@@ -293,6 +307,12 @@ export class ProjectService {
     const media = internalBlocks.media.find((b) => b.blockId === blockId);
     if (media) {
       return { kind: 'media', block: media };
+    }
+    const interaction = (internalBlocks.interactions ?? []).find(
+      (b) => b.blockId === blockId,
+    );
+    if (interaction) {
+      return { kind: 'interaction', block: interaction };
     }
     return null;
   }
@@ -517,6 +537,21 @@ export class ProjectService {
     );
   }
 
+  createInteractionBlock(
+    block: IInteractionBlock,
+    inputBlocks: number[],
+    outputBlocks: number[],
+  ): Observable<IProjectFile> {
+    return this.callCreate((projectId) =>
+      this.electronApi.setInteractionBlock(
+        projectId,
+        block,
+        inputBlocks,
+        outputBlocks,
+      ),
+    );
+  }
+
   connectBlocks(fromBlockId: number, toBlockId: number): Observable<IProjectFile> {
     const projectId = this.projectId();
     if (projectId == null) {
@@ -592,6 +627,42 @@ export class ProjectService {
         return block.insertQueryConfig?.typeRequestData ?? null;
       case EDatabaseQueryType.UPDATE:
         return block.updateQueryConfig?.typeRequestData ?? null;
+      default:
+        return null;
+    }
+  }
+
+  private interactionOutputType(block: IInteractionBlock): EDataTypes | null {
+    switch (block.interactionType) {
+      case EInteractionTypes.BUTTON:
+        return block.buttonConfig?.payloadType ?? null;
+      case EInteractionTypes.INPUT_TEXT:
+        return EDataTypes.STRING;
+      case EInteractionTypes.INPUT_NUMBER:
+        return EDataTypes.NUMBER;
+      case EInteractionTypes.TOGGLE_BUTTON:
+        return EDataTypes.BOOLEAN;
+      case EInteractionTypes.GROUP_SWITCH:
+        return EDataTypes.STRING;
+      case EInteractionTypes.COORDINATE_PLANE:
+        return EDataTypes.ARRAY_NUMBERS;
+      case EInteractionTypes.SLIDER:
+        return EDataTypes.NUMBER;
+      default:
+        return null;
+    }
+  }
+
+  private interactionInputType(block: IInteractionBlock): EDataTypes | null {
+    switch (block.interactionType) {
+      case EInteractionTypes.TOGGLE_BUTTON:
+        return EDataTypes.BOOLEAN;
+      case EInteractionTypes.GROUP_SWITCH:
+        return EDataTypes.STRING;
+      case EInteractionTypes.COORDINATE_PLANE:
+        return EDataTypes.ARRAY_NUMBERS;
+      case EInteractionTypes.SLIDER:
+        return EDataTypes.NUMBER;
       default:
         return null;
     }

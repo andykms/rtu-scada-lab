@@ -2,6 +2,7 @@ import type { IHttpClientBlock } from '../../../../../../../electron/types/block
 import type { IGraphBlock } from '../../../../../../../electron/types/blocks/internal-blocks/graphs/graphs.type';
 import type { IIndicatorsBlock } from '../../../../../../../electron/types/blocks/internal-blocks/indicators/indicators.type';
 import type { IMediaBlock } from '../../../../../../../electron/types/blocks/internal-blocks/media/media.type';
+import type { IInteractionBlock } from '../../../../../../../electron/types/blocks/internal-blocks/interaction/interaction.type';
 import type { ITcpServerBlock } from '../../../../../../../electron/types/blocks/network-blocks/tcp-server/tcp-server.type';
 import type { ITcpClientBlock } from '../../../../../../../electron/types/blocks/network-blocks/tcp-client/tcp-client.type';
 import type { IMqttClientBlock } from '../../../../../../../electron/types/blocks/network-blocks/mqtt-client/mqtt-client.type';
@@ -23,7 +24,8 @@ export type TEditableBlock =
   | IConverterBlock
   | IGraphBlock
   | IIndicatorsBlock
-  | IMediaBlock;
+  | IMediaBlock
+  | IInteractionBlock;
 
 export interface ICreateBlockDialogData<TBlock = TEditableBlock> {
   blockId: number;

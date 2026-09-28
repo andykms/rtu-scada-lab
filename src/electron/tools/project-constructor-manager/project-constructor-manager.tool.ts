@@ -4,6 +4,7 @@ import { IConverterBlock } from "../../types/blocks/internal-blocks/converter/co
 import { IGraphBlock } from "../../types/blocks/internal-blocks/graphs/graphs.type";
 import { EGraphType } from "../../types/blocks/internal-blocks/graphs/graph-type";
 import { IIndicatorsBlock } from "../../types/blocks/internal-blocks/indicators/indicators.type";
+import { IInteractionBlock } from "../../types/blocks/internal-blocks/interaction/interaction.type";
 import { IMediaBlock } from "../../types/blocks/internal-blocks/media/media.type";
 import { IComBlock } from "../../types/blocks/network-blocks/com/com.type";
 import { EDatabaseQueryType } from "../../types/blocks/network-blocks/database/database-query-type";
@@ -317,6 +318,43 @@ export class ProjectConstructorManager extends ProjectContructorTools {
     );
   }
 
+  async setInteractionBlock(
+    projectId: number,
+    config: IInteractionBlock,
+    inputBlocks: number[],
+    outputBlocks: number[],
+  ): Promise<void> {
+    await this.ensureProjectId(projectId);
+    const inputDataType = this.getInteractionInputDataType(config);
+    const outputDataType = this.getInteractionOutputDataType(config);
+
+    if (inputDataType == null && inputBlocks.length > 0) {
+      return Promise.reject(
+        new AppError(
+          `Блок взаимодействия с id ${config.blockId} не принимает данные обратной связи для выбранного типа ввода`,
+          EAppErrorCodes.BlockNotAcceptData,
+        ),
+      );
+    }
+    if (outputDataType == null && outputBlocks.length > 0) {
+      return Promise.reject(
+        new AppError(
+          `Блок взаимодействия с id ${config.blockId} не отдаёт данные. Выберите тип ввода`,
+          EAppErrorCodes.BlockNotAcceptData,
+        ),
+      );
+    }
+
+    this.upsertInternalBlock("interactions", config);
+    await this.syncBlockEdges(
+      config.blockId,
+      inputBlocks,
+      outputBlocks,
+      inputDataType,
+      outputDataType,
+    );
+  }
+
   async setDatabaseBlock(
     projectId: number,
     config: IDatabaseBlock,
@@ -513,6 +551,7 @@ export class ProjectConstructorManager extends ProjectContructorTools {
     ib.graphs = ib.graphs.filter((b) => !idSet.has(b.blockId));
     ib.indicators = ib.indicators.filter((b) => !idSet.has(b.blockId));
     ib.media = ib.media.filter((b) => !idSet.has(b.blockId));
+    ib.interactions = (ib.interactions ?? []).filter((b) => !idSet.has(b.blockId));
 
     blocks.blockIds = (blocks.blockIds ?? []).filter((id) => !idSet.has(id));
     blocks.blockNames = (blocks.blockNames ?? []).filter((id) => !idSet.has(id));
@@ -755,6 +794,10 @@ export class ProjectConstructorManager extends ProjectContructorTools {
       return indicator.typeResponseData === EDataTypes.NOTHING
         ? null
         : indicator.typeResponseData;
+    }
+    const interaction = ib.interactions.find((b) => b.blockId === blockId);
+    if (interaction) {
+      return this.getInteractionOutputDataType(interaction);
     }
     return null;
   }

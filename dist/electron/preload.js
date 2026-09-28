@@ -18,6 +18,7 @@ electron_1.contextBridge.exposeInMainWorld("electronAPI", {
     setGraphBlock: (projectId, data, inputBlocks, outputBlocks) => electron_1.ipcRenderer.invoke("setGraphBlock", projectId, data, inputBlocks, outputBlocks),
     setIndicatorsBlock: (projectId, data, inputBlocks, outputBlocks) => electron_1.ipcRenderer.invoke("setIndicatorsBlock", projectId, data, inputBlocks, outputBlocks),
     setMediaBlock: (projectId, data, inputBlocks, outputBlocks) => electron_1.ipcRenderer.invoke("setMediaBlock", projectId, data, inputBlocks, outputBlocks),
+    setInteractionBlock: (projectId, data, inputBlocks, outputBlocks) => electron_1.ipcRenderer.invoke("setInteractionBlock", projectId, data, inputBlocks, outputBlocks),
     connectBlocks: (projectId, fromBlockId, toBlockId) => electron_1.ipcRenderer.invoke("connectBlocks", projectId, fromBlockId, toBlockId),
     disconnectBlocks: (projectId, fromBlockId, toBlockId) => electron_1.ipcRenderer.invoke("disconnectBlocks", projectId, fromBlockId, toBlockId),
     deleteBlocks: (projectId, blockIds) => electron_1.ipcRenderer.invoke("deleteBlocks", projectId, blockIds),

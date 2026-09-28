@@ -1,6 +1,7 @@
 import type { IConverterBlock } from "../../../../electron/types/blocks/internal-blocks/converter/converter.type";
 import type { IGraphBlock } from "../../../../electron/types/blocks/internal-blocks/graphs/graphs.type";
 import type { IIndicatorsBlock } from "../../../../electron/types/blocks/internal-blocks/indicators/indicators.type";
+import type { IInteractionBlock } from "../../../../electron/types/blocks/internal-blocks/interaction/interaction.type";
 import type { IMediaBlock } from "../../../../electron/types/blocks/internal-blocks/media/media.type";
 import type { IComBlock } from "../../../../electron/types/blocks/network-blocks/com/com.type";
 import type { IDatabaseBlock } from "../../../../electron/types/blocks/network-blocks/database/database.type";
@@ -102,6 +103,13 @@ export interface IElectronAPI {
   setMediaBlock: (
     projectId: number,
     data: IMediaBlock,
+    inputBlocks: number[],
+    outputBlocks: number[],
+  ) => Promise<IProjectFile>;
+
+  setInteractionBlock: (
+    projectId: number,
+    data: IInteractionBlock,
     inputBlocks: number[],
     outputBlocks: number[],
   ) => Promise<IProjectFile>;

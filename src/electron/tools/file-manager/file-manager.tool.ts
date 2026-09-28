@@ -196,7 +196,13 @@ export class FileManager {
       }
     }
 
-    const internalKeys = ["converters", "graphs", "indicators", "media"] as const;
+    const internalKeys = [
+      "converters",
+      "graphs",
+      "indicators",
+      "media",
+      "interactions",
+    ] as const;
     for (const key of internalKeys) {
       if (!Array.isArray(blocks.internalBlocks[key])) {
         throw new AppError(

@@ -9,6 +9,8 @@ import {
   type ITimeRequestSettings,
 } from '../../../../../../electron/types/blocks/network-blocks/non-realtime-network-block.type';
 import type { IProjectFile } from '../../../../../../electron/types/project/project-file/project-file.type';
+import type { IInteractionBlock } from '../../../../../../electron/types/blocks/internal-blocks/interaction/interaction.type';
+import { EInteractionTypes } from '../../../../../../electron/types/blocks/internal-blocks/interaction/interaction-types.type';
 import { dataTypeLabelKey } from '../create-block-forms/shared/data-type-options';
 import { ISceneEdge, ISceneNode, IScenePort } from './scene.models';
 
@@ -488,14 +490,86 @@ export function buildSceneNodes(
       nodeId: String(block.blockId),
       kind: 'media',
       blockName: block.blockName,
-      primaryBlockId: block.blockId,
       traits: [typeLabel(block.typeRequestData, labels)],
+      primaryBlockId: block.blockId,
       ports: portsSimple(block.blockId, block.typeRequestData, null, labels),
       memberBlockIds: [block.blockId],
     });
   }
 
+  for (const block of internalBlocks.interactions ?? []) {
+    const request = interactionInputType(block);
+    const response = interactionOutputType(block);
+    push({
+      nodeId: String(block.blockId),
+      kind: 'interaction',
+      blockName: block.blockName,
+      primaryBlockId: block.blockId,
+      traits: [interactionTypeLabel(block.interactionType, labels)],
+      ports: portsSimple(block.blockId, request, response, labels),
+      memberBlockIds: [block.blockId],
+    });
+  }
+
   return nodes;
+}
+
+function interactionOutputType(block: IInteractionBlock): EDataTypes | null {
+  switch (block.interactionType) {
+    case EInteractionTypes.BUTTON:
+      return block.buttonConfig?.payloadType ?? null;
+    case EInteractionTypes.INPUT_TEXT:
+    case EInteractionTypes.GROUP_SWITCH:
+      return EDataTypes.STRING;
+    case EInteractionTypes.INPUT_NUMBER:
+    case EInteractionTypes.SLIDER:
+      return EDataTypes.NUMBER;
+    case EInteractionTypes.TOGGLE_BUTTON:
+      return EDataTypes.BOOLEAN;
+    case EInteractionTypes.COORDINATE_PLANE:
+      return EDataTypes.ARRAY_NUMBERS;
+    default:
+      return null;
+  }
+}
+
+function interactionInputType(block: IInteractionBlock): EDataTypes | null {
+  switch (block.interactionType) {
+    case EInteractionTypes.TOGGLE_BUTTON:
+      return EDataTypes.BOOLEAN;
+    case EInteractionTypes.GROUP_SWITCH:
+      return EDataTypes.STRING;
+    case EInteractionTypes.COORDINATE_PLANE:
+      return EDataTypes.ARRAY_NUMBERS;
+    case EInteractionTypes.SLIDER:
+      return EDataTypes.NUMBER;
+    default:
+      return null;
+  }
+}
+
+function interactionTypeLabel(
+  type: EInteractionTypes | null,
+  labels: Record<string, string>,
+): string {
+  switch (type) {
+    case EInteractionTypes.BUTTON:
+      return labels['interactionTypeButton'] ?? 'Button';
+    case EInteractionTypes.INPUT_TEXT:
+      return labels['interactionTypeInputText'] ?? 'Text';
+    case EInteractionTypes.INPUT_NUMBER:
+      return labels['interactionTypeInputNumber'] ?? 'Number';
+    case EInteractionTypes.TOGGLE_BUTTON:
+      return labels['interactionTypeToggle'] ?? 'Toggle';
+    case EInteractionTypes.GROUP_SWITCH:
+      return labels['interactionTypeGroupSwitch'] ?? 'Group switch';
+    case EInteractionTypes.COORDINATE_PLANE:
+      return labels['interactionTypeCoordinatePlane'] ?? 'Plane';
+    case EInteractionTypes.SLIDER:
+      return labels['interactionTypeSlider'] ?? 'Slider';
+    default:
+      return '—';
+  }
 }
 
 export function buildSceneEdges(

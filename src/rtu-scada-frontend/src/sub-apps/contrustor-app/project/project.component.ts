@@ -20,6 +20,7 @@ import type { IHttpClientBlock } from '../../../../../electron/types/blocks/netw
 import type { IGraphBlock } from '../../../../../electron/types/blocks/internal-blocks/graphs/graphs.type';
 import type { IIndicatorsBlock } from '../../../../../electron/types/blocks/internal-blocks/indicators/indicators.type';
 import type { IMediaBlock } from '../../../../../electron/types/blocks/internal-blocks/media/media.type';
+import type { IInteractionBlock } from '../../../../../electron/types/blocks/internal-blocks/interaction/interaction.type';
 import {
   ICreateBlockDialogData,
   ICreateBlockFormResult,
@@ -40,6 +41,7 @@ import { ConverterComponent } from './create-block-forms/converter/converter.com
 import { GraphsComponent } from './create-block-forms/graphs/graphs.component';
 import { IndicatorsComponent } from './create-block-forms/indicators/indicators.component';
 import { MediaComponent } from './create-block-forms/media/media.component';
+import { InteractionComponent } from './create-block-forms/interaction/interaction.component';
 import { ConstructorAppSceneComponent } from './scene/scene.component';
 import type { ISceneNode } from './scene/scene.models';
 import { PaperDivingLine } from "../../../paper-ui/layout/diving-line/diving-line.component";
@@ -225,6 +227,18 @@ export class ProjectComponent extends LanguageProvider implements OnInit {
       .subscribe();
   };
 
+  readonly openInteractionDialog = () =>
+    this.openCreateBlockDialog<IInteractionBlock>(
+      InteractionComponent,
+      this.labels().interaction,
+      (result) =>
+        this.projectService.createInteractionBlock(
+          result.block,
+          result.inputBlocks,
+          result.outputBlocks,
+        ),
+    );
+
   openEditBlock(node: ISceneNode): void {
     const labels = this.labels() as Record<string, string>;
     const editTitle = (kindLabel: string) =>
@@ -360,6 +374,19 @@ export class ProjectComponent extends LanguageProvider implements OnInit {
           MediaComponent,
           editTitle(labels['media'] ?? node.kindLabel),
           (result) => this.projectService.createMediaBlocks(result.blocks),
+        );
+        break;
+      case 'interaction':
+        this.openEditSingleBlock<IInteractionBlock>(
+          node,
+          InteractionComponent,
+          editTitle(labels['interaction'] ?? node.kindLabel),
+          (result) =>
+            this.projectService.createInteractionBlock(
+              result.block,
+              result.inputBlocks,
+              result.outputBlocks,
+            ),
         );
         break;
       default:

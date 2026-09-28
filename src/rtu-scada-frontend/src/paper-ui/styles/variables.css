@@ -22,8 +22,8 @@
 
     --menu-background: linear-gradient(to bottom, #cee0fb 0%, #88acda 100%);
 
-    --glassed-color: rgba(247, 247, 247, 1);
-    --sub-glassed-color: rgba(239,239,239, 1);
+    --glassed-color: rgba(247, 247, 247, 0.7);
+    --sub-glassed-color: rgba(239,239,239, 0.7);
     --glass: linear-gradient(to bottom, var(--glassed-color) 0%, var(--sub-glassed-color) 100%);
     --textfield-color: var(--glass);
 
@@ -45,14 +45,14 @@
     --subtext-color: #b3b3b3;
     --substrate: #2e2e2e;
     --box-shadow-color: rgba(255, 255, 255, 0.08);
-    --glassed-color: #252525;
-    --sub-glassed-color: #262626;
+    --glassed-color: rgba(37, 37, 37, 0.7);
+    --sub-glassed-color: rgba(38, 38, 38, 0.7);
     --glass: linear-gradient(to bottom, var(--glassed-color) 0%, var(--sub-glassed-color) 100%);
     --textfield-color: var(--glass);
-    --modal-color: rgba(255, 255, 255, 0.13);
+    --modal-color: rgba(105, 105, 105, 0.13);
     --divider-color: #3e3e3e;
     --primary-color: #47a9ff;
-    --even-color: rgba(23, 23, 23, 0.425);
+    --even-color: rgba(90, 90, 90, 0.425);
     --dropdown-color: rgba(49, 59, 74, 0.5);
     --dropdown-color-hover: rgba(105, 115, 130, 0.8);
     --menu-background: linear-gradient(to bottom, #2e496f 0%, #0e2a4f 100%);

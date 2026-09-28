@@ -1,6 +1,7 @@
 import { IConverterBlock } from "../../blocks/internal-blocks/converter/converter.type";
 import { IGraphBlock } from "../../blocks/internal-blocks/graphs/graphs.type";
 import { IIndicatorsBlock } from "../../blocks/internal-blocks/indicators/indicators.type";
+import { IInteractionBlock } from "../../blocks/internal-blocks/interaction/interaction.type";
 import { IMediaBlock } from "../../blocks/internal-blocks/media/media.type";
 import { IComBlock } from "../../blocks/network-blocks/com/com.type";
 import { IDatabaseBlock } from "../../blocks/network-blocks/database/database.type";
@@ -38,6 +39,7 @@ export interface IProjectFile extends IProjectFileInfo {
         graphs: IGraphBlock[];
         indicators: IIndicatorsBlock[];
         media: IMediaBlock[];
+        interactions: IInteractionBlock[];
       };
     };
     edges: {

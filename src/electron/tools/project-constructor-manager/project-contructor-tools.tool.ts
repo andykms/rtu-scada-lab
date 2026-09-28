@@ -5,6 +5,8 @@ import { IGraphSource } from "../../types/blocks/internal-blocks/graphs/data-typ
 import { EGraphType } from "../../types/blocks/internal-blocks/graphs/graph-type";
 import { IGraphBlock } from "../../types/blocks/internal-blocks/graphs/graphs.type";
 import { IIndicatorsBlock } from "../../types/blocks/internal-blocks/indicators/indicators.type";
+import { IInteractionBlock } from "../../types/blocks/internal-blocks/interaction/interaction.type";
+import { EInteractionTypes } from "../../types/blocks/internal-blocks/interaction/interaction-types.type";
 import { IMediaBlock } from "../../types/blocks/internal-blocks/media/media.type";
 import { IComBlock } from "../../types/blocks/network-blocks/com/com.type";
 import { EDatabaseQueryType } from "../../types/blocks/network-blocks/database/database-query-type";
@@ -37,6 +39,9 @@ export abstract class ProjectContructorTools {
     }
     if (!this.currProjectState.projectData.scene) {
       this.currProjectState.projectData.scene = { nodePositions: {} };
+    }
+    if (!this.currProjectState.projectData.blocks.internalBlocks.interactions) {
+      this.currProjectState.projectData.blocks.internalBlocks.interactions = [];
     }
     if (!this.currProjectState.projectData.scene.nodePositions) {
       this.currProjectState.projectData.scene.nodePositions = {};
@@ -73,6 +78,7 @@ export abstract class ProjectContructorTools {
             graphs: [],
             indicators: [],
             media: [],
+            interactions: [],
           },
         },
         edges: {},
@@ -404,6 +410,31 @@ export abstract class ProjectContructorTools {
               }
               break;
             }
+            case "interactions": {
+              const interactionBlock = findedBlock as IInteractionBlock;
+              const interactionInputType =
+                this.getInteractionInputDataType(interactionBlock);
+              if (interactionInputType == null) {
+                return Promise.reject(
+                  new AppError(
+                    `Блок взаимодействия с id ${findedBlock.blockId} не принимает данные обратной связи`,
+                    EAppErrorCodes.BlockNotAcceptData,
+                  ),
+                );
+              }
+              if (interactionInputType != currOutputDataType) {
+                return Promise.reject(
+                  new AppError(
+                    `Типы блоков с id ${findedBlock.blockId} и ${currBlockId} не совместимы.
+                        Измените тип получаемой информации в блоке с id ${findedBlock.blockId} 
+                        на тип отправляемой информации в текущем блоке с id ${currBlockId}
+                        `,
+                    EAppErrorCodes.DataTypesNotCompatible,
+                  ),
+                );
+              }
+              break;
+            }
             default: {
               return Promise.reject(
                 new AppError(
@@ -702,6 +733,31 @@ export abstract class ProjectContructorTools {
                 ),
               );
             }
+            case "interactions": {
+              const interactionBlock = findedBlock as IInteractionBlock;
+              const interactionOutputType =
+                this.getInteractionOutputDataType(interactionBlock);
+              if (interactionOutputType == null) {
+                return Promise.reject(
+                  new AppError(
+                    `Блок взаимодействия с id ${findedBlock.blockId} не отдаёт данные`,
+                    EAppErrorCodes.BlockNotAcceptData,
+                  ),
+                );
+              }
+              if (interactionOutputType != currInputDataType) {
+                return Promise.reject(
+                  new AppError(
+                    `Типы блоков с id ${findedBlock.blockId} и ${currBlockId} не совместимы.
+                        Измените тип отправляемой информации в блоке с id ${findedBlock.blockId}
+                        на тип получаемой информации в текущем блоке с id ${currBlockId}
+                        `,
+                    EAppErrorCodes.DataTypesNotCompatible,
+                  ),
+                );
+              }
+              break;
+            }
             default: {
               return Promise.reject(
                 new AppError(
@@ -726,6 +782,47 @@ export abstract class ProjectContructorTools {
       }
     }
     return Promise.resolve(newEdges);
+  }
+
+  protected getInteractionOutputDataType(
+    block: IInteractionBlock,
+  ): EDataTypes | null {
+    switch (block.interactionType) {
+      case EInteractionTypes.BUTTON:
+        return block.buttonConfig?.payloadType ?? null;
+      case EInteractionTypes.INPUT_TEXT:
+        return EDataTypes.STRING;
+      case EInteractionTypes.INPUT_NUMBER:
+        return EDataTypes.NUMBER;
+      case EInteractionTypes.TOGGLE_BUTTON:
+        return EDataTypes.BOOLEAN;
+      case EInteractionTypes.GROUP_SWITCH:
+        return EDataTypes.STRING;
+      case EInteractionTypes.COORDINATE_PLANE:
+        return EDataTypes.ARRAY_NUMBERS;
+      case EInteractionTypes.SLIDER:
+        return EDataTypes.NUMBER;
+      default:
+        return null;
+    }
+  }
+
+  /** Feedback input type; null when the widget does not accept feedback. */
+  protected getInteractionInputDataType(
+    block: IInteractionBlock,
+  ): EDataTypes | null {
+    switch (block.interactionType) {
+      case EInteractionTypes.TOGGLE_BUTTON:
+        return EDataTypes.BOOLEAN;
+      case EInteractionTypes.GROUP_SWITCH:
+        return EDataTypes.STRING;
+      case EInteractionTypes.COORDINATE_PLANE:
+        return EDataTypes.ARRAY_NUMBERS;
+      case EInteractionTypes.SLIDER:
+        return EDataTypes.NUMBER;
+      default:
+        return null;
+    }
   }
 
   protected getConverterOutputDataType(
